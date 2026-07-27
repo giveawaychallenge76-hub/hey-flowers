@@ -4,17 +4,20 @@
 # from ~74MB to ~40MB. Delete this file if you ever want them shipped.
 
 # unused leftovers (verified: zero references from index.html/app.js/templates)
-moon app template/
-stickers-king/
-anniversay-stickers/
-birthday-assets/
+# LEADING SLASH IS REQUIRED — a bare "birthday-assets/" matches at EVERY
+# depth, which previously stripped templates/birthday-cartoon/birthday-assets/
+# too and blanked all 27 party characters on the live site.
+/moon app template/
+/stickers-king/
+/anniversay-stickers/
+/birthday-assets/
 
 # the standalone HTML these templates were converted FROM
-anniversary-tin.html
-birthdaycrtoon.html
-birthdaycake.html
-crush copy 4.html
-sunflower-single-file.html
+/anniversary-tin.html
+/birthdaycrtoon.html
+/birthdaycake.html
+/crush copy 4.html
+/sunflower-single-file.html
 
 # local tooling
 .claude/

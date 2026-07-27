@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@700;800;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=15">
+<link rel="stylesheet" href="styles.css?v=16">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
@@ -96,40 +96,41 @@
   <!-- ══ pricing ══ -->
   <section class="pricing" id="pricing">
     <h2 class="sec-h">price</h2>
+    <p class="price-note">🎉 Everything is <b>free</b> while we're new — every plan, no card needed.</p>
     <div class="price-grid three">
       <div class="price-card">
         <div class="tier">MONTHLY</div>
-        <div class="amount">$5 <span>/ month</span></div>
+        <div class="amount"><s>$5</s> FREE <span>/ month</span></div>
         <ul>
           <li>Access every template</li>
           <li>Make <b>15 gifts</b> a month</li>
           <li>A new template every month</li>
           <li>Colours, stickers, fonts &amp; uploads</li>
         </ul>
-        <button class="cta wide" data-auth-open="signup">Start monthly</button>
+        <button class="cta wide" data-auth-open="signup">Start free</button>
       </div>
       <div class="price-card dark featured">
         <div class="badge">✦ BEST VALUE</div>
         <div class="tier">ANNUAL</div>
-        <div class="amount">$20 <span>/ year</span></div>
+        <div class="amount"><s>$20</s> FREE <span>/ year</span></div>
         <ul>
           <li>Access every template</li>
           <li>Make <b>100 gifts</b> a year</li>
           <li>A new template every month</li>
           <li>Colours, stickers, fonts &amp; uploads</li>
         </ul>
-        <button class="cta wide" data-auth-open="signup">Go annual</button>
+        <button class="cta wide" data-auth-open="signup">Start free</button>
       </div>
       <div class="price-card">
         <div class="tier">LIFETIME</div>
-        <div class="amount">$30 <span>once</span></div>
+        <div class="amount"><s>$30</s> FREE <span>once</span></div>
         <ul>
           <li>Access every template</li>
           <li><b>Unlimited</b> gifts, forever</li>
           <li>New templates &amp; gifts every month</li>
           <li>Colours, stickers, fonts &amp; uploads</li>
         </ul>
-        <button class="cta wide" data-auth-open="signup">Get lifetime</button>
+        <button class="cta wide" data-auth-open="signup">Start free</button>
       </div>
     </div>
   </section>
@@ -218,7 +219,7 @@
   <div class="viewer-stage"><iframe id="viewFrame" title="Your gift" allow="microphone; autoplay"></iframe></div>
 </div>
 
-<script src="auth.js?v=3"></script>
-<script src="app.js?v=13"></script>
+<script src="auth.js?v=4"></script>
+<script src="app.js?v=14"></script>
 </body>
 </html>

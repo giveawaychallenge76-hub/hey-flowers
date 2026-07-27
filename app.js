@@ -222,6 +222,9 @@ ${giftRuntime(tpl, vals, opts)}
 /* ───────────────────────── 3. the shelf ──────────────────────────── */
 /* Two rows of cards drifting in opposite directions. Each track holds
    its card sequence TWICE so the -50% keyframe loops seamlessly. */
+/* Signed out → the drifting marquee (it's the landing page's charm).
+   Signed in  → a calm static grid: you're here to pick one and build,
+   so every template sits still and fully visible.                     */
 function paintShelf(all){
   const list = all.filter(t => !t.openEditor);   // the blank canvas isn't a card
   if (!list.length){ shelf.innerHTML = '<div class="loading">Nothing matches that.</div>'; return; }
@@ -234,6 +237,13 @@ function paintShelf(all){
           : `<div class="fallback">${esc(t.name)}</div>`
       }</div>
     </button>`;
+
+  const signedIn = !!(window.HFAuth && window.HFAuth.user && window.HFAuth.user());
+  shelf.classList.toggle('as-grid', signedIn);
+  if (signedIn){
+    shelf.innerHTML = `<div class="shelf-grid">${list.map(card).join('')}</div>`;
+    return;
+  }
   const reps = Math.max(1, Math.ceil(6 / list.length));
   const seq  = Array.from({ length: reps }, () => list.map(card).join('')).join('');
   const row  = rev => `<div class="marquee"><div class="mq-track${rev ? ' rev' : ''}">${seq}${seq}</div></div>`;
@@ -1056,11 +1066,14 @@ wrapBtn.onclick     = wrap;
 /* just signed in: pick up whatever they were trying to do, and repaint the
    profile since the drafts/sent storage is now scoped to their account */
 document.addEventListener('hf:signedin', () => {
+  paintShelf(TEMPLATES);          // marquee → calm static grid
   const p = pendingOpen;
   pendingOpen = null;
   if (p) openEditor(p.id, p.preset, p.resumeKey);
   else if (document.getElementById('mine').classList.contains('on')) paintMine();
 });
+/* signed out again → back to the drifting shelf */
+document.addEventListener('hf:signedout', () => paintShelf(TEMPLATES));
 
 /* a gift link opens straight into the gift */
 function routeFromHash(){

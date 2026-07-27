@@ -186,11 +186,17 @@ body{font-family:'Special Elite','Courier New',monospace;background:#5a9be0;over
   border-radius:14px;padding:6px 20px;letter-spacing:.04em;transition:.4s cubic-bezier(.2,1.4,.4,1);pointer-events:none;
   text-shadow:0 2px 0 #7c141f;background:rgba(255,255,255,.12);backdrop-filter:blur(1px)}
 .stamp4.on{opacity:1;transform:translate(-50%,-50%) rotate(-10deg) scale(1)}
-/* after YES the card becomes a little certificate — make room up top so the
-   APPROVED stamp frames the names instead of landing on the words */
-#card.approved{padding-top:104px;padding-bottom:6px}
-#card.approved .stamp4{top:56px}
-#card.approved .qrow2{margin-top:2px}
+/* After YES the card becomes a little certificate. The stamp was absolutely
+   positioned and kept landing ON the "it's official — X + Y" line, which made
+   both unreadable. Once approved it joins the normal flow instead, so it can
+   never overlap no matter how long the two names are. */
+#card.approved{padding:14px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:4px}
+#card.approved .stamp4{position:static;transform:rotate(-9deg);opacity:1;
+  font-size:clamp(22px,7vw,34px);border-width:4px;padding:5px 16px;margin:18px 0 4px;
+  align-self:center;flex:none}
+#card.approved .qrow2{margin-top:0}
+#card.approved .qbig2{font-size:clamp(19px,5.4vw,26px);line-height:1.15}
+#card.approved .qnote3{font-size:12.5px;line-height:1.5;padding:0 6px}
 
 @media (max-width:640px){
   #guitar{left:4%;bottom:6.5%;width:116px}

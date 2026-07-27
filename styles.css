@@ -114,9 +114,26 @@ body.auth-off .nav-signin{display:none}
 .marquee{overflow:hidden;padding:14px 0}
 .mq-track{display:flex;gap:20px;width:max-content;animation:mq 38s linear infinite}
 .mq-track.rev{animation-direction:reverse}
-.marquee:hover .mq-track{animation-play-state:paused}
+/* the landing shelf never stops — not on hover, not on click. (It used to
+   pause on hover, which read as the page freezing.) */
 @keyframes mq{to{transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){.mq-track{animation:none}}
+
+/* ── signed in: a calm static grid, nothing moving ── */
+.shelf.as-grid{padding:26px 20px 10px}
+.shelf-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+  max-width:1040px;margin:0 auto;
+}
+.shelf-grid .gift-card{width:100%}
+.shelf-grid .bed{height:330px}
+@media (max-width:900px){ .shelf-grid{grid-template-columns:repeat(2,1fr);gap:18px} }
+@media (max-width:620px){
+  .shelf.as-grid{padding:18px 14px 10px}
+  /* phones: one per row, stacked — the whole template is visible at once */
+  .shelf-grid{grid-template-columns:1fr;gap:16px;max-width:420px}
+  .shelf-grid .bed{height:auto;aspect-ratio:4/5}
+}
 
 .gift-card{
   width:225px;flex:none;background:#fff;border-radius:22px;overflow:hidden;
@@ -153,8 +170,20 @@ body.auth-off .nav-signin{display:none}
   box-shadow:0 24px 50px -24px rgba(10,40,80,.5);
 }
 .price-card .tier{font-size:13px;letter-spacing:.14em;color:#7b8598;font-weight:600}
-.price-card .amount{font-family:'Fredoka';font-weight:700;font-size:46px;margin:8px 0 14px}
-.price-card .amount span{font-size:16px;font-weight:400;color:#7b8598}
+/* the struck-out old price + FREE + period all sit on one baseline row */
+.price-card .amount{font-family:'Fredoka';font-weight:700;font-size:40px;margin:8px 0 14px;
+  display:flex;align-items:baseline;flex-wrap:wrap;gap:0 7px;line-height:1.05}
+.price-card .amount span{font-size:15px;font-weight:400;color:#7b8598}
+/* free-for-now: the old price stays visible, struck through */
+.price-card .amount s{font-size:23px;font-weight:600;color:#9aa3b2;
+  text-decoration-thickness:3px}
+.price-card.dark .amount s{color:#6d7688}
+.price-note{
+  text-align:center;color:#fff;font-size:15px;margin:-14px auto 26px;max-width:560px;
+  background:rgba(10,14,22,.42);border:1px solid rgba(255,255,255,.16);
+  border-radius:999px;padding:11px 20px;
+}
+.price-note b{color:var(--yellow)}
 .price-card ul{list-style:none;margin-bottom:22px}
 .price-card li{padding:7px 0 7px 26px;position:relative;font-size:15px}
 .price-card li::before{content:'✓';position:absolute;left:0;color:#54b167;font-weight:700}

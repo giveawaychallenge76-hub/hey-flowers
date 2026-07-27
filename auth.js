@@ -66,6 +66,8 @@ window.HF_SB = HF_SB;   // app.js uses the same client for drafts / uploads
       closeModal();
       // tell the app so it can resume the template they picked before signing in
       if (was !== user.id) document.dispatchEvent(new CustomEvent('hf:signedin'));
+    } else if (was){
+      document.dispatchEvent(new CustomEvent('hf:signedout'));
     }
   }
 
