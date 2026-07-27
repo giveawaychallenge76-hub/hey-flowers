@@ -227,13 +227,16 @@ body.auth-off .nav-signin{display:none}
 }
 .foot-col a:hover,.foot-col button:not(.cta):hover{color:var(--yellow);transform:translateX(2px)}
 .foot-about .cta{align-self:flex-start}
-.foot-social{flex-direction:row;display:flex;gap:10px}
+/* one account, so show the handle rather than a lone anonymous circle */
+.foot-social{flex-direction:row;display:flex;gap:10px;flex-wrap:wrap}
 .foot-social a{
-  width:38px;height:38px;border-radius:50%;display:grid;place-items:center;padding:0;
+  display:inline-flex;align-items:center;gap:9px;padding:9px 16px 9px 12px;
+  border-radius:999px;width:fit-content;
   background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);
 }
 .foot-social a:hover{background:var(--yellow);color:#3a2a00;transform:translateY(-2px)}
-.foot-social svg{width:17px;height:17px}
+.foot-social svg{width:18px;height:18px;flex:none}
+.ig-handle{font-size:14px;font-weight:500}
 /* the oversized wordmark, like a watermark under everything */
 .foot-mark{
   font-family:'Fredoka';font-weight:700;text-align:center;line-height:1;
