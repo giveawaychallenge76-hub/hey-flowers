@@ -163,6 +163,8 @@ body.auth-off .nav-signin{display:none}
 .price-grid.one{grid-template-columns:1fr;max-width:440px;margin:0 auto}
 .price-grid.three{grid-template-columns:repeat(3,1fr);gap:20px;align-items:center}
 .price-card.featured{transform:scale(1.05);z-index:1}
+/* nothing to stand out from when it's the only plan */
+.price-grid.one .price-card.featured{transform:none}
 @media(max-width:820px){
   .price-grid.three{grid-template-columns:1fr;max-width:440px;margin:0 auto}
   .price-card.featured{transform:none}
@@ -186,6 +188,9 @@ body.auth-off .nav-signin{display:none}
   border-radius:999px;padding:11px 20px;
 }
 .price-note b{color:var(--yellow)}
+/* the trial line under the amount */
+.price-sub{font-size:13.5px;color:#7b8598;margin:-6px 0 16px}
+.price-card.dark .price-sub{color:var(--soft)}
 .price-card ul{list-style:none;margin-bottom:22px}
 .price-card li{padding:7px 0 7px 26px;position:relative;font-size:15px}
 .price-card li::before{content:'✓';position:absolute;left:0;color:#54b167;font-weight:700}
