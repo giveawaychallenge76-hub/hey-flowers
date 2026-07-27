@@ -27,7 +27,7 @@
 
    Flip to true the moment the provider actually works — nothing else to
    change; the button appears and is already wired.                      */
-const SHOW_GOOGLE = false;
+const SHOW_GOOGLE = true;
 const SHOW_APPLE  = false;
 
 const SUPABASE_URL      = 'https://qzobweooybjemvsjmmet.supabase.co';
