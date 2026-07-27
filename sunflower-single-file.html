@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sunflower — send a moment, not a card</title>
+<meta name="description" content="Pick a gift, write your words, send a link. It opens in their browser and something happens.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Gloria+Hallelujah&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   sunflower — visual system
+   Sky above, grass below, warm sun bleeding in top-left.
+   Two voices: Outfit is the product speaking,
+   Caveat is a person speaking.
+   ═══════════════════════════════════════════════════ */
+:root{
+  --sky-1:#FDF6D9; --sky-2:#F3F8FC; --sky-3:#DCEAF7; --grass:#CFE0C0;
+  --ink:#2B2A26; --ink-soft:#7E796F;
+  --pill:#fff; --shell:rgba(255,255,255,.62); --edge:rgba(255,255,255,.7);
+  --field:rgba(255,255,255,.72);
+  --accent:#D98A24;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+body.dark{
+  --sky-1:#33334C; --sky-2:#1F2131; --sky-3:#181A28; --grass:#232F28;
+  --ink:#F4F0E6; --ink-soft:#A8A395;
+  --pill:#3B3E53; --shell:rgba(43,46,64,.6); --edge:rgba(255,255,255,.09);
+  --field:rgba(255,255,255,.07);
+  --accent:#F2B65E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Outfit',system-ui,sans-serif;color:var(--ink);min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(70vw 60vh at 2% -6%, var(--sky-1), transparent 58%),
+    linear-gradient(180deg, var(--sky-2) 0%, var(--sky-3) 62%, var(--grass) 100%);
+  background-attachment:fixed;
+  transition:background .6s var(--ease), color .3s var(--ease);
+}
+.wrap{max-width:1200px;margin:0 auto;padding:0 28px}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+/* ── the garden: two sunflowers, one butterfly ── */
+.garden{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bloom{position:absolute;bottom:-3%;width:min(150px,13vw);transform-origin:50% 100%}
+.bl{left:1.5%;animation:sway 11s ease-in-out infinite}
+.br{right:1.5%;animation:sway 14s ease-in-out infinite reverse}
+@keyframes sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.8deg)}}
+.fly{position:absolute;width:30px;will-change:transform;filter:drop-shadow(0 4px 6px rgba(40,55,75,.25))}
+.fly .w{transform-origin:50% 62%;animation:flap .32s ease-in-out infinite alternate}
+.fly .wr{animation-delay:.02s}
+@keyframes flap{from{transform:scaleX(1)}to{transform:scaleX(.4) rotate(5deg)}}
+nav,.screen{position:relative;z-index:1}
+
+/* ── nav ── */
+nav{position:sticky;top:0;z-index:60;padding:18px 0;backdrop-filter:blur(10px)}
+.nav-in{max-width:1200px;margin:0 auto;padding:0 28px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:9px;background:none;border:0}
+.logo svg{width:30px;height:30px}
+.logo span{font-family:'Gloria Hallelujah',cursive;font-size:20px;color:var(--ink)}
+.seg{margin:0 auto;display:flex;gap:2px;background:var(--shell);border-radius:999px;padding:4px;
+     box-shadow:0 2px 16px -8px rgba(40,50,70,.35)}
+.seg button{border:0;background:transparent;font-size:15px;color:var(--ink-soft);
+            padding:9px 20px;border-radius:999px;transition:.25s var(--ease)}
+.seg button.on{background:var(--pill);color:var(--ink);box-shadow:0 3px 10px -4px rgba(40,50,70,.3)}
+.right{display:flex;align-items:center;gap:10px}
+.toggle{display:flex;background:var(--shell);border-radius:999px;padding:4px}
+.toggle button{border:0;background:transparent;width:34px;height:30px;border-radius:999px;
+               font-size:13px;color:var(--ink-soft)}
+.toggle button.on{background:var(--pill)}
+.cta{background:#16150F;color:#FCFAF2;border:0;border-radius:999px;padding:12px 22px;font-size:15px;
+     box-shadow:0 12px 26px -14px rgba(0,0,0,.7);transition:.25s var(--ease)}
+body.dark .cta{background:#F4F0E6;color:#1B1D28}
+.cta:hover{transform:translateY(-1px)}
+
+/* ── screens ── */
+.screen{display:none;animation:in .5s var(--ease)}
+.screen.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.head{text-align:center;padding:40px 0 0}
+.head h1{font-family:'Caveat',cursive;font-weight:700;font-size:clamp(34px,5.6vw,72px);
+         line-height:1.05;white-space:nowrap}
+.head h1 em{font-style:normal;color:var(--accent)}
+.head p{color:var(--ink-soft);margin-top:8px;font-weight:300;font-size:17px}
+.loading{grid-column:1/-1;text-align:center;color:var(--ink-soft);padding:60px 0;font-weight:300}
+
+/* ── the shelf ── */
+.shelf{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:30px 0 150px}
+.gift-card{background:none;border:0;padding:0;text-align:center;color:inherit}
+.gift-card:disabled{cursor:default}
+.bed{height:250px;display:grid;place-items:center;transition:transform .5s var(--ease)}
+.gift-card:hover:not(:disabled) .bed{transform:translateY(-10px)}
+.bed img,.bed .fallback{max-height:100%;max-width:76%;object-fit:contain;
+  filter:drop-shadow(0 20px 26px rgba(40,55,75,.22))}
+.bed .fallback{width:130px;height:170px;display:grid;place-items:center;border-radius:14px;
+  border:1.5px dashed var(--edge);color:var(--ink-soft);font-size:12px;font-weight:300;padding:12px}
+.gift-card:hover:not(:disabled) .bed img{animation:bob 2.8s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.cap .n{font-family:'Caveat',cursive;font-weight:700;font-size:24px;line-height:1.1}
+.cap .d{color:var(--ink-soft);font-size:13px;font-weight:300;margin-top:2px}
+.cap .peek{font-family:'Caveat',cursive;font-size:17px;color:var(--ink-soft);margin-top:6px;
+  height:22px;opacity:0;transform:translateY(-4px);transition:.35s var(--ease)}
+.gift-card:hover:not(:disabled) .cap .peek{opacity:1;transform:none}
+
+.searchbar{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:50;width:min(560px,86vw);
+  background:rgba(255,255,255,.52);backdrop-filter:blur(18px);border:1px solid var(--edge);
+  border-radius:999px;padding:15px 26px;box-shadow:0 22px 54px -26px rgba(40,60,80,.6)}
+body.dark .searchbar{background:rgba(36,39,54,.6)}
+.searchbar input{width:100%;border:0;background:transparent;font:inherit;font-size:16px;color:var(--ink);outline:none}
+
+/* ── compose: preview left, form right ── */
+.composer{display:grid;grid-template-columns:1fr 400px;gap:40px;padding:4px 0 90px;align-items:start}
+.back{width:46px;height:46px;border-radius:50%;border:0;background:var(--pill);font-size:18px;
+  color:var(--ink);box-shadow:0 8px 20px -12px rgba(40,50,70,.6);margin-bottom:12px}
+.stage{min-height:600px;display:grid;place-items:center;padding:10px 0 40px}
+.device{display:flex;flex-direction:column;align-items:center;gap:12px}
+.screen-frame{width:360px;max-width:100%;aspect-ratio:9/16;border-radius:30px;overflow:hidden;
+  background:#000;border:8px solid #1B1A17;box-shadow:0 40px 80px -34px rgba(30,45,65,.65)}
+body.dark .screen-frame{border-color:#0E0D14}
+.screen-frame iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+.device-bar{display:flex;align-items:center;gap:8px}
+.device-bar .hint{font-size:12px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
+.device-bar .hint.stale{color:var(--accent)}
+.mini{width:34px;height:34px;border-radius:50%;border:1px solid var(--edge);background:var(--shell);
+  color:var(--ink);font-size:14px;backdrop-filter:blur(10px)}
+.mini:hover{background:var(--ink);color:var(--sky-2)}
+.poster{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;max-width:420px}
+.poster img{max-height:260px;filter:drop-shadow(0 28px 36px rgba(40,55,75,.24))}
+.poster .q{font-family:'Caveat',cursive;font-size:26px}
+.poster .to{font-family:'Caveat',cursive;font-weight:700;font-size:46px;line-height:1;color:var(--accent)}
+.poster .msg{font-family:'Caveat',cursive;font-size:22px;line-height:1.4;max-width:26ch}
+.poster .msg b{font-weight:700}
+.poster .meta{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+
+.panel{background:var(--shell);backdrop-filter:blur(20px);border:1px solid var(--edge);
+  border-radius:24px;box-shadow:0 26px 64px -32px rgba(40,60,80,.55);
+  position:sticky;top:96px;max-height:calc(100vh - 130px);
+  display:flex;flex-direction:column;overflow:hidden}
+.panel h2{padding:26px 28px 0}
+.panel .sub{padding:0 28px}
+#fields{flex:1;overflow-y:auto;padding:0 28px 14px;min-height:0}
+.panel-actions{padding:14px 28px 20px;border-top:1px solid var(--edge);
+  background:var(--shell);backdrop-filter:blur(20px)}
+.panel-actions .send.ghost{margin-bottom:10px}
+.panel h2{font-family:'Caveat',cursive;font-weight:700;font-size:32px}
+.panel .sub{color:var(--ink-soft);font-size:13.5px;font-weight:300;margin:3px 0 22px;line-height:1.5}
+.f{margin-bottom:18px}
+.f .lab{font-size:15px;display:flex;align-items:center;gap:8px}
+.f .req{color:var(--accent)}
+.f .tag{font-size:10px;color:var(--ink-soft);border:1px solid currentColor;padding:0 5px;
+  border-radius:4px;opacity:.45;margin-left:auto}
+.f .help{font-size:13px;color:var(--ink-soft);font-weight:300;margin:2px 0 8px}
+input[type=text],textarea,input[type=url],input[type=date]{
+  width:100%;background:var(--field);border:1px solid rgba(0,0,0,.06);border-radius:14px;
+  padding:13px 15px;font:inherit;font-size:15px;color:var(--ink);transition:.2s var(--ease)}
+body.dark input,body.dark textarea{border-color:rgba(255,255,255,.1)}
+input:focus,textarea:focus{outline:none;border-color:var(--ink);background:#fff}
+body.dark input:focus,body.dark textarea:focus{background:rgba(255,255,255,.13)}
+textarea{resize:vertical;min-height:82px;font-family:'Outfit'}
+input[type=color]{width:100%;height:46px;border:0;border-radius:14px;background:var(--field);padding:5px}
+.send{width:100%;background:rgba(255,255,255,.78);border:1px solid rgba(0,0,0,.06);border-radius:16px;
+  padding:16px;font-size:16px;color:var(--ink);transition:.25s var(--ease)}
+body.dark .send{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.1)}
+.send:hover{background:#16150F;color:#FCFAF2;border-color:#16150F}
+body.dark .send:hover{background:#F4F0E6;color:#1B1D28}
+.send.ghost{margin-bottom:10px}
+
+/* ── sent ── */
+.sent{max-width:600px;margin:0 auto;text-align:center;padding:20px 0 160px}
+.sent h1{font-family:'Caveat',cursive;font-weight:700;font-size:52px;margin-top:16px}
+.sent p{color:var(--ink-soft);font-weight:300;margin-top:4px}
+.link{display:flex;align-items:center;gap:10px;background:var(--shell);border:1px solid var(--edge);
+  border-radius:999px;padding:11px 11px 11px 22px;margin:24px 0 16px;backdrop-filter:blur(14px)}
+.link code{flex:1;text-align:left;font-family:'Outfit';font-size:14px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.link button{background:#16150F;color:#FCFAF2;border:0;border-radius:999px;padding:10px 18px;font-size:14px}
+body.dark .link button{background:#F4F0E6;color:#1B1D28}
+.row{display:flex;gap:10px}
+
+/* ── gifts I've sent ── */
+.mine-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.mine-card{background:var(--shell);border:1px solid var(--edge);border-radius:18px;padding:18px;
+  text-align:left;backdrop-filter:blur(14px)}
+.mine-card .who{font-family:'Caveat',cursive;font-weight:700;font-size:26px}
+.mine-card .when{color:var(--ink-soft);font-size:12px;font-weight:300;margin-bottom:12px}
+.mine-card .acts{display:flex;gap:8px}
+.mine-card .acts button{flex:1;background:var(--field);border:1px solid var(--edge);border-radius:10px;
+  padding:9px;font-size:13px;color:var(--ink)}
+.mine-card .acts button:hover{background:var(--ink);color:var(--sky-2)}
+.empty{grid-column:1/-1;text-align:center;color:var(--ink-soft);font-weight:300;padding:70px 0}
+
+.mine-h{font-family:'Caveat',cursive;font-weight:700;font-size:26px;padding-top:24px}
+.mine-list{padding:16px 0 30px}
+.mine-list:last-of-type{padding-bottom:160px}
+
+/* ── the gift, full screen ── */
+/* The gift takes the whole screen. It brings its own background —
+   we don't frame it, we get out of its way. The controls float on top. */
+.viewer{position:fixed;inset:0;z-index:200;background:#fff}
+.viewer[hidden]{display:none}
+.viewer-stage{position:absolute;inset:0}
+.viewer-stage iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+.viewer-bar{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;align-items:center;gap:8px;
+  padding:16px 18px;pointer-events:none}
+.viewer-bar span{flex:1;font-size:13px;color:#2B2A26;background:rgba(255,255,255,.72);
+  backdrop-filter:blur(12px);padding:8px 16px;border-radius:999px;pointer-events:auto;
+  box-shadow:0 6px 20px -10px rgba(30,40,60,.4);max-width:max-content}
+.vbtn{pointer-events:auto;background:rgba(255,255,255,.78);color:#2B2A26;border:0;border-radius:999px;
+  padding:9px 16px;font-size:13px;backdrop-filter:blur(12px);
+  box-shadow:0 6px 20px -10px rgba(30,40,60,.4)}
+.vbtn:hover{background:#16150F;color:#FCFAF2}
+
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);z-index:300;
+  background:#16150F;color:#FCFAF2;padding:12px 20px;border-radius:999px;font-size:14px;
+  opacity:0;pointer-events:none;transition:.3s var(--ease)}
+.toast.on{opacity:1;transform:translate(-50%,-6px)}
+
+@media (max-width:1050px){
+  .shelf{grid-template-columns:repeat(2,1fr)}
+  .composer{grid-template-columns:1fr}
+  .panel{position:static;max-height:none}
+}
+@media (max-width:620px){
+  .shelf{grid-template-columns:1fr 1fr;gap:4px}
+  .bed{height:190px}
+  .nav-in{flex-wrap:wrap}
+  .seg{order:3;width:100%;margin-top:10px;justify-content:center}
+  .head h1{font-size:clamp(28px,7.4vw,40px)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+</style>
+</head>
+<body>
+
+<div class="garden" aria-hidden="true">
+  <div class="bloom bl"><svg viewBox="0 0 200 560" preserveAspectRatio="xMidYMax meet">
+    <defs>
+      <linearGradient id="pB" x1=".5" y1="1" x2=".5" y2="0"><stop offset="0" stop-color="#C98A22"/><stop offset="1" stop-color="#F6CE55"/></linearGradient>
+      <linearGradient id="pF" x1=".5" y1="1" x2=".5" y2="0"><stop offset="0" stop-color="#EDB93B"/><stop offset="1" stop-color="#FFE694"/></linearGradient>
+      <radialGradient id="dc" cx=".38" cy=".34"><stop offset="0" stop-color="#8A5F2A"/><stop offset="1" stop-color="#4E3417"/></radialGradient>
+      <linearGradient id="lf" x1="0" y1="0" x2=".9" y2="1"><stop offset="0" stop-color="#9AC97D"/><stop offset="1" stop-color="#4E8146"/></linearGradient>
+    </defs>
+    <path d="M100 150 C 106 290, 94 420, 100 560" stroke="#6EA55B" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M100 300 C 62 286, 34 300, 18 332 C 56 346, 88 330, 100 300Z" fill="url(#lf)"/>
+    <path d="M104 396 C 140 384, 168 398, 184 428 C 146 440, 114 426, 104 396Z" fill="url(#lf)" opacity=".93"/>
+    <g id="pb"><path d="M100 104 C 86 78, 82 44, 96 14 C 99 8, 102 8, 105 15 C 118 45, 114 79, 100 104Z" fill="url(#pB)"/></g>
+    <use href="#pb" transform="rotate(28 100 104)"/><use href="#pb" transform="rotate(56 100 104)"/>
+    <use href="#pb" transform="rotate(84 100 104)"/><use href="#pb" transform="rotate(112 100 104)"/>
+    <use href="#pb" transform="rotate(140 100 104)"/><use href="#pb" transform="rotate(168 100 104)"/>
+    <use href="#pb" transform="rotate(196 100 104)"/><use href="#pb" transform="rotate(224 100 104)"/>
+    <use href="#pb" transform="rotate(252 100 104)"/><use href="#pb" transform="rotate(280 100 104)"/>
+    <use href="#pb" transform="rotate(308 100 104)"/><use href="#pb" transform="rotate(336 100 104)"/>
+    <g id="pf"><path d="M100 100 C 90 78, 88 50, 99 28 C 101 24, 103 25, 105 30 C 113 52, 110 80, 100 100Z" fill="url(#pF)"/></g>
+    <use href="#pf" transform="rotate(36 100 104)"/><use href="#pf" transform="rotate(72 100 104)"/>
+    <use href="#pf" transform="rotate(108 100 104)"/><use href="#pf" transform="rotate(144 100 104)"/>
+    <use href="#pf" transform="rotate(180 100 104)"/><use href="#pf" transform="rotate(216 100 104)"/>
+    <use href="#pf" transform="rotate(252 100 104)"/><use href="#pf" transform="rotate(288 100 104)"/>
+    <use href="#pf" transform="rotate(324 100 104)"/>
+    <circle cx="100" cy="104" r="33" fill="url(#dc)"/>
+    <circle cx="100" cy="104" r="33" fill="none" stroke="#3E2A12" opacity=".35"/>
+    <ellipse cx="90" cy="93" rx="12" ry="8" fill="#C79A55" opacity=".35"/>
+  </svg></div>
+  <div class="bloom br"><svg viewBox="0 0 200 560" preserveAspectRatio="xMidYMax meet"><use href="#garden-copy"/>
+    <path d="M100 150 C 94 290, 106 420, 100 560" stroke="#6EA55B" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M96 316 C 132 304, 160 318, 176 348 C 138 360, 106 346, 96 316Z" fill="url(#lf)"/>
+    <path d="M104 420 C 68 408, 40 422, 24 452 C 62 464, 94 450, 104 420Z" fill="url(#lf)" opacity=".93"/>
+    <use href="#pb"/><use href="#pb" transform="rotate(28 100 104)"/><use href="#pb" transform="rotate(56 100 104)"/>
+    <use href="#pb" transform="rotate(84 100 104)"/><use href="#pb" transform="rotate(112 100 104)"/>
+    <use href="#pb" transform="rotate(140 100 104)"/><use href="#pb" transform="rotate(168 100 104)"/>
+    <use href="#pb" transform="rotate(196 100 104)"/><use href="#pb" transform="rotate(224 100 104)"/>
+    <use href="#pb" transform="rotate(252 100 104)"/><use href="#pb" transform="rotate(280 100 104)"/>
+    <use href="#pb" transform="rotate(308 100 104)"/><use href="#pb" transform="rotate(336 100 104)"/>
+    <use href="#pf" transform="rotate(18 100 104)"/><use href="#pf" transform="rotate(54 100 104)"/>
+    <use href="#pf" transform="rotate(90 100 104)"/><use href="#pf" transform="rotate(126 100 104)"/>
+    <use href="#pf" transform="rotate(162 100 104)"/><use href="#pf" transform="rotate(198 100 104)"/>
+    <use href="#pf" transform="rotate(234 100 104)"/><use href="#pf" transform="rotate(270 100 104)"/>
+    <use href="#pf" transform="rotate(306 100 104)"/><use href="#pf" transform="rotate(342 100 104)"/>
+    <circle cx="100" cy="104" r="33" fill="url(#dc)"/>
+    <ellipse cx="90" cy="93" rx="12" ry="8" fill="#C79A55" opacity=".35"/>
+  </svg></div>
+  <div class="fly" id="fly"><svg viewBox="0 0 60 46">
+    <g class="w"><path d="M30 26 C 16 2, -2 6, 3 20 C 6 30, 20 32, 30 26Z" fill="#F0A93C"/>
+      <path d="M30 26 C 18 32, 4 34, 8 42 C 13 48, 27 38, 30 26Z" fill="#D9711F"/></g>
+    <g class="w wr" transform="translate(60 0) scale(-1 1)">
+      <path d="M30 26 C 16 2, -2 6, 3 20 C 6 30, 20 32, 30 26Z" fill="#F0A93C"/>
+      <path d="M30 26 C 18 32, 4 34, 8 42 C 13 48, 27 38, 30 26Z" fill="#D9711F"/></g>
+    <ellipse cx="30" cy="27" rx="2" ry="9" fill="#3B2E1C"/>
+    <path d="M30 18 C 27 10, 23 8, 21 9 M30 18 C 33 10, 37 8, 39 9" stroke="#3B2E1C" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  </svg></div>
+</div>
+
+<!-- ══ nav ══ -->
+<nav>
+  <div class="nav-in">
+    <button class="logo" data-go="gallery">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="8" fill="#5B3E1B"/>
+        <g id="pet"><path d="M20 12 C 17 6, 18 1, 20 0 C 22 1, 23 6, 20 12Z" fill="#F3C64C"/></g>
+        <use href="#pet" transform="rotate(45 20 20)"/><use href="#pet" transform="rotate(90 20 20)"/>
+        <use href="#pet" transform="rotate(135 20 20)"/><use href="#pet" transform="rotate(180 20 20)"/>
+        <use href="#pet" transform="rotate(225 20 20)"/><use href="#pet" transform="rotate(270 20 20)"/>
+        <use href="#pet" transform="rotate(315 20 20)"/></svg>
+      <span>sunflower</span>
+    </button>
+
+    <div class="seg">
+      <button id="tab-gallery" class="on" data-go="gallery">Gift shelf</button>
+      <button id="tab-mine" data-go="mine">Gifts I've sent</button>
+    </div>
+
+    <div class="right">
+      <div class="toggle">
+        <button id="lt" class="on" data-theme="light" aria-label="Light">☀</button>
+        <button id="dk" data-theme="dark" aria-label="Dark">☾</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ gallery ══ -->
+<main class="screen on" id="gallery">
+  <div class="wrap">
+    <header class="head">
+      <h1>Send a <em>moment</em>, not a card.</h1>
+      <p>A little effort, wrapped in a link. It opens in their browser and something happens.</p>
+    </header>
+    <div class="shelf" id="shelf" aria-live="polite">
+      <div class="loading">Reading the template folder…</div>
+    </div>
+  </div>
+</main>
+
+<!-- ══ compose ══ -->
+<main class="screen" id="compose">
+  <div class="wrap">
+    <button class="back" data-go="gallery" aria-label="Back">←</button>
+    <div class="composer">
+      <section class="stage">
+        <div class="device">
+          <div class="screen-frame"><iframe id="pv" title="Preview" allow="microphone; autoplay"></iframe></div>
+          <div class="device-bar">
+            <span class="hint" id="pvHint">live preview</span>
+            <button class="mini" id="pvRefresh" title="Refresh">↻</button>
+            <button class="mini" id="pvFull" title="Full screen">⤢</button>
+          </div>
+        </div>
+      </section>
+      <aside class="panel">
+        <h2 id="pTitle"></h2>
+        <p class="sub" id="pSub"></p>
+        <form id="fields" autocomplete="off"></form>
+        <div class="panel-actions">
+          <button class="send ghost" id="previewBtn">▷ Open it — see what they'll see</button>
+          <button class="send" id="wrapBtn">Wrap it and get the link ➤</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<!-- ══ sent ══ -->
+<main class="screen" id="sent">
+  <div class="wrap">
+    <div class="sent">
+      <div class="poster" id="sentPoster"></div>
+      <h1>It's wrapped.</h1>
+      <p>Send them this link. Everything they'll see is inside it — no account, nothing to install.</p>
+      <div class="link"><code id="glink"></code><button id="copyBtn">Copy link</button></div>
+      <div class="row">
+        <button class="send ghost" id="openSentBtn">▷ Open the gift</button>
+        <button class="send" data-go="gallery">Back to the shelf</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ══ gifts I've sent ══ -->
+<main class="screen" id="mine">
+  <div class="wrap">
+    <header class="head">
+      <h1>Gifts I've sent</h1>
+      <p id="mineSub">Kept on this device only.</p>
+    </header>
+    <h3 class="mine-h">Created — still drafts</h3>
+    <div class="mine-list" id="draftList"></div>
+    <h3 class="mine-h">Sent — link generated</h3>
+    <div class="mine-list" id="mineList"></div>
+  </div>
+</main>
+
+<!-- ══ the gift itself ══ -->
+<div class="viewer" id="viewer" hidden>
+  <div class="viewer-bar">
+    <span id="viewerTag"></span>
+    <button class="vbtn" id="replayBtn">↻ Replay</button>
+    <button class="vbtn" id="closeBtn">✕ Close</button>
+  </div>
+  <div class="viewer-stage"><iframe id="viewFrame" title="Your gift" allow="microphone; autoplay"></iframe></div>
+</div>
+
+<script type="application/json" id="man-birthday">{
+  "id": "birthday",
+  "name": "BIRTHDAY",
+  "tagline": "blow the candle",
+  "category": "Birthday",
+  "experienceTime": "1 min",
+  "description": "An envelope, a candle they blow out with their mic, and a scroll of little notes written just for them.",
+  "thumbnail": "icon.png",
+  "featured": true,
+    "trending": true,
+    "assetsBaseURL": "https://giveawaychallenge76-hub.github.io/latenight/",
+  "fields": [
+    { "key": "name",        "type": "text",      "label": "Their name",            "placeholder": "ashika",  "required": true },
+    { "key": "question",    "type": "text",      "label": "Opening question",      "default": "Is it your birthday?? 🎂" },
+    { "key": "note1_title", "type": "text",      "label": "Note 1 — title",        "default": "she is so cute...." },
+    { "key": "note1_text",  "type": "paragraph", "label": "Note 1 — text",         "default": "the one reading this note right now. 🥰" },
+    { "key": "note2_title", "type": "text",      "label": "Note 2 — title",        "default": "No matter how much time passes..." },
+    { "key": "note2_text",  "type": "paragraph", "label": "Note 2 — text",         "default": "You will always have such a beautiful heart! ❤️" },
+    { "key": "note3_title", "type": "text",      "label": "Note 3 — title",        "default": "Your beautiful smile..." },
+    { "key": "note3_text",  "type": "paragraph", "label": "Note 3 — text",         "default": "Makes every single day feel worth celebrating. ✨" },
+    { "key": "note4_title", "type": "text",      "label": "Final note — title",    "default": "Happy Birthday" },
+    { "key": "note4_text",  "type": "paragraph", "label": "Final note — text",     "default": "YOU<br>YOU<br>YOU❤️" },
+    { "key": "photo_url",   "type": "image",     "label": "Background photo", "default": "1000076281.jpg" },
+        { "key": "music_url",   "type": "music",     "label": "Their song", "default": "YTDown.com_Shorts_Ariana-Grande-Hate-That-I-Made-You-Love-_Media_5b-pz-Fm_XI_008_128k.mp3" }
+  ]
+}
+</script>
+<script type="text/plain" id="tpl-birthday"><!DOCTYPE html>  
+<html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Happy Birthday x! 🎂</title>  
+<style>  
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+body{
+height:100vh;
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+background: linear-gradient(rgba(255, 214, 223, 0.4), rgba(244, 165, 181, 0.4)), 
+            url('{{photo_url}}') no-repeat center center;
+background-size: cover;
+font-family:Georgia, serif;
+}
+
+/* HEARTS BACKGROUND */
+#hearts{ position:fixed; inset:0; pointer-events:none; z-index: 1; }
+.heart{
+position:absolute; bottom:-100px; opacity:0;
+animation:floatUp linear infinite;
+}
+.heart::before,.heart::after{
+content:''; position:absolute;
+width:50%; height:80%; background:currentColor;
+border-radius:50% 50% 0 0;
+}
+.heart::before{ left:50%; transform-origin:left bottom; transform:rotate(-45deg); }
+.heart::after{  left:0;   transform-origin:right bottom; transform:rotate(45deg); }
+@keyframes floatUp{
+0%  { transform:translateY(0); opacity:0; }
+10% { opacity:.8; }
+100%{ transform:translateY(-120vh) translateX(40px) rotate(20deg); opacity:0; }
+}
+
+/* ── CELEBRATION CONFETTI ENGINE ── */
+.confetti-particle {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 99;
+  animation: explodeDrop 3s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+@keyframes explodeDrop {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  30% { opacity: 1; }
+  100% { transform: translate(var(--x-move), var(--y-move)) rotate(var(--rot)) scale(0.3); opacity: 0; }
+}
+
+/* ── FRONT PAGE ── */
+#front-page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  background: linear-gradient(rgba(255, 214, 223, 0.45), rgba(244, 165, 181, 0.45)), 
+              url('{{photo_url}}') no-repeat center center;
+  background-size: cover;
+  transition: opacity 0.6s ease;
+}
+
+.proposal-box {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(192, 67, 90, 0.3);
+  max-width: 90%;
+  width: 360px;
+  backdrop-filter: blur(4px);
+}
+
+.proposal-box h1 {
+  color: #c0435a;
+  font-size: 1.6rem;
+  margin-bottom: 30px;
+}
+
+.btn-container {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  position: relative;
+  height: 50px;
+}
+
+.btn {
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#yes-btn {
+  background-color: #ff4d6d;
+  color: white;
+  box-shadow: 0 4px 10px rgba(255, 77, 109, 0.3);
+}
+#yes-btn:hover {
+  background-color: #ff758f;
+}
+
+#no-btn {
+  background-color: #f0f0f0;
+  color: #555;
+  position: absolute;
+  left: 190px; 
+  transition: all 0.2s ease;
+}
+
+/* ── SURPRISE CONTAINER ── */
+#surprise-content {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+.hint{
+text-align:center;
+color:#c0435a;
+font-size:16px;
+margin-bottom:20px;
+transition:opacity .4s;
+font-weight: bold;
+text-shadow: 0 1px 4px rgba(255,255,255,0.8);
+background: rgba(255, 255, 255, 0.7);
+padding: 5px 15px;
+border-radius: 20px;
+}
+.hint.hidden{ opacity:0; }
+
+/* Envelope Setup */
+.envelope{
+position:relative;
+width:320px;
+height:380px; 
+cursor:pointer;
+animation:bob 3s ease-in-out infinite;
+}
+.envelope.pulled{ animation:none; }
+
+@keyframes bob{
+0%,100%{ transform:translateY(0); }
+50%    { transform:translateY(-10px); }
+}
+
+.back-flap{
+position:absolute;
+top:0; left:0;
+width:0; height:0;
+border-left:  160px solid transparent;
+border-right: 160px solid transparent;
+border-bottom:130px solid #e5c158;
+z-index:1;
+}
+
+.body-bg{
+position:absolute;
+left:0; right:0;
+top:130px;
+height:250px;
+background:#dec168;
+z-index:1;
+border-radius:0 0 4px 4px;
+box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+
+/* ── LETTER CARD ENGINE ── */
+.letter{
+position:absolute;
+left:20px;
+right:20px;
+height:245px; 
+background:#fff;
+border-radius:4px;
+top:132px; 
+z-index:2;
+box-shadow:0 4px 15px rgba(0,0,0,.15);
+transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), height 1s cubic-bezier(0.25, 1, 0.5, 1);
+overflow:hidden;
+transform: translateY(0);
+}
+
+.envelope.pulled .letter{
+transform:translateY(-215px);
+height: 325px; 
+}
+
+.content{
+height:100%;
+display:flex; flex-direction:column;
+justify-content:flex-start; align-items:center;
+text-align:center; padding:12px;
+opacity:0;
+transition:opacity 0.6s ease 0.4s;
+}
+.envelope.pulled .content{ opacity:1; }
+
+.content h2{ 
+  color:#c0435a; 
+  margin-top: 5px;
+  margin-bottom:5px; 
+  font-size: 1.5rem; 
+  font-weight: normal;
+  font-family: 'Dancing Script', 'Brush Script MT', 'Georgia', cursive, serif;
+}
+
+.highlight-name {
+  background: transparent; 
+  padding: 0 4px;
+  border: none; 
+  font-weight: bold;
+  color: #ff4d6d;
+  font-size: 1.8rem;
+  display: inline-block;
+}
+
+.mic-instruction {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+/* CAKE */
+.cake-design {
+  position: relative;
+  width: 90px;
+  height: 45px;
+  background: #f48fb1; 
+  border-radius: 6px 6px 0 0;
+  margin-top: 22px;
+  margin-bottom: 12px;
+  box-shadow: inset 0 -8px 0 #f06292;
+  flex-shrink: 0;
+}
+.cake-design::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 8px;
+  background: #fff8e1; 
+  top: 18px; left: 0;
+}
+.cake-design::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 6px;
+  background: #e1bee7; 
+  border-radius: 6px 6px 0 0;
+  top: 0; left: 0;
+}
+.candle-wick {
+  position: absolute;
+  width: 6px;
+  height: 18px;
+  background: linear-gradient(#b2ebf2, #00bcd4);
+  top: -18px;
+  left: 42px;
+  border-radius: 1px;
+}
+.candle-wick::before {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 4px;
+  background: #333;
+  top: -4px; left: 2px;
+}
+.glowing-flame {
+  position: absolute;
+  width: 10px;
+  height: 14px;
+  background: #ffb74d;
+  border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+  top: -32px;
+  left: 40px;
+  box-shadow: 0 0 10px #ffb74d, 0 0 20px #ff9800;
+  animation: flameMove 0.6s ease-in-out infinite alternate;
+  transition: opacity 0.3s ease;
+}
+@keyframes flameMove {
+  0% { transform: scale(1) rotate(-3deg); opacity: 0.9; }
+  100% { transform: scale(1.15) rotate(4deg); opacity: 1; box-shadow: 0 0 12px #ffb74d, 0 0 22px #ff5722; }
+}
+
+.smoke {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: rgba(220, 220, 220, 0.8);
+  border-radius: 50%;
+  top: -36px;
+  left: 39px;
+  opacity: 0;
+  pointer-events: none;
+}
+.blown-out .glowing-flame {
+  opacity: 0 !important;
+  animation: none !important;
+}
+.blown-out .smoke {
+  animation: smokeRise 1.5s ease-out forwards;
+}
+@keyframes smokeRise {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; filter: blur(0px); }
+  50% { opacity: 0.4; }
+  100% { transform: translateY(-30px) scale(2.5); opacity: 0; filter: blur(4px); }
+}
+
+/* MEMORY SLIDER DISPLAY SCROLL */
+.cute-note-scroll {
+  width: 100%;
+  background: #fff9f9;
+  border: none; 
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 4px;
+  font-family: "Comic Sans MS", "Chalkboard SE", "Comic Neue", sans-serif;
+  position: relative;
+}
+.cute-note-scroll h4 {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 5px;
+  font-weight: normal;
+}
+.important-list {
+  color: #ff4d6d;
+  font-weight: bold;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  letter-spacing: 1px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.front-pocket{
+position:absolute;
+left:0; right:0;
+top:130px;
+bottom:0;
+background:#eed070;
+z-index:4;
+border-radius:0 0 4px 4px;
+clip-path: polygon(0 0, 50% 55px, 100% 0, 100% 100%, 0 100%);
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.front-label{
+font-size:18px;
+font-weight:bold;
+color:#2b2204;
+opacity:0.85;
+transition:opacity .3s;
+text-align:center;
+margin-top:45px; 
+}
+.envelope.pulled .front-label{ opacity:0; }
+
+</style>  
+</head>  
+<body>  
+
+<audio id="romantic-music" loop>
+  <source src="{{music_url}}" type="audio/mpeg">
+</audio>
+<audio id="birthday-music" loop>
+  <source src="{{music_url}}">
+</audio>
+
+<div id="hearts"></div>  
+
+<div id="front-page">
+    <div class="proposal-box">
+        <h1>{{question}}</h1>
+        <div class="btn-container">
+            <button class="btn" id="yes-btn">Yes</button>
+            <button class="btn" id="no-btn">No</button>
+        </div>
+    </div>
+</div>
+
+<div id="surprise-content" class="wrap">  
+    <div class="hint" id="hint">Tap to pull out the letter 💖</div>  
+    
+    <div class="envelope" id="envelope">  
+        <div class="back-flap"></div>  
+        <div class="body-bg"></div>  
+
+        <div class="letter">  
+            <div class="content">  
+                <h2>Happy Birthday <span class="highlight-name">{{name}}</span> 🥳</h2>  
+                <div class="mic-instruction" id="mic-tag">(use the mic to blow the candle)</div>
+                
+                <div class="cake-design" id="cake-container">
+                    <div class="glowing-flame"></div>
+                    <div class="candle-wick"></div>
+                    <div class="smoke"></div>
+                </div>
+
+                <div class="cute-note-scroll" id="note-scroller">
+                    <h4 id="note-title">A list of my most important things...</h4>
+                    <div class="important-list" id="display-text">
+                        {{note4_text}}
+                    </div>
+                </div>
+            </div>  
+        </div>  
+
+        <div class="front-pocket">
+            <div class="front-label">Place your hand here</div>  
+        </div>
+    </div>
+</div>  
+
+<script>  
+const hearts = document.getElementById("hearts");  
+const colors = ["#ff4d6d","#ff758f","#ff8fa3","#ffb3c1","#e84c6a"];  
+for(let i = 0; i < 80; i++){  
+    const h = document.createElement("span");  
+    h.className = "heart";  
+    const size = 10 + Math.random()*50;  
+    h.style.width  = size+"px";  
+    h.style.height = size+"px";  
+    h.style.left   = Math.random()*100+"vw";  
+    h.style.color  = colors[Math.floor(Math.random()*colors.length)];  
+    h.style.animationDuration = 6+Math.random()*10+"s";  
+    h.style.animationDelay   = -Math.random()*12+"s";  
+    hearts.appendChild(h);  
+}  
+
+const romanticMusic = document.getElementById("romantic-music");
+const birthdayMusic = document.getElementById("birthday-music");
+
+function startRomanticTrack() {
+    romanticMusic.play().catch(e => console.log("Audio initializing..."));
+    window.removeEventListener("click", startRomanticTrack);
+    window.removeEventListener("touchstart", startRomanticTrack);
+}
+window.addEventListener("click", startRomanticTrack);
+window.addEventListener("touchstart", startRomanticTrack);
+
+const noBtn = document.getElementById("no-btn");
+const yesBtn = document.getElementById("yes-btn");
+const frontPage = document.getElementById("front-page");
+const surpriseContent = document.getElementById("surprise-content");
+
+function escapeNoButton() {
+    const padding = 25; 
+    const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+    const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+    
+    const randomX = Math.max(padding, Math.min(maxX, Math.floor(Math.random() * maxX)));
+    const randomY = Math.max(padding, Math.min(maxY, Math.floor(Math.random() * maxY)));
+    
+    noBtn.style.position = "fixed";
+    noBtn.style.left = randomX + "px";
+    noBtn.style.top = randomY + "px";
+}
+
+noBtn.addEventListener("mouseover", escapeNoButton);
+noBtn.addEventListener("touchstart", (e) => { e.preventDefault(); escapeNoButton(); });
+noBtn.addEventListener("click", (e) => { e.preventDefault(); escapeNoButton(); });
+
+yesBtn.addEventListener("click", () => {
+    yesBtn.innerHTML = "Yay! 🥰";
+    romanticMusic.pause();
+    birthdayMusic.play().catch(e => console.log("Music handover."));
+
+    setTimeout(() => {
+        frontPage.style.opacity = "0";
+        setTimeout(() => {
+            frontPage.style.display = "none";
+            surpriseContent.style.display = "flex";
+            setTimeout(() => { surpriseContent.style.opacity = "1"; }, 50);
+        }, 600);
+    }, 500);
+});
+
+const envelope = document.getElementById("envelope");  
+const hint     = document.getElementById("hint");  
+let letterOpened = false;
+  
+function toggle(){  
+    envelope.classList.toggle("pulled");  
+    const isPulled = envelope.classList.contains("pulled");
+    hint.classList.toggle("hidden", isPulled);  
+    
+    if(isPulled && !letterOpened) {
+        letterOpened = true;
+        setTimeout(initBlowDetection, 1000); 
+    }
+}  
+envelope.addEventListener("click", toggle);  
+envelope.addEventListener("touchstart", e => { e.preventDefault(); toggle(); }, {passive:false});  
+
+function initBlowDetection() {
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then((stream) => {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const microphone = audioContext.createMediaStreamSource(stream);
+        
+        analyser.fftSize = 512;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        microphone.connect(analyser);
+
+        function checkBlow() {
+            if (!letterOpened) return; 
+            analyser.getByteFrequencyData(dataArray);
+            
+            let highFrequencySum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                if (i >= bufferLength / 4) highFrequencySum += dataArray[i];
+            }
+            const highFreqAverage = highFrequencySum / (bufferLength * 0.75);
+            
+            if (highFreqAverage > 45) { 
+                extinguishCandle(stream, audioContext);
+                return;
+            }
+            requestAnimationFrame(checkBlow);
+        }
+        checkBlow();
+    })
+    .catch((err) => {
+        document.getElementById("mic-tag").innerHTML = "(tap the cake to blow the candle)";
+        document.getElementById("cake-container").addEventListener("click", (e) => {
+            e.stopPropagation();
+            extinguishCandle();
+        });
+    });
+}
+
+// ── NEW ADVANCED ENGAGEMENT FEATURES ──
+function triggerConfettiExplosion() {
+    const confettiColors = ["#ff4d6d", "#ff758f", "#ffbe0b", "#ff006e", "#8338ec", "#3a86ff", "#00f5d4"];
+    
+    for (let i = 0; i < 65; i++) {
+        const p = document.createElement("div");
+        p.className = "confetti-particle";
+        p.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+        
+        // Emits directly outwards center-screen from behind the envelope position
+        p.style.left = "50vw";
+        p.style.top = "45vh";
+        
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 80 + Math.random() * 160;
+        
+        p.style.setProperty('--x-move', Math.cos(angle) * velocity + 'vw');
+        p.style.setProperty('--y-move', (Math.sin(angle) * velocity + 150) + 'vh');
+        p.style.setProperty('--rot', Math.floor(Math.random() * 720 - 360) + 'deg');
+        
+        p.style.animationDelay = (Math.random() * 0.2) + 's';
+        p.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+        
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 3500);
+    }
+}
+
+function runMemoryNoteCarousel() {
+    const memories = [
+        { title: "{{note1_title}}", txt: "{{note1_text}}" },
+        { title: "{{note2_title}}", txt: "{{note2_text}}" },
+        { title: "{{note3_title}}", txt: "{{note3_text}}" },
+        { title: "{{note4_title}}", txt: "{{note4_text}}" }
+    ];
+    
+    let currentIndex = 0;
+    const titleEl = document.getElementById("note-title");
+    const txtEl = document.getElementById("display-text");
+    const scrollerBox = document.getElementById("note-scroller");
+
+    // Makes layout feel interactive & clickable like a button link
+    scrollerBox.style.cursor = "pointer";
+    titleEl.innerHTML = memories[0].title;
+    txtEl.innerHTML = memories[0].txt;
+
+    scrollerBox.addEventListener("click", (e) => {
+        e.stopPropagation(); // Avoids closing the letter fold state layout
+        
+        txtEl.style.opacity = "0";
+        titleEl.style.opacity = "0";
+        txtEl.style.transform = "scale(0.9)";
+        
+        setTimeout(() => {
+            currentIndex = (currentIndex + 1) % memories.length;
+            titleEl.innerHTML = memories[currentIndex].title;
+            txtEl.innerHTML = memories[currentIndex].txt;
+            
+            txtEl.style.opacity = "1";
+            titleEl.style.opacity = "1";
+            txtEl.style.transform = "scale(1)";
+            triggerConfettiExplosion();
+        }, 300);
+    });
+}
+
+function extinguishCandle(stream = null, audioContext = null) {
+    const cake = document.getElementById("cake-container");
+    const micTag = document.getElementById("mic-tag");
+    
+    cake.classList.add("blown-out");
+    micTag.innerHTML = "✨ Click below to read your wishes! ✨";
+    
+    triggerConfettiExplosion();
+    runMemoryNoteCarousel();
+    
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    if (audioContext) audioContext.close();
+}
+<\/script>  
+</body>  
+</html></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   sunflower
+
+   The site knows nothing about birthdays, apologies or Valentine's.
+   It knows three things:
+     1. templates/index.json lists the folders
+     2. each folder has a manifest.json declaring its editable fields
+     3. each folder has an index.html full of {{tokens}}
+
+   Everything else — the shelf, the editor, the preview, the link —
+   is derived. To add a gift you drop in a folder. No code changes.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const TEMPLATES = [];          // loaded from disk at boot
+let current = null;            // template being edited
+let values  = {};              // the sender's answers
+
+/* ───────────────────────── 1. load the folders ───────────────────── */
+async function boot(){
+  try{
+    const manEl = document.getElementById('man-birthday');
+    const tplEl = document.getElementById('tpl-birthday');
+    if (manEl && tplEl){
+      const manifest = JSON.parse(manEl.textContent);
+      manifest.html = tplEl.textContent.split('<\\/script>').join('</script>');
+      manifest.dir  = 'templates/birthday/';
+      manifest.assetsBaseURL = manifest.assetsBaseURL || manifest.dir;
+      TEMPLATES.push(manifest);
+    }
+  }catch(err){
+    shelf.innerHTML = `<div class="loading">Couldn't read the template folder.<br>
+      Serve this over http (see README) — <code>fetch</code> won't work from a file:// path.</div>`;
+    console.error(err);
+    return;
+  }
+  paintShelf(TEMPLATES);
+  routeFromHash();          // a gift link opens straight into the gift
+}
+
+/* ───────────────────────── 2. the injector ───────────────────────── */
+/* Fills a COPY of the template. The original file is never touched. */
+function inject(tpl, vals){
+  const base = tpl.assetsBaseURL;
+  const dflt = k => (tpl.fields.find(f => f.key === k) || {}).default || '';
+  return tpl.html.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+    let v = vals[key];
+    if (v === undefined || v === null || v === '') v = dflt(key);
+    // a bare filename means "an asset that lives with the template"
+    if (v && /_url$/.test(key) && !/^(https?:|data:|blob:)/.test(v)) v = base + v;
+    return v;
+  });
+}
+
+/* ───────────────────────── 3. the shelf ──────────────────────────── */
+function paintShelf(list){
+  if (!list.length){ shelf.innerHTML = '<div class="loading">Nothing matches that.</div>'; return; }
+  shelf.innerHTML = list.map(t => `
+    <button class="gift-card" data-open="${t.id}">
+      <div class="bed">${
+        t.thumbnail
+          ? `<img src="${t.assetsBaseURL + t.thumbnail}" alt="" onerror="this.replaceWith(fallback('${t.name}'))">`
+          : `<div class="fallback">no thumbnail<br>in the manifest</div>`
+      }</div>
+      <div class="cap">
+        <div class="n">${esc(t.name)}</div>
+        <div class="d">${esc(t.category)}${t.experienceTime ? ' · ' + esc(t.experienceTime) : ''}</div>
+        <div class="peek">${esc(t.tagline || '')}</div>
+      </div>
+    </button>`).join('');
+}
+function fallback(name){
+  const d = document.createElement('div');
+  d.className = 'fallback';
+  d.textContent = name;
+  return d;
+}
+
+/* ───────────────────────── 4. the editor, built from the manifest ── */
+/* One control per field TYPE. No per-template logic anywhere. */
+const CONTROL = {
+  text:      f => `<input type="text" data-k="${f.key}" value="${esc(f.value)}" placeholder="${esc(f.placeholder||'')}">`,
+  paragraph: f => `<textarea data-k="${f.key}" placeholder="${esc(f.placeholder||'')}">${esc(f.value)}</textarea>`,
+  image:     f => `<input type="url" data-k="${f.key}" value="${esc(f.value)}" placeholder="https://… or a filename in the template folder">`,
+  music:     f => `<input type="url" data-k="${f.key}" value="${esc(f.value)}" placeholder="https://… or a filename in the template folder">`,
+  color:     f => `<input type="color" data-k="${f.key}" value="${f.value || '#FFC24B'}">`,
+  date:      f => `<input type="date" data-k="${f.key}" value="${esc(f.value)}">`,
+  select:    f => `<select data-k="${f.key}">${(f.options||[]).map(o =>
+                    `<option ${o===f.value?'selected':''}>${esc(o)}</option>`).join('')}</select>`
+};
+
+function openEditor(id, preset, resumeKey){
+  current = TEMPLATES.find(t => t.id === id);
+  if (!current) return;
+  draftKey = resumeKey !== undefined ? resumeKey : null;
+
+  values = {};
+  current.fields.forEach(f => values[f.key] = (preset && preset[f.key] !== undefined)
+    ? preset[f.key]
+    : (f.default !== undefined ? f.default : ''));
+
+  pTitle.textContent = current.name;
+  pSub.textContent   = current.description || '';
+
+  fields.innerHTML = current.fields.map(f => {
+    const build = CONTROL[f.type] || CONTROL.text;
+    return `<div class="f">
+      <div class="lab">${esc(f.label)}${f.required ? '<span class="req">*</span>' : ''}
+        <span class="tag">${esc(f.type)}</span></div>
+      ${f.placeholder ? `<div class="help">e.g. ${esc(f.placeholder)}</div>` : ''}
+      ${build({ ...f, value: values[f.key] })}
+    </div>`;
+  }).join('');
+
+  refreshPreview();
+  go('compose');
+}
+
+/* ── the preview ──────────────────────────────────────────────────
+   The template is a real running page, so it can't be re-mounted on
+   every keystroke — it would restart the envelope mid-type. That was
+   the glitch. So: it refreshes when you FINISH a field (blur), or when
+   you press ↻. While you type, the label goes amber to say "stale".   */
+let stale = false, idle;
+
+fields.addEventListener('input', e => {
+  const k = e.target.dataset.k;
+  if (!k) return;
+  values[k] = e.target.value;
+  markStale();
+  clearTimeout(idle);
+  idle = setTimeout(saveDraft, 400);          // draft saves quietly, preview does not
+});
+fields.addEventListener('change', e => {      // fires on blur — you've finished the field
+  if (e.target.dataset.k) refreshPreview();
+});
+pvRefresh.onclick = refreshPreview;
+pvFull.onclick    = () => openGift(current, values);
+
+function markStale(){
+  stale = true;
+  pvHint.textContent = 'tap ↻ to update';
+  pvHint.classList.add('stale');
+}
+function refreshPreview(){
+  if (!current) return;
+  stale = false;
+  pvHint.textContent = 'live preview';
+  pvHint.classList.remove('stale');
+  pv.srcdoc = inject(current, values);
+}
+
+/* The sent screen shows a still card, not a running template — you're
+   done editing by then, and it keeps that page light. */
+function posterHTML(){
+  const t = current, v = values;
+  const first = t.fields.find(f => f.type === 'text' && f.required) || t.fields[0];
+  const line  = t.fields.find(f => f.type === 'paragraph');
+  return `
+    ${t.thumbnail ? `<img src="${t.assetsBaseURL + t.thumbnail}" alt="" onerror="this.remove()">` : ''}
+    ${v.question ? `<div class="q">${esc(v.question)}</div>` : ''}
+    ${v[first.key] ? `<div class="to">${esc(v[first.key])}</div>` : ''}
+    ${line && v[line.key] ? `<div class="msg">${strip(v[line.key])}</div>` : ''}
+    <div class="meta">${[
+      v.photo_url ? 'photo' : null,
+      v.music_url ? 'song'  : null,
+      t.experienceTime
+    ].filter(Boolean).join(' · ')}</div>`;
+}
+
+/* ───────────────────────── 5. open the gift for real ─────────────── */
+function openGift(tpl, vals){
+  viewerTag.textContent = `${tpl.category} · ${tpl.tagline || ''}`;
+  viewer.hidden = false;
+  document.body.style.overflow = 'hidden';
+  viewFrame.srcdoc = inject(tpl, vals);
+  window._viewing = { tpl, vals };
+}
+function closeGift(){
+  viewer.hidden = true;
+  viewFrame.srcdoc = '';
+  document.body.style.overflow = '';
+  if (location.hash.startsWith('#g=')) history.replaceState(null, '', location.pathname);
+}
+replayBtn.onclick = () => { const v = window._viewing; if (v) viewFrame.srcdoc = inject(v.tpl, v.vals); };
+closeBtn.onclick  = closeGift;
+addEventListener('keydown', e => { if (e.key === 'Escape' && !viewer.hidden) closeGift(); });
+
+/* ───────────────────────── 6. wrap it: the link IS the gift ──────── */
+/* Everything the recipient needs is encoded in the URL, so this works
+   with no backend at all. Swap encode/decode for a Supabase row later
+   and nothing else in this file changes. */
+function encodeGift(id, vals){
+  const json = JSON.stringify({ t: id, v: vals });
+  return btoa(unescape(encodeURIComponent(json))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodeGift(str){
+  const b = str.replace(/-/g,'+').replace(/_/g,'/');
+  return JSON.parse(decodeURIComponent(escape(atob(b))));
+}
+
+function wrap(){
+  const missing = current.fields.filter(f => f.required && !values[f.key]);
+  if (missing.length){
+    toast(`${missing[0].label} is needed first`);
+    return;
+  }
+  const payload = encodeGift(current.id, values);
+  const url = location.origin + location.pathname + '#g=' + payload;
+  glink.textContent = url;
+  glink.dataset.url = url;
+  sentPoster.innerHTML = posterHTML();
+  remember(current, values, url);
+  dropDraft();
+  go('sent');
+}
+
+copyBtn.onclick = async () => {
+  try{ await navigator.clipboard.writeText(glink.dataset.url); toast('Link copied'); }
+  catch{ toast('Press ⌘C to copy'); }
+};
+openSentBtn.onclick = () => openGift(current, values);
+previewBtn.onclick  = () => openGift(current, values);
+wrapBtn.onclick     = wrap;
+
+/* a gift link opens straight into the gift */
+function routeFromHash(){
+  const m = location.hash.match(/^#g=(.+)$/);
+  if (!m) return;
+  try{
+    const { t, v } = decodeGift(m[1]);
+    const tpl = TEMPLATES.find(x => x.id === t);
+    if (tpl) openGift(tpl, v);
+  }catch{ toast("That link looks broken"); }
+}
+addEventListener('hashchange', routeFromHash);
+
+/* ───────────────────────── 7. gifts I've sent (this device) ──────── */
+function makeStore(key){
+  let mem = [];
+  return {
+    read(){ try{ return JSON.parse(localStorage.getItem(key)) || []; }catch{ return mem; } },
+    write(list){ try{ localStorage.setItem(key, JSON.stringify(list)); }catch{ mem = list; } }
+  };
+}
+const store  = makeStore('sunflower.sent');    // link generated
+const drafts = makeStore('sunflower.drafts');  // started, not sent
+
+let draftKey = null;
+function saveDraft(){
+  if (!current) return;
+  const first = current.fields.find(f => f.required) || current.fields[0];
+  const list = drafts.read();
+  if (draftKey === null) draftKey = Date.now();
+  const i = list.findIndex(d => d.key === draftKey);
+  const entry = { key: draftKey, id: current.id, to: values[first.key] || 'someone', at: Date.now(), vals: { ...values } };
+  if (i >= 0) list[i] = entry; else list.unshift(entry);
+  drafts.write(list.slice(0, 40));
+}
+function dropDraft(){
+  if (draftKey === null) return;
+  drafts.write(drafts.read().filter(d => d.key !== draftKey));
+  draftKey = null;
+}
+
+function remember(tpl, vals, url){
+  const first = tpl.fields.find(f => f.required) || tpl.fields[0];
+  const list = store.read();
+  list.unshift({ id: tpl.id, to: vals[first.key] || 'someone', at: Date.now(), url, vals });
+  store.write(list.slice(0, 60));
+}
+function paintMine(){
+  const sent = store.read();
+  mineList.innerHTML = sent.length ? sent.map((g, i) => `
+    <div class="mine-card">
+      <div class="who">${esc(g.to)}</div>
+      <div class="when">${new Date(g.at).toLocaleString()} · ${esc(g.id)}</div>
+      <div class="acts">
+        <button data-mine-open="${i}">Open</button>
+        <button data-mine-copy="${i}">Copy link</button>
+        <button data-mine-edit="${i}">Edit</button>
+      </div>
+    </div>`).join('')
+    : `<div class="empty">Nothing sent yet.</div>`;
+
+  const dr = drafts.read();
+  draftList.innerHTML = dr.length ? dr.map((g, i) => `
+    <div class="mine-card">
+      <div class="who">${esc(g.to)}</div>
+      <div class="when">${new Date(g.at).toLocaleString()} · ${esc(g.id)} · draft</div>
+      <div class="acts">
+        <button data-draft-edit="${i}">Keep editing</button>
+        <button data-draft-del="${i}">Delete</button>
+      </div>
+    </div>`).join('')
+    : `<div class="empty">No drafts. Start one from the shelf.</div>`;
+}
+draftList.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const list = drafts.read();
+  if (b.dataset.draftEdit !== undefined){
+    const d = list[b.dataset.draftEdit];
+    if (d) openEditor(d.id, d.vals, d.key);
+  }
+  if (b.dataset.draftDel !== undefined){
+    list.splice(b.dataset.draftDel, 1);
+    drafts.write(list);
+    paintMine();
+    toast('Draft deleted');
+  }
+});
+mineList.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const list = store.read();
+  const open = b.dataset.mineOpen, copy = b.dataset.mineCopy, edit = b.dataset.mineEdit;
+  const g = list[open ?? copy ?? edit];
+  if (!g) return;
+  const tpl = TEMPLATES.find(t => t.id === g.id);
+  if (open !== undefined) openGift(tpl, g.vals);
+  if (copy !== undefined) navigator.clipboard.writeText(g.url).then(() => toast('Link copied'));
+  if (edit !== undefined) openEditor(g.id, g.vals);  // becomes a new draft
+});
+
+/* ───────────────────────── 8. plumbing ──────────────────────────── */
+const esc   = s => String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const strip = s => esc(String(s ?? '').replace(/<br\s*\/?>/gi, ' '));
+
+function go(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+  document.getElementById('tab-gallery').classList.toggle('on', id === 'gallery');
+  document.getElementById('tab-mine').classList.toggle('on', id === 'mine');
+  if (id === 'mine') paintMine();
+  scrollTo(0, 0);
+}
+
+let toastTimer;
+function toast(msg){
+  let el = document.querySelector('.toast');
+  if (!el){ el = document.createElement('div'); el.className = 'toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('on'), 2200);
+}
+
+document.addEventListener('click', e => {
+  const nav = e.target.closest('[data-go]');
+  if (nav) go(nav.dataset.go);
+  const card = e.target.closest('[data-open]');
+  if (card) openEditor(card.dataset.open);
+  const th = e.target.closest('[data-theme]');
+  if (th){
+    document.body.classList.toggle('dark', th.dataset.theme === 'dark');
+    lt.classList.toggle('on', th.dataset.theme === 'light');
+    dk.classList.toggle('on', th.dataset.theme === 'dark');
+  }
+});
+/* ── the butterfly wanders ── */
+(function(){
+  const el = document.getElementById('fly');
+  if (!el || matchMedia('(prefers-reduced-motion: reduce)').matches){ if(el) el.style.display='none'; return; }
+  let x = innerWidth*.2, y = innerHeight*.55, tx = x, ty = y, flip = 1;
+  function pick(){
+    tx = 60 + Math.random()*(innerWidth - 140);
+    ty = innerHeight*.28 + Math.random()*innerHeight*.5;
+    setTimeout(pick, 3500 + Math.random()*4000);
+  }
+  pick();
+  (function step(){
+    const dx = tx - x, dy = ty - y;
+    x += dx*.012; y += dy*.012 + Math.sin(Date.now()/300)*.5;
+    if (Math.abs(dx) > 4) flip = dx > 0 ? -1 : 1;
+    el.style.transform = `translate(${x}px, ${y}px) scaleX(${flip}) rotate(${dx*.02}deg)`;
+    requestAnimationFrame(step);
+  })();
+})();
+
+boot();
+
+</script>
+</body>
+</html>

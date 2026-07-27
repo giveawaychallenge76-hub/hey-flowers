@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>heyflowers — create your stunning gift, share link</title>
+<meta name="description" content="Pick a template, make it yours — colours, stickers, fonts — and send it as a link. It opens in their browser and something happens.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@700;800;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=13">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+<!-- ══ sign in / sign up modal (opens over the landing page) ══ -->
+<div id="auth">
+  <div class="auth-backdrop" id="authBackdrop"></div>
+  <div class="auth-card">
+    <button type="button" class="auth-x" id="authClose" aria-label="Close">✕</button>
+    <div class="auth-logo"><span class="hey">hey</span><span class="flowers">flowers</span></div>
+    <p class="auth-sub">Sign in to create &amp; send your gifts.</p>
+    <div class="auth-tabs">
+      <button type="button" id="tabLogin" class="on">Log in</button>
+      <button type="button" id="tabSignup">Sign up</button>
+    </div>
+
+    <div class="oauth">
+      <button type="button" class="oauth-btn" data-oauth="google">
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.92v2.33A9 9 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.95 10.71a5.41 5.41 0 0 1 0-3.42V4.96H.92a9 9 0 0 0 0 8.08l3.03-2.33z"/>
+          <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .92 4.96l3.03 2.33C4.66 5.16 6.65 3.58 9 3.58z"/>
+        </svg><span>Continue with Google</span>
+      </button>
+      <button type="button" class="oauth-btn" data-oauth="apple">
+        <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+        <span>Continue with Apple</span>
+      </button>
+    </div>
+    <div class="oauth-or"><span>or</span></div>
+
+    <form id="authForm" autocomplete="on">
+      <input type="email" id="authEmail" placeholder="you@email.com" required autocomplete="email">
+      <input type="password" id="authPass" placeholder="password (6+ characters)" required minlength="6">
+      <button type="submit" class="cta wide" id="authSubmit">Log in</button>
+    </form>
+    <div class="auth-msg" id="authMsg"></div>
+    <div class="auth-switch" id="authSwitch"></div>
+    <div class="auth-note" id="authNote"></div>
+  </div>
+</div>
+
+<!-- ══ nav ══ -->
+<nav class="hf-nav">
+  <div class="nav-in">
+    <button class="logo" data-go="gallery">
+      <span class="hey">hey</span><span class="flowers">flowers</span>
+    </button>
+    <div class="nav-pill">
+      <button id="tab-gallery" class="on" data-scrollto="#shelf">template</button>
+      <button id="tab-price" data-scrollto="#pricing">price</button>
+    </div>
+    <div class="nav-auth">
+      <button class="nav-signin" type="button" data-auth-open="login">
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.92v2.33A9 9 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.95 10.71a5.41 5.41 0 0 1 0-3.42V4.96H.92a9 9 0 0 0 0 8.08l3.03-2.33z"/>
+          <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .92 4.96l3.03 2.33C4.66 5.16 6.65 3.58 9 3.58z"/>
+        </svg>Sign in
+      </button>
+      <button class="nav-me" id="tab-mine" type="button" data-go="mine" title="Your profile">
+        <span class="me-dot">🌼</span>profile
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ landing: the templates greet you, drifting ══ -->
+<main class="screen on" id="gallery">
+  <section class="hero">
+    <div class="count-pill"><span class="rd"></span>+999 PEOPLE CREATING</div>
+    <h1 class="hero-h">create your <em>stunning</em> gift,<br>share the link</h1>
+    <p class="hero-p">make your first gift</p>
+    <div class="hero-cta">
+      <button class="cta big" data-scrollto="#shelf">Pick a template ↓</button>
+    </div>
+  </section>
+
+  <div class="shelf" id="shelf" aria-live="polite">
+    <div class="loading">Reading the template folder…</div>
+  </div>
+
+  <!-- ══ pricing ══ -->
+  <section class="pricing" id="pricing">
+    <h2 class="sec-h">price</h2>
+    <div class="price-grid three">
+      <div class="price-card">
+        <div class="tier">MONTHLY</div>
+        <div class="amount">$5 <span>/ month</span></div>
+        <ul>
+          <li>Access every template</li>
+          <li>Make <b>15 gifts</b> a month</li>
+          <li>A new template every month</li>
+          <li>Colours, stickers, fonts &amp; uploads</li>
+        </ul>
+        <button class="cta wide" data-auth-open="signup">Start monthly</button>
+      </div>
+      <div class="price-card dark featured">
+        <div class="badge">✦ BEST VALUE</div>
+        <div class="tier">ANNUAL</div>
+        <div class="amount">$20 <span>/ year</span></div>
+        <ul>
+          <li>Access every template</li>
+          <li>Make <b>100 gifts</b> a year</li>
+          <li>A new template every month</li>
+          <li>Colours, stickers, fonts &amp; uploads</li>
+        </ul>
+        <button class="cta wide" data-auth-open="signup">Go annual</button>
+      </div>
+      <div class="price-card">
+        <div class="tier">LIFETIME</div>
+        <div class="amount">$30 <span>once</span></div>
+        <ul>
+          <li>Access every template</li>
+          <li><b>Unlimited</b> gifts, forever</li>
+          <li>New templates &amp; gifts every month</li>
+          <li>Colours, stickers, fonts &amp; uploads</li>
+        </ul>
+        <button class="cta wide" data-auth-open="signup">Get lifetime</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="hf-foot">
+    <span class="foot-logo"><span class="hey">hey</span><span class="flowers">flowers</span></span>
+    <span>© 2026 heyflowers · made by xykunl</span>
+  </footer>
+</main>
+
+<!-- ══ the editor workspace ══ -->
+<main class="screen" id="compose">
+  <div class="ed">
+    <div class="ed-top">
+      <button class="back" data-go="gallery" aria-label="Back">←</button>
+      <div class="ed-name" id="pTitle"></div>
+      <div class="ptabs" id="ptabs"></div>
+      <div class="ed-actions">
+        <button class="top-btn ghost" id="previewBtn">▷ Preview</button>
+        <button class="top-btn cta" id="wrapBtn">Export ➤</button>
+      </div>
+    </div>
+    <div class="ed-body">
+      <aside class="ed-side" id="edSide"></aside>
+      <section class="ed-panel">
+        <div class="panel-h" id="panelTitle">Text</div>
+        <p id="pSub" hidden></p>
+        <form id="fields" autocomplete="off"></form>
+      </section>
+      <section class="ed-stage">
+        <div class="device">
+          <div class="screen-frame">
+            <iframe id="pv" title="Preview" allow="microphone; autoplay"></iframe>
+            <div id="svo" aria-hidden="true"></div>
+          </div>
+          <div class="device-bar">
+            <span class="hint" id="pvHint">live preview</span>
+            <button class="mini" id="pvRefresh" title="Refresh">↻</button>
+            <button class="mini" id="pvFull" title="Full screen">⤢</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- ══ sent ══ -->
+<main class="screen" id="sent">
+  <div class="wrap-s">
+    <div class="sent">
+      <div class="poster" id="sentPoster"></div>
+      <h1>It's wrapped.</h1>
+      <p>Send them this link. Everything they'll see is inside it — no account, nothing to install.</p>
+      <div class="link"><code id="glink"></code><button id="copyBtn">Copy link</button></div>
+      <div class="row">
+        <button class="send ghost" id="openSentBtn">▷ Open the gift</button>
+        <button class="send" data-go="gallery">Back to templates</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ══ profile ══ -->
+<main class="screen" id="mine">
+  <div class="wrap-s prof-wrap">
+    <section class="profile">
+      <div class="avatar">🌼</div>
+      <div class="handle" id="userEmail">@you</div>
+      <div class="pstat" id="pstat">Kept on this device only.</div>
+      <button class="top-btn ghost" id="logoutBtn" style="margin-top:14px">Log out</button>
+    </section>
+    <h3 class="phead">Drafts</h3>
+    <div class="p-list" id="draftList"></div>
+    <h3 class="phead">Sent gifts</h3>
+    <div class="p-list" id="mineList"></div>
+  </div>
+</main>
+
+<!-- ══ the gift itself ══ -->
+<div class="viewer" id="viewer" hidden>
+  <div class="viewer-bar">
+    <span id="viewerTag"></span>
+    <button class="vbtn" id="replayBtn">↻ Replay</button>
+    <button class="vbtn" id="closeBtn">✕ Close</button>
+  </div>
+  <div class="viewer-stage"><iframe id="viewFrame" title="Your gift" allow="microphone; autoplay"></iframe></div>
+</div>
+
+<script src="auth.js?v=2"></script>
+<script src="app.js?v=13"></script>
+</body>
+</html>

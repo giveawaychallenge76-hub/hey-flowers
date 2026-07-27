@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>for saj — the field ♥</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦋</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Special+Elite&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<!--
+════════════════════════════════════════════════
+  the field — one screen, three commands:
+  ① click the guitar → music
+  ② shake the cloud → stars fall forever
+  ③ shake the tree → butterflies bring the messages
+  CUSTOMIZE: CONFIG block at the top of the script.
+════════════════════════════════════════════════
+-->
+<style>
+:root{ --ink:#26211a; --red:#c93a45; --gold:#e8b62e; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Special Elite','Courier New',monospace;background:#87b8e8;overflow:hidden;color:var(--ink)}
+
+/* the real field */
+#scene{position:fixed;inset:0;overflow:hidden}
+#sceneImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 62%}
+#scene.shakeC #sceneImg{animation:shC .6s ease}
+#scene.shakeT #sceneImg{animation:shT .55s ease}
+@keyframes shC{0%,100%{transform:none}20%{transform:translate(-8px,3px) rotate(-.4deg)}45%{transform:translate(7px,-2px) rotate(.35deg)}70%{transform:translate(-4px,2px)}}
+@keyframes shT{0%,100%{transform:none}25%{transform:translateX(-6px) rotate(.35deg) scale(1.005)}55%{transform:translateX(6px) rotate(-.3deg)}80%{transform:translateX(-3px)}}
+#vig{position:fixed;inset:0;pointer-events:none;z-index:3;background:radial-gradient(120% 100% at 50% 40%, rgba(0,0,0,0) 62%, rgba(10,20,40,.28) 100%)}
+#grain{position:fixed;inset:-40px;z-index:60;pointer-events:none;opacity:.06;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='170' height='170'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='170' height='170' filter='url(%23n)'/></svg>")}
+
+/* header */
+#head{position:fixed;left:22px;top:18px;z-index:10;pointer-events:none}
+#head .h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:clamp(28px,4.6vw,44px);color:#fff;text-shadow:0 3px 20px rgba(10,30,60,.55);line-height:1}
+#head .h2{font-size:12px;letter-spacing:.3em;color:#f2f7ff;text-shadow:0 2px 8px rgba(10,30,60,.6);margin-top:6px;opacity:.9}
+
+/* hotspots */
+.hot{position:absolute;z-index:6;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#hotCloud{left:34%;top:2%;width:32%;height:20%}
+#hotTree{left:33%;top:26%;width:34%;height:46%}
+
+/* guitar on the grass */
+#guitar{
+  position:absolute;left:12%;bottom:6%;width:min(150px,17vw);z-index:7;cursor:pointer;
+  transform:rotate(14deg);transform-origin:50% 90%;
+  filter:drop-shadow(0 14px 18px rgba(10,30,20,.45));transition:transform .25s;
+}
+#guitar:hover{transform:rotate(11deg) scale(1.05)}
+#guitar img{width:100%;display:block}
+#guitar.strum{animation:strum .5s ease}
+@keyframes strum{0%,100%{transform:rotate(14deg)}25%{transform:rotate(9deg) scale(1.04)}60%{transform:rotate(17deg)}}
+#starGuitar{position:absolute;right:10%;bottom:5.5%;width:min(110px,13vw);z-index:6;transform:rotate(-12deg);
+  filter:drop-shadow(0 12px 16px rgba(10,30,20,.4));opacity:0;transition:opacity 1.2s, transform 1.2s;pointer-events:none}
+#starGuitar.on{opacity:1;transform:rotate(-9deg)}
+#starGuitar img{width:100%}
+
+/* music notes */
+.note{position:absolute;z-index:8;font-size:20px;color:#fff;text-shadow:0 2px 8px rgba(10,30,60,.5);pointer-events:none}
+
+/* command chip */
+#cmd{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(120px);z-index:20;
+  background:rgba(255,253,244,.96);border-radius:999px;padding:11px 26px 13px;text-align:center;
+  box-shadow:0 14px 40px rgba(10,30,60,.4);transition:transform .5s cubic-bezier(.2,1.4,.4,1);
+  font-size:15px;white-space:nowrap;max-width:94vw;
+}
+#cmd.on{transform:translateX(-50%) translateY(0)}
+#cmd b{color:var(--red)}
+#cmd .stepno{display:inline-block;background:var(--ink);color:#ffd76a;border-radius:99px;font-size:11px;padding:2px 9px;margin-right:9px;letter-spacing:.14em;vertical-align:1px}
+#cmd.pop{animation:cmdpop .5s ease}
+@keyframes cmdpop{0%{transform:translateX(-50%) scale(.85)}55%{transform:translateX(-50%) scale(1.06)}100%{transform:translateX(-50%) scale(1)}}
+
+/* highlight ring on the current target */
+#ring{position:absolute;z-index:5;border:3px dashed rgba(255,255,255,.95);border-radius:50%;pointer-events:none;
+  box-shadow:0 0 0 6px rgba(255,255,255,.15), 0 0 30px rgba(255,255,255,.45), inset 0 0 26px rgba(255,255,255,.25);
+  animation:ringpulse 1.6s ease-in-out infinite;display:none}
+#ring.on{display:block}
+@keyframes ringpulse{0%,100%{transform:scale(1);opacity:.95}50%{transform:scale(1.07);opacity:.55}}
+
+/* falling / hanging stars */
+.fstar{position:fixed;z-index:9;pointer-events:none;
+  clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+  filter:drop-shadow(0 3px 3px rgba(10,30,60,.3))}
+
+/* butterflies */
+.bfly{position:fixed;z-index:12;cursor:pointer;font-size:34px;line-height:1;-webkit-tap-highlight-color:transparent;
+  filter:drop-shadow(0 6px 8px rgba(10,30,60,.35))}
+.bfly .wings{display:inline-block;animation:flap .35s ease-in-out infinite alternate}
+@keyframes flap{0%{transform:scaleX(1) rotate(-4deg)}100%{transform:scaleX(.55) rotate(5deg)}}
+.bfly.rest .wings{animation-duration:.9s}
+.bfly .dot{position:absolute;right:-4px;top:-4px;width:13px;height:13px;border-radius:50%;background:var(--red);
+  box-shadow:0 0 0 3px rgba(255,255,255,.85), 0 0 12px rgba(201,58,69,.8);animation:ringpulse 1.2s infinite}
+.bfly.seen .dot{display:none}
+.bfly.gold{font-size:44px;filter:sepia(1) saturate(3.4) hue-rotate(-12deg) drop-shadow(0 0 14px rgba(255,210,80,.9)) drop-shadow(0 6px 8px rgba(10,30,60,.35))}
+.bfly:hover{z-index:14}
+
+/* toast */
+#toast{position:fixed;left:50%;top:22px;transform:translateX(-50%) translateY(-90px);z-index:30;
+  background:rgba(255,253,244,.97);border-radius:999px;padding:8px 22px 10px;font-size:14px;
+  box-shadow:0 12px 30px rgba(10,30,60,.35);transition:transform .45s cubic-bezier(.2,1.4,.4,1);white-space:nowrap}
+#toast.on{transform:translateX(-50%) translateY(0)}
+#toast b{color:var(--red)}
+
+/* card modal */
+#ovl{position:fixed;inset:0;z-index:40;background:rgba(15,25,50,.55);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:16px}
+#ovl.on{display:flex}
+#card{
+  width:min(430px,94vw);max-height:88vh;overflow:auto;background:#fffdf4;border-radius:16px;position:relative;
+  padding:24px 22px 22px;box-shadow:0 34px 90px rgba(0,10,30,.55);
+  animation:cardin .45s cubic-bezier(.2,1.35,.4,1);
+}
+@keyframes cardin{0%{transform:scale(.7) translateY(40px);opacity:0}100%{transform:none;opacity:1}}
+#card .cx{position:absolute;right:13px;top:9px;font-size:22px;cursor:pointer;color:#a89868;font-weight:700;z-index:2}
+#card .cx:hover{color:var(--red)}
+.ck{font-size:11px;letter-spacing:.34em;color:#8a7a55;text-align:center;text-transform:uppercase}
+.ct{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:31px;text-align:center;line-height:1.02;margin:4px 0 14px}
+.cimg{width:100%;display:flex;justify-content:center;margin:6px 0}
+.cimg img{max-width:82%;max-height:44vh;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(30,20,0,.25))}
+.cimg.photo img{max-width:100%;border-radius:8px;box-shadow:0 12px 30px rgba(30,20,0,.3)}
+.ccap{font-size:13.5px;text-align:center;line-height:1.65;color:#4a4030;margin-top:8px}
+.ccap b{color:var(--red)}
+.clist{font-size:14.5px;line-height:2.1;background:#fbf8ee;border:1.5px dashed #c2b394;border-radius:10px;padding:12px 18px;margin:8px 0}
+.clist b{color:var(--red)}
+.twin{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 4px}
+.twin figure{margin:0}
+.twin img{width:100%;border-radius:8px;box-shadow:0 10px 24px rgba(30,20,0,.3);aspect-ratio:.9;object-fit:cover}
+.twin figcaption{font-family:'Caveat',cursive;font-weight:600;font-size:17px;text-align:center;margin-top:6px;line-height:1.1}
+.qrow2{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:16px;flex-wrap:wrap}
+.qbig2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:30px;width:100%;text-align:center;line-height:1}
+.yb{font-family:'Special Elite',monospace;font-size:17px;color:#fff;border:0;border-radius:999px;padding:11px 40px 12px;cursor:pointer;
+  background:linear-gradient(180deg,#ff6f7e,var(--red) 60%,#9c1f2b);box-shadow:0 6px 0 #7c141f, 0 0 26px rgba(201,58,69,.45);transition:transform .15s;letter-spacing:.06em}
+.yb:hover{transform:scale(1.06) rotate(-1deg)}
+.sb{font-family:'Special Elite',monospace;font-size:13px;color:#6a5f4a;background:#efe6c8;border:0;border-radius:999px;padding:10px 18px;cursor:pointer}
+.qnote3{font-size:12.5px;color:#8a7a55;text-align:center;margin-top:10px;min-height:1.2em}
+.stamp4{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-12deg) scale(3);opacity:0;
+  font-family:Tahoma,Verdana,sans-serif;font-weight:700;font-size:44px;color:var(--red);border:5px solid var(--red);
+  border-radius:12px;padding:6px 20px;letter-spacing:.06em;transition:.4s cubic-bezier(.2,1.4,.4,1);pointer-events:none;mix-blend-mode:multiply}
+.stamp4.on{opacity:.93;transform:translate(-50%,-50%) rotate(-10deg) scale(1)}
+
+@media (max-width:640px){
+  #guitar{left:6%;bottom:8%;width:118px}
+  #starGuitar{right:5%}
+  #hotTree{left:24%;width:52%}
+  #hotCloud{left:28%;width:44%}
+  .bfly{font-size:30px}
+}
+</style>
+</head>
+<body>
+
+<div id="scene">
+  <img id="sceneImg" src="crush-assets/tree-field.jpg" alt="">
+  <div class="hot" id="hotCloud" title="the cloud"></div>
+  <div class="hot" id="hotTree" title="the tree"></div>
+  <div id="ring"></div>
+  <div id="guitar"><img src="crush-assets/guitar-acoustic.png" alt="guitar"></div>
+  <div id="starGuitar"><img src="crush-assets/guitar-star.png" alt=""></div>
+</div>
+<div id="vig"></div>
+<div id="grain"></div>
+
+<div id="head">
+  <div class="h1">for saj,</div>
+  <div class="h2">A LITTLE FIELD I MADE FOR YOU · — NAVEEN</div>
+</div>
+
+<div id="cmd"></div>
+<div id="toast"></div>
+
+<div id="ovl"><div id="card"></div></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ══════════ CONFIG ══════════ */
+var HER = "saj";
+var HIM = "naveen";
+
+/* what each butterfly carries (in order) */
+var CARDS = [
+  { k:"the reminders", t:"texts i'd send you daily", html:
+      '<div class="clist">— drink water. you always forget.<br>— eat something real, not just chips.<br>— text me when you reach home.<br>— don\'t fight your thoughts at 2am.<br>— and if nobody said it today — <b>you look really, really pretty.</b></div>' +
+      '<div class="cimg"><img src="crush-assets/msg-beach.png" alt=""></div>' +
+      '<div class="ccap">to be loved is to be <b>reminded</b>. i\'d remind you every day.</div>' },
+  { k:"the receipts", t:"songs i looped, thinking of you", html:
+      '<div class="cimg"><img src="crush-assets/receiptify.png" alt=""></div>' +
+      '<div class="ccap">real data. embarrassing. <b>worth it.</b></div>' },
+  { k:"things i noticed", t:"i've been paying attention", html:
+      '<div class="clist">— you laugh <b>before</b> your joke lands<br>— you say “last episode” and lie<br>— you wave at every single dog<br>— your “i\'m fine” has 4 meanings<br>— boring days turn into plans around you</div>' +
+      '<div class="ccap">noticed, filed, kept.</div>' },
+  { k:"the errands", t:"the grocery run i'd do for you", html:
+      '<div class="cimg"><img src="crush-assets/basket.png" alt=""></div>' +
+      '<div class="ccap">snacks, fruit, the good muffins. <b>no list needed.</b></div>' },
+  { k:"the letter", t:"typed slowly, meant completely", html:
+      '<div class="cimg photo"><img src="crush-assets/typewriter.jpg" alt=""></div>' +
+      '<div class="clist" style="line-height:1.9">' + "saj,<br>i've rewritten this 37 times. so, simply:<br>you make ordinary days feel like the good part of the movie.<br>i like you. a lot.<br>— naveen" + '</div>' }
+];
+
+/* the LAST butterfly: your two images + the question */
+var FINAL_CARD = { k:"the last butterfly", t:"these two exist because of you", html:
+      '<div class="twin">' +
+        '<figure><img src="crush-assets/tree-field.jpg" alt=""><figcaption>the field i built you</figcaption></figure>' +
+        '<figure><img src="crush-assets/paint-hand.jpg" alt=""><figcaption>me, learning design for you</figcaption></figure>' +
+      '</div>' +
+      '<div class="qrow2"><div class="qbig2">so… will you be mine?</div>' +
+        '<button class="yb" id="yesBtn">YES ♥</button>' +
+        '<button class="sb" id="shyBtn">gimme a sec 🙈</button></div>' +
+      '<div class="qnote3" id="qnote3"></div>' +
+      '<div class="stamp4" id="stamp4">APPROVED ♥</div>' };
+/* ════════════════════════════ */
+
+document.querySelector("#head .h1").textContent = "for " + HER + ",";
+document.querySelector("#head .h2").textContent = "A LITTLE FIELD I MADE FOR YOU · — " + HIM.toUpperCase();
+
+var STAR_COLORS = ["#e8b62e","#c93a45","#2fa39a","#7a58c9","#e6739f","#3565d6","#7fc95a","#f28e3a"];
+var BFLY_HUES = [0, 45, 110, 175, 250];
+
+/* ── audio: soft guitar picking (synth pluck) ── */
+var AC = null, playing = false, musTimer = null, noteTimer = null;
+function ac(){ if(!AC){ var C = window.AudioContext||window.webkitAudioContext; if(C) AC = new C(); } return AC; }
+function pluck(f, when, vol){
+  var a = ac(); if(!a) return;
+  var t = a.currentTime + when;
+  var o = a.createOscillator(), o2 = a.createOscillator(), g = a.createGain(), lp = a.createBiquadFilter();
+  o.type = "triangle"; o.frequency.value = f;
+  o2.type = "sine"; o2.frequency.value = f * 2;
+  lp.type = "lowpass"; lp.frequency.setValueAtTime(2600, t); lp.frequency.exponentialRampToValueAtTime(600, t + 1.1);
+  g.gain.setValueAtTime(vol || .12, t);
+  g.gain.exponentialRampToValueAtTime(.0005, t + 1.25);
+  o.connect(g); o2.connect(g); g.connect(lp); lp.connect(a.destination);
+  o.start(t); o.stop(t + 1.3); o2.start(t); o2.stop(t + 1.3);
+}
+var CHORDS = [
+  [130.81,196.00,261.63,329.63,392.00],   /* C  */
+  [110.00,164.81,220.00,261.63,329.63],   /* Am */
+  [ 87.31,174.61,220.00,261.63,349.23],   /* F  */
+  [ 98.00,196.00,246.94,293.66,392.00]    /* G  */
+];
+var chordIdx = 0;
+function bar(){
+  var ch = CHORDS[chordIdx % CHORDS.length]; chordIdx++;
+  var pat = [0,2,3,4,3,2,1,3];
+  pat.forEach(function(pi, i){ pluck(ch[Math.min(pi, ch.length-1)], i * .32, pi === 0 ? .16 : .1); });
+}
+function startMusic(){
+  if (playing) return;
+  playing = true;
+  bar(); musTimer = setInterval(bar, 2560);
+  noteTimer = setInterval(function(){
+    var g = document.getElementById("guitar").getBoundingClientRect();
+    var n = document.createElement("span");
+    n.className = "note"; n.textContent = Math.random() < .5 ? "♪" : "♫";
+    n.style.left = (g.left + g.width * (0.3 + Math.random() * .4)) + "px";
+    n.style.top = (g.top + 10) + "px";
+    document.body.appendChild(n);
+    n.animate([
+      { transform:"translate(0,0) rotate(0)", opacity:1 },
+      { transform:"translate(" + (Math.random()*60-30) + "px,-130px) rotate(" + (Math.random()*50-25) + "deg)", opacity:0 }
+    ], { duration:2400, easing:"ease-out", fill:"forwards" });
+    setTimeout(function(){ n.remove(); }, 2500);
+  }, 700);
+}
+
+/* ── toast + command chip + ring ── */
+var toastT = null;
+function toast(html){
+  var t = document.getElementById("toast");
+  t.innerHTML = html; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove("on"); }, 2600);
+}
+var cmd = document.getElementById("cmd");
+function setCmd(html){
+  cmd.innerHTML = html;
+  cmd.classList.add("on");
+  cmd.classList.remove("pop"); void cmd.offsetWidth; cmd.classList.add("pop");
+}
+var ring = document.getElementById("ring");
+var ringTarget = null;
+function ringOn(el, pad){
+  ringTarget = { el: el, pad: pad || 14 };
+  placeRing();
+  ring.classList.add("on");
+}
+function ringOff(){ ringTarget = null; ring.classList.remove("on"); }
+function placeRing(){
+  if (!ringTarget) return;
+  var r = ringTarget.el.getBoundingClientRect(), p = ringTarget.pad;
+  ring.style.left = (r.left - p) + "px";
+  ring.style.top = (r.top - p) + "px";
+  ring.style.width = (r.width + p*2) + "px";
+  ring.style.height = (r.height + p*2) + "px";
+}
+window.addEventListener("resize", placeRing);
+
+/* ── falling stars ── */
+var rainOn = false;
+function dropStars(n, fromCloud){
+  var live = document.querySelectorAll(".fstar").length;
+  if (live > 60) return;
+  var c = document.getElementById("hotCloud").getBoundingClientRect();
+  for (var i = 0; i < n; i++){
+    var s = document.createElement("span");
+    s.className = "fstar";
+    var sz = 10 + Math.random() * 20;
+    s.style.width = sz + "px"; s.style.height = sz + "px";
+    s.style.background = STAR_COLORS[(Math.random() * STAR_COLORS.length) | 0];
+    var x = fromCloud ? (c.left + Math.random() * c.width) : (Math.random() * window.innerWidth);
+    s.style.left = x + "px";
+    s.style.top = (c.top + c.height * .55) + "px";
+    document.body.appendChild(s);
+    var drift = Math.random() * 90 - 45;
+    s.animate([
+      { transform:"translate(0,0) rotate(0)", opacity:1 },
+      { transform:"translate(" + drift * .5 + "px," + (window.innerHeight * .55) + "px) rotate(" + (Math.random()*220-110) + "deg)", opacity:1 },
+      { transform:"translate(" + drift + "px," + (window.innerHeight * 1.05) + "px) rotate(" + (Math.random()*440-220) + "deg)", opacity:.85 }
+    ], { duration: 3600 + Math.random() * 2600, easing:"cubic-bezier(.3,.1,.6,1)", fill:"forwards" });
+    setTimeout(function(el){ el.remove(); }.bind(null, s), 6400);
+  }
+}
+
+/* ── steps ── */
+var step = 1;
+var guitar = document.getElementById("guitar");
+var hotCloud = document.getElementById("hotCloud");
+var hotTree = document.getElementById("hotTree");
+var scene = document.getElementById("scene");
+
+function startStep1(){
+  setCmd('<span class="stepno">STEP 1 / 3</span> <b>click</b> the guitar 🎸 — every field needs music');
+  ringOn(guitar, 10);
+}
+function startStep2(){
+  step = 2;
+  setCmd('<span class="stepno">STEP 2 / 3</span> now <b>shake</b> the cloud ☁ — click it');
+  ringOn(hotCloud, -8);
+}
+function startStep3(){
+  step = 3;
+  setCmd('<span class="stepno">STEP 3 / 3</span> <b>shake</b> the tree 🌳 — something lives in there');
+  ringOn(hotTree, -6);
+}
+
+setTimeout(startStep1, 900);
+
+/* step 1: guitar */
+guitar.addEventListener("click", function(){
+  guitar.classList.remove("strum"); void guitar.offsetWidth; guitar.classList.add("strum");
+  if (!playing){
+    startMusic();
+    document.getElementById("starGuitar").classList.add("on");
+    toast("music on ♪ <b>she plays too?</b> even better.");
+    if (step === 1) startStep2();
+  } else {
+    bar();
+  }
+});
+
+/* step 2: cloud — hover drips stars, click = shake + endless rain */
+hotCloud.addEventListener("pointerenter", function(){ dropStars(3, true); });
+hotCloud.addEventListener("click", function(){
+  scene.classList.remove("shakeC"); void scene.offsetWidth; scene.classList.add("shakeC");
+  dropStars(14, true);
+  if (!rainOn && step >= 2){
+    rainOn = true;
+    setInterval(function(){ dropStars(2, true); }, 620);
+    toast("the cloud says <b>okay ♥</b> — stars till the end.");
+    if (step === 2) startStep3();
+  }
+});
+
+/* step 3: tree — shake out butterflies one by one */
+var released = 0, TOTAL = CARDS.length + 1;
+hotTree.addEventListener("pointerenter", function(){
+  scene.classList.remove("shakeT"); void scene.offsetWidth; scene.classList.add("shakeT");
+});
+hotTree.addEventListener("click", function(){
+  if (step < 3) return;
+  scene.classList.remove("shakeT"); void scene.offsetWidth; scene.classList.add("shakeT");
+  if (released >= TOTAL){ toast("the tree is empty — <b>the butterflies have it all</b> ♥"); return; }
+  releaseButterfly(released);
+  released++;
+  if (released < TOTAL){
+    setCmd('<span class="stepno">STEP 3 / 3</span> <b>shake again</b> — ' + (TOTAL - released) + ' more inside · tap each butterfly ♥');
+  } else {
+    setCmd('they\'re all out — <b>tap the golden one</b> ✨');
+    ringOff();
+  }
+});
+
+/* butterflies */
+function releaseButterfly(i){
+  var isFinal = (i === TOTAL - 1);
+  var b = document.createElement("span");
+  b.className = "bfly" + (isFinal ? " gold" : "");
+  b.innerHTML = '<span class="wings"' +
+    (!isFinal ? ' style="filter:hue-rotate(' + BFLY_HUES[i % BFLY_HUES.length] + 'deg) saturate(1.4)"' : "") +
+    '>🦋</span><span class="dot"></span>';
+  var tr = hotTree.getBoundingClientRect();
+  var sx = tr.left + tr.width * .5, sy = tr.top + tr.height * .42;
+  b.style.left = sx + "px"; b.style.top = sy + "px";
+  document.body.appendChild(b);
+  beepFlutter();
+  /* fly to a resting spot */
+  var rx = window.innerWidth * (0.12 + Math.random() * 0.76);
+  var ry = window.innerHeight * (0.16 + Math.random() * 0.42);
+  if (isFinal){ rx = window.innerWidth * .5; ry = window.innerHeight * .3; }
+  var dx = rx - sx, dy = ry - sy;
+  b.animate([
+    { transform:"translate(0,0) scale(.5)" },
+    { transform:"translate(" + dx*.4 + "px," + (dy*.3 - 90) + "px) scale(1.1)" },
+    { transform:"translate(" + dx + "px," + dy + "px) scale(1)" }
+  ], { duration: 2400, easing:"cubic-bezier(.3,.6,.4,1)", fill:"forwards" });
+  setTimeout(function(){
+    b.style.left = rx + "px"; b.style.top = ry + "px";
+    var anim = b.animate([{ transform:"translate(0,0)" }], { duration:1 });
+    anim.finish();
+    b.classList.add("rest");
+    b.animate([
+      { transform:"translate(0,0)" },
+      { transform:"translate(6px,-9px)" },
+      { transform:"translate(-5px,4px)" },
+      { transform:"translate(0,0)" }
+    ], { duration:4200, iterations:Infinity, easing:"ease-in-out" });
+  }, 2450);
+  b.addEventListener("click", function(){
+    b.classList.add("seen");
+    openCard(isFinal ? FINAL_CARD : CARDS[i], isFinal);
+  });
+}
+function beepFlutter(){
+  var a = ac(); if(!a) return;
+  [1400,1750,1580].forEach(function(f,i){
+    var t = a.currentTime + i*.07;
+    var o = a.createOscillator(), g = a.createGain();
+    o.type = "sine"; o.frequency.value = f;
+    g.gain.setValueAtTime(.035, t); g.gain.exponentialRampToValueAtTime(.0005, t+.12);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+.14);
+  });
+}
+
+/* cards */
+var ovl = document.getElementById("ovl");
+var card = document.getElementById("card");
+function openCard(c, isFinal){
+  card.innerHTML = '<span class="cx">✕</span>' +
+    '<div class="ck">' + c.k + '</div>' +
+    '<div class="ct">' + c.t + '</div>' + c.html;
+  ovl.classList.add("on");
+  card.querySelector(".cx").addEventListener("click", function(){ ovl.classList.remove("on"); });
+  if (isFinal){
+    var yes = card.querySelector("#yesBtn");
+    var shy = card.querySelector("#shyBtn");
+    yes.addEventListener("click", onYes);
+    shy.addEventListener("click", function(){
+      card.querySelector("#qnote3").textContent = "take your time… the button waits with you ♥";
+      shy.textContent = "ok… YES ♥"; shy.className = "yb";
+      shy.addEventListener("click", onYes);
+    });
+  }
+}
+ovl.addEventListener("click", function(e){ if (e.target === ovl) ovl.classList.remove("on"); });
+
+/* YES */
+var saidYes = false;
+function onYes(){
+  if (saidYes) return;
+  saidYes = true;
+  var st = card.querySelector("#stamp4");
+  if (st) st.classList.add("on");
+  var a = ac();
+  if (a) [523,659,784,1046,1318].forEach(function(f,i){ pluck(f, i*.13, .16); });
+  for (var w = 0; w < 5; w++) setTimeout(function(){ dropStars(16, false); }, w * 500);
+  var now = new Date();
+  var stamp = now.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}) +
+              " · " + now.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+  setTimeout(function(){
+    var q = card.querySelector(".qrow2");
+    if (q) q.innerHTML = '<div class="qbig2" style="color:var(--red)">it\'s official — ' + HER + ' + ' + HIM + ' ♥</div>';
+    var n = card.querySelector("#qnote3");
+    if (n) n.innerHTML = "approved on <b>" + stamp + "</b><br>screenshot this &amp; send it to " + HIM + " — he's been refreshing his phone all day ♥";
+    setCmd('she said <b>YES</b> ♥ — ' + stamp);
+  }, 900);
+}
+})();
+</script>
+</body>
+</html>

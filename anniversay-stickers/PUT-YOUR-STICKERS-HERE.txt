@@ -1,0 +1,8 @@
+All done — your stickers are installed. ✔
+
+Cut-out files used by anniversary-tin.html:
+  polaroid.png, cassette.png, envelope.png, camera.png,
+  star-red.png, smiley.png, onestep.png
+
+Optional: add star-shades.png (star with sunglasses) and it will
+replace the drawn version on the tin lid automatically.

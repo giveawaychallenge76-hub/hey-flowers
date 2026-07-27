@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sunflower",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4174"],
+      "port": 4174
+    },
+    {
+      "name": "sunflower-alt",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4175"],
+      "port": 4175
+    }
+  ]
+}

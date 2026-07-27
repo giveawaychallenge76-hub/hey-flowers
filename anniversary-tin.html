@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>happy anniversary, my love ♥</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💙</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,600&family=Special+Elite&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<!--
+════════════════════════════════════════════════════════════
+  HOW TO CUSTOMIZE (search for these markers):
+  1. HEADING TEXT   → the <h1> words
+  2. STICKER IMAGES → your real stickers live in the "stickers"
+     folder next to this file (already set up).
+  3. YOUR PHOTOS    → find the ourPhotos array near the bottom.
+     Put your photo files next to this html, then set
+     src:"my-photo.jpg" for each. They print out of the camera
+     on the photo page when you press the red button.
+  4. STORY ENTRIES  → edit the timeline cards
+  5. LETTER TEXT    → edit the letterLines array near the bottom
+  6. VIDEO SRC      → uncomment the video tag or YouTube iframe
+════════════════════════════════════════════════════════════
+-->
+<style>
+:root{
+  --blue:#2733e0;
+  --blue-deep:#131c9e;
+  --blue-hi:#5f6eff;
+  --ink:#1c1c1c;
+  --cream:#f6eed9;
+  --red:#c92433;
+  --yellow:#ffd23f;
+  --paper:#ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Gaegu','Comic Sans MS',cursive;background:#fff;color:var(--ink);min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+.bg-star{position:fixed;font-size:14px;opacity:.5;pointer-events:none;animation:twinkle 3s ease-in-out infinite;z-index:0}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(.9)}50%{opacity:.7;transform:scale(1.1)}}
+[data-view]{position:relative;z-index:1}
+[hidden]{display:none!important}
+
+/* ─────────── HOME / TIN ─────────── */
+.home-wrap{max-width:640px;margin:0 auto;padding:36px 16px 60px;text-align:center}
+
+/* HEADING TEXT — scrapbook cut-out style */
+h1.headline{line-height:1.1;margin-bottom:4px}
+h1 .chip{display:inline-block;background:var(--cream);box-shadow:0 2px 7px rgba(0,0,0,.14);padding:.02em .4em .08em;color:var(--ink)}
+h1 .chip.small{font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(17px,3.4vw,23px);letter-spacing:.16em;transform:rotate(-1.2deg)}
+h1 .chip.big{font-family:'Playfair Display',serif;font-weight:700;font-style:italic;font-size:clamp(38px,7.5vw,58px);transform:rotate(.8deg);margin-top:6px}
+h1 .chip.big .hrt{color:var(--red);font-style:normal}
+.sub-hint{color:#8b8bb5;font-size:17px;margin:12px 0 24px}
+.sub-hint b{color:var(--blue)}
+
+.tin{width:min(560px,100%);margin:0 auto;container-type:inline-size;position:relative}
+
+/* realistic glossy tin */
+.half{
+  position:relative;width:100%;aspect-ratio:56/30;border-radius:6.5cqw;
+  border:1px solid rgba(255,255,255,.4);
+  background:
+    radial-gradient(95% 150% at 15% 6%, rgba(255,255,255,.9), rgba(255,255,255,0) 42%),
+    radial-gradient(70% 100% at 82% 100%, rgba(150,170,255,.5), rgba(150,170,255,0) 48%),
+    linear-gradient(148deg,#6272ff 0%,#2b38e8 44%,#0e1584 100%);
+  box-shadow:
+    0 24px 48px -14px rgba(14,21,132,.55),
+    0 5px 12px rgba(14,21,132,.3),
+    inset 0 2px 3px rgba(255,255,255,.75),
+    inset 0 -4px 9px rgba(4,8,70,.6);
+}
+/* inner wall (depth ring) */
+.wall{
+  position:absolute;inset:3.6%;border-radius:5cqw;
+  background:linear-gradient(180deg,#0a1173 0%,#3a49f0 34%,#0a1173 100%);
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.35), 0 1px 2px rgba(255,255,255,.25);
+}
+/* tin floor */
+.well{
+  position:absolute;inset:6.6%;border-radius:4cqw;
+  background:radial-gradient(120% 100% at 30% 18%, #2c3ad6 0%, #1b27bb 52%, #0f1a92 100%);
+  box-shadow:
+    inset 0 12px 24px rgba(3,8,60,.65),
+    inset 0 -4px 10px rgba(130,150,255,.22),
+    inset 4px 0 10px rgba(3,8,60,.35),
+    inset -4px 0 10px rgba(3,8,60,.35);
+}
+/* fine metal grain */
+.well::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+  opacity:.28;mix-blend-mode:soft-light;
+}
+/* long specular sweep across the lid */
+.half::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;
+  background:linear-gradient(115deg, rgba(255,255,255,0) 24%, rgba(255,255,255,.34) 34%, rgba(255,255,255,.06) 43%, rgba(255,255,255,0) 52%);
+}
+.hinge{display:flex;justify-content:center;gap:34%;margin:-1.1cqw 0;position:relative;z-index:2}
+.hinge i{width:9cqw;height:2.6cqw;border-radius:1cqw;
+  background:linear-gradient(180deg,#8b97ff,#2733e0 45%,#0a1173);
+  box-shadow:0 2px 4px rgba(0,0,30,.45), inset 0 1px 1px rgba(255,255,255,.6)}
+
+/* items pinned in the tin */
+.item{position:absolute;display:block;transform:rotate(var(--r,0deg));transition:transform .25s ease,filter .25s ease;z-index:4;filter:drop-shadow(0 5px 7px rgba(2,6,50,.5))}
+a.item{cursor:pointer}
+a.item:hover,a.item:focus-visible{transform:rotate(var(--r,0deg)) scale(1.07);filter:drop-shadow(0 9px 14px rgba(2,6,50,.65));z-index:6}
+.item:hover .tag,.item:focus-visible .tag{opacity:1;transform:translate(var(--tx,0),-50%) scale(1)}
+
+.stk{display:block;width:100%;height:auto}
+.fb{display:none;width:100%;height:auto}
+.no-img .stk{display:none}
+.no-img .fb{display:block}
+
+/* hover label */
+.tag{
+  position:absolute;top:50%;transform:translate(var(--tx,0),-50%) scale(.85);
+  opacity:0;transition:.22s ease;pointer-events:none;white-space:nowrap;
+  font-family:'Gaegu',cursive;font-weight:700;font-size:4cqw;line-height:1;
+  color:var(--blue);background:#fff;border:1.5px solid var(--blue);
+  padding:.9cqw 2.4cqw 1.2cqw;border-radius:999px;box-shadow:0 3px 8px rgba(0,0,40,.3);z-index:9;
+}
+.tag::before{content:"";position:absolute;top:50%;width:2.6cqw;height:2px;background:var(--blue)}
+.tag.right{left:calc(100% + 3cqw);--tx:0}
+.tag.right::before{right:100%;transform:translateY(-50%)}
+.tag.left{right:calc(100% + 3cqw);left:auto;--tx:0}
+.tag.left::before{left:100%;transform:translateY(-50%)}
+.tag.top{top:auto;bottom:calc(100% + 2.2cqw);left:50%;transform:translate(-50%,4px) scale(.85)}
+.item:hover .tag.top,.item:focus-visible .tag.top{transform:translate(-50%,0) scale(1)}
+.tag.top::before{display:none}
+
+/* ── lid items ── */
+.idcard{left:6%;top:24%;width:40%;--r:-2.5deg}
+.idcard .card{background:#fff;border-radius:1.6cqw;padding:1.6cqw 2.2cqw 2cqw;text-align:left;box-shadow:inset 0 0 6px rgba(0,0,30,.06)}
+.idcard .cardhead{display:flex;align-items:center;justify-content:center;gap:1.6cqw;border-bottom:1.5px solid var(--ink);padding-bottom:.8cqw;margin-bottom:1.2cqw}
+.idcard .cardhead b{font-size:3.6cqw;letter-spacing:.14em;color:var(--ink)}
+.idcard .cardhead i{color:var(--yellow);font-style:normal;font-size:3cqw;text-shadow:0 0 1px #c90}
+.idcard .row{display:flex;gap:2cqw;align-items:center}
+.idcard .pic{width:9cqw;height:10.5cqw;border-radius:1cqw;background:linear-gradient(160deg,var(--blue-hi),var(--blue));display:flex;align-items:center;justify-content:center;color:#fff;font-size:5cqw;flex:none}
+.idcard table{font-size:3cqw;line-height:1.35;color:var(--ink);border-collapse:collapse}
+.idcard td{padding:0 1.6cqw 0 0;vertical-align:top}
+.idcard td b{background:#eafbe0;padding:0 .8cqw;border-radius:.6cqw}
+.idcard .cardfoot{margin-top:1.2cqw;background:var(--blue);color:#fff;font-size:2.6cqw;text-align:center;border-radius:.8cqw;letter-spacing:.18em;padding:.2cqw 0}
+
+.psnote{left:48%;top:9%;width:24%;--r:-3deg}
+.psnote .note{background:rgba(255,255,255,.94);padding:1.4cqw 2cqw;border-radius:.6cqw;font-weight:700;font-size:3.4cqw;line-height:1.05;color:var(--ink)}
+.psnote .note b{color:var(--red)}
+.star-red{right:7%;top:12%;width:17%;--r:10deg}
+.star-shades{right:9%;top:62%;width:14%;--r:-6deg}
+.smiley{right:28%;top:36%;width:12%;--r:6deg}
+.washi{left:10%;top:76%;width:26%;--r:-2deg}
+.washi .strip{background:var(--red);border-radius:1.4cqw;padding:1.2cqw 2cqw;display:flex;justify-content:space-between;opacity:.95}
+.washi .strip span{color:#fff;font-size:3.2cqw;line-height:1}
+
+/* ── base items ── */
+.envelope{left:5%;top:10%;width:30%;--r:-4deg}
+.polaroid-item{right:5%;top:5%;width:25%;--r:3deg}
+.cassette{left:8%;top:58%;width:28%;--r:2deg}
+.camera{left:36%;top:34%;width:32%;--r:-2deg}
+
+.tinstar{position:absolute;font-size:3.2cqw;pointer-events:none;z-index:2}
+.footer-credit{margin-top:26px;color:#a9a9cc;font-size:15px}
+.footer-credit span{color:var(--blue)}
+
+/* ─────────── INNER PAGES ─────────── */
+.page{max-width:720px;margin:0 auto;padding:30px 18px 70px}
+.back{display:inline-block;font-weight:700;font-size:18px;color:var(--blue);border:1.5px solid var(--blue);border-radius:999px;padding:4px 16px 6px;margin-bottom:22px;transition:.2s;background:#fff}
+.back:hover{background:var(--blue);color:#fff}
+h2.script{font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:clamp(30px,5.6vw,42px);color:var(--blue);text-align:center}
+.page-sub{text-align:center;color:#8b8bb5;font-size:16px;margin:4px 0 28px}
+
+/* photo page — instant camera */
+.camera-stage{position:relative;width:min(360px,82vw);margin:10px auto 0}
+.camera-stage img.onestep{position:relative;z-index:2;width:100%;display:block;filter:drop-shadow(0 12px 20px rgba(20,20,60,.28))}
+.camera-stage.shake img.onestep{animation:camshake .55s ease}
+@keyframes camshake{0%,100%{transform:none}20%{transform:rotate(-2deg) translateY(1px)}40%{transform:rotate(2deg)}60%{transform:rotate(-1.4deg)}80%{transform:rotate(1deg)}}
+.flashfx{position:absolute;inset:-4%;background:#fff;border-radius:24px;opacity:0;pointer-events:none;z-index:3}
+.camera-stage.flash .flashfx{animation:flashpop .45s ease}
+@keyframes flashpop{0%{opacity:0}15%{opacity:.95}100%{opacity:0}}
+.shutter{position:absolute;left:22.1%;top:52.9%;width:17%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;z-index:4;background:transparent;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.shutter::after{content:"";position:absolute;inset:10%;border-radius:50%;box-shadow:0 0 0 0 rgba(230,57,70,.55);animation:pulse 1.7s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(230,57,70,.55)}70%{box-shadow:0 0 0 13px rgba(230,57,70,0)}100%{box-shadow:0 0 0 0 rgba(230,57,70,0)}}
+.camera-stage.empty .shutter::after{animation:none}
+.chute{position:absolute;top:74%;left:50%;transform:translateX(-50%);width:56%;height:240%;overflow:hidden;z-index:1;pointer-events:none}
+.chute .print{position:absolute;top:0;left:0;width:100%;transform:translateY(-101%)}
+.chute .print.ejecting{animation:eject 2s cubic-bezier(.25,.8,.35,1) forwards}
+@keyframes eject{0%{transform:translateY(-101%)}14%{transform:translateY(-97%)}100%{transform:translateY(0)}}
+.print img.pframe{width:100%;display:block}
+.print{position:relative}
+.print .shot{position:absolute;left:12.6%;top:17.3%;width:67.3%;height:57%;object-fit:cover;background:#000}
+.print .shot.dev{animation:develop 3.4s ease forwards}
+@keyframes develop{0%{filter:brightness(.05) saturate(0) contrast(1.25)}55%{filter:brightness(.55) saturate(.45) sepia(.35)}100%{filter:none}}
+.print .cap{font-family:'Gaegu',cursive;font-weight:700;text-align:center;font-size:19px;color:var(--ink);padding-top:2px}
+.pile{display:flex;flex-wrap:wrap;justify-content:center;gap:26px;margin-top:16px;min-height:30px}
+.pile .print{width:min(200px,42vw);transform:rotate(var(--pr,0deg));transition:transform .25s;animation:settle .5s ease}
+.pile .print:hover{transform:rotate(0) scale(1.05);z-index:3}
+@keyframes settle{0%{transform:scale(.72) rotate(0)}100%{transform:scale(1) rotate(var(--pr))}}
+.film-row{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:12px;font-size:17px;color:#8b8bb5}
+.film-row .dots{letter-spacing:3px;color:var(--red);font-size:14px}
+.toast{position:absolute;left:50%;top:-6px;transform:translateX(-50%);background:#fff;border:1.5px solid var(--red);color:var(--red);font-weight:700;border-radius:999px;padding:2px 14px 4px;opacity:0;transition:.3s;z-index:5;white-space:nowrap;font-size:16px}
+.toast.on{opacity:1;top:-18px}
+
+/* story page */
+.timeline{position:relative;margin:10px 0 0;padding-left:34px}
+.timeline::before{content:"";position:absolute;left:12px;top:6px;bottom:6px;width:3px;background:var(--blue);border-radius:99px;opacity:.35}
+.tl-item{position:relative;margin-bottom:26px}
+.tl-item::before{content:"★";position:absolute;left:-31px;top:0;color:var(--yellow);text-shadow:0 0 1px #c90;font-size:19px}
+.tl-date{display:inline-block;background:var(--blue);color:#fff;font-weight:700;font-size:14px;border-radius:999px;padding:1px 12px 3px;letter-spacing:.06em}
+.tl-card{background:#fff;border:1.5px solid #e3e3f7;border-radius:14px;padding:12px 16px;margin-top:8px;box-shadow:0 4px 10px rgba(39,51,224,.08)}
+.tl-card h3{font-size:21px;color:var(--ink)}
+.tl-card p{font-size:18px;color:#55557a;line-height:1.4}
+.tl-end{text-align:center;font-family:'Playfair Display',serif;font-style:italic;font-size:24px;color:var(--blue);margin-top:6px}
+
+/* letter page — typewriter */
+.letter-paper{
+  position:relative;background:#f9f2e0;border-radius:6px;cursor:pointer;
+  padding:44px 34px 34px;box-shadow:0 8px 24px rgba(39,51,224,.15);
+  background-image:repeating-linear-gradient(transparent,transparent 33px,rgba(39,51,224,.13) 34px);
+}
+.letter-paper .tape-corner{position:absolute;width:86px;height:26px;background:rgba(255,235,170,.9);box-shadow:0 1px 3px rgba(0,0,30,.2)}
+.letter-paper .tape-corner.tl{left:-18px;top:-8px;transform:rotate(-40deg)}
+.letter-paper .tape-corner.tr{right:-18px;top:-8px;transform:rotate(40deg)}
+.letter-text{font-family:'Special Elite','Courier New',monospace;font-size:17px;line-height:34px;color:#3a3a55;min-height:238px;white-space:pre-wrap}
+.letter-text .cursor{display:inline-block;width:9px;height:19px;background:#3a3a55;vertical-align:-3px;animation:blink 1s steps(1) infinite}
+.wax-seal{width:58px;height:58px;border-radius:50%;margin:8px 0 0 auto;background:radial-gradient(circle at 35% 30%,#ff6b74,var(--red) 60%,#8e1c28);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;box-shadow:0 3px 8px rgba(142,28,40,.5);opacity:0;transform:scale(.4);transition:.5s cubic-bezier(.2,1.6,.4,1)}
+.wax-seal.show{opacity:1;transform:scale(1)}
+.type-hint{text-align:center;color:#b3b3cf;font-size:15px;margin-top:12px}
+
+/* video page */
+.tv{background:#20203a;border-radius:22px;padding:20px 20px 14px;box-shadow:0 10px 26px rgba(20,20,60,.4)}
+.screen{position:relative;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center}
+.screen video,.screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.static{position:absolute;inset:0;opacity:.25;background-image:repeating-conic-gradient(#fff 0% .0001%,#000 .0002% .0003%);background-size:6px 6px;animation:staticmove .18s steps(2) infinite}
+@keyframes staticmove{to{background-position:6px 6px}}
+.screen .insert{position:relative;z-index:2;color:#fff;font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(24px,4.6vw,34px);text-shadow:0 2px 8px #000}
+.tv-foot{display:flex;justify-content:space-between;align-items:center;padding-top:10px}
+.tv-foot .rec{color:#ff5560;font-weight:700;font-size:15px;letter-spacing:.15em;animation:blink 1.2s steps(1) infinite}
+@keyframes blink{50%{opacity:.25}}
+.tv-foot .knobs{display:flex;gap:8px}
+.tv-foot .knobs i{width:12px;height:12px;border-radius:50%;background:#4a4a72}
+.video-note{text-align:center;color:#8b8bb5;font-size:16px;margin-top:16px}
+
+@media (max-width:480px){
+  .letter-paper{padding:38px 18px 26px}
+  .letter-text{font-size:15px;line-height:34px}
+}
+</style>
+</head>
+<body>
+
+<span class="bg-star" style="left:6%;top:18%">⭐</span>
+<span class="bg-star" style="left:12%;top:70%;animation-delay:.8s">✦</span>
+<span class="bg-star" style="right:8%;top:24%;animation-delay:.4s">💫</span>
+<span class="bg-star" style="right:14%;top:78%;animation-delay:1.2s">⭐</span>
+<span class="bg-star" style="left:48%;top:92%;animation-delay:.6s">✦</span>
+
+<!-- ═════════ HOME : THE TIN ═════════ -->
+<main data-view="home">
+  <div class="home-wrap">
+    <!-- HEADING TEXT -->
+    <h1 class="headline">
+      <span class="chip small">happy anniversary,</span><br>
+      <span class="chip big">my love <span class="hrt">♥</span></span>
+    </h1>
+    <p class="sub-hint">a little tin of us — <b>hover</b> the things inside, <b>click</b> to open</p>
+
+    <div class="tin">
+      <!-- ── LID ── -->
+      <div class="half">
+        <div class="wall"></div>
+        <div class="well"></div>
+
+        <span class="tinstar" style="left:50%;top:60%">✨</span>
+        <span class="tinstar" style="left:4%;top:12%">✦</span>
+        <span class="tinstar" style="right:28%;top:36%">💫</span>
+
+        <!-- STORY -->
+        <a class="item idcard" href="#/story" aria-label="open our story">
+          <span class="tag right">story ♥</span>
+          <div class="card">
+            <div class="cardhead"><i>★</i><b>COUPLE&nbsp;CARD</b><i>★</i></div>
+            <div class="row">
+              <div class="pic">♥</div>
+              <table>
+                <tr><td>SINCE</td><td><b>day one</b></td></tr>
+                <tr><td>STATUS</td><td><b>in love</b></td></tr>
+                <tr><td>EXPIRES</td><td><b>never</b></td></tr>
+              </table>
+            </div>
+            <div class="cardfoot">US, OFFICIALLY™</div>
+          </div>
+        </a>
+
+        <div class="item psnote"><div class="note">P.S:<br><b>I LOVE YOU</b></div></div>
+
+        <!-- STICKER IMAGES: stickers/star-red.png -->
+        <div class="item star-red">
+          <img class="stk" src="stickers/star-red.png" alt="" onerror="this.parentElement.classList.add('no-img')">
+          <svg class="fb" viewBox="0 0 120 116">
+            <defs><radialGradient id="rs" cx="38%" cy="32%" r="80%"><stop offset="0" stop-color="#e8404f"/><stop offset="1" stop-color="#a31220"/></radialGradient></defs>
+            <path d="M60 4 L75 42 L116 45 L84 71 L95 111 L60 88 L25 111 L36 71 L4 45 L45 42 Z" fill="url(#rs)" stroke="#7c0e19" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M60 18 L71 47 L102 50 L78 69 L86 99 L60 82 L34 99 L42 69 L18 50 L49 47 Z" fill="none" stroke="#ffe9d0" stroke-width="2.4" stroke-dasharray="6 5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <!-- STICKER IMAGES: stickers/star-shades.png -->
+        <div class="item star-shades">
+          <img class="stk" src="stickers/star-shades.png" alt="" onerror="this.parentElement.classList.add('no-img')">
+          <svg class="fb" viewBox="0 0 120 100">
+            <path d="M60 2 L74 30 L106 22 L88 48 L118 62 L84 68 L94 98 L60 78 L26 98 L36 68 L2 62 L32 48 L14 22 L46 30 Z" fill="#fff" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+            <g>
+              <rect x="30" y="40" width="26" height="18" rx="9" fill="#111"/>
+              <rect x="64" y="40" width="26" height="18" rx="9" fill="#111"/>
+              <rect x="26" y="37" width="34" height="8" rx="4" fill="#ff8a70"/>
+              <rect x="60" y="37" width="34" height="8" rx="4" fill="#ff8a70"/>
+              <rect x="54" y="40" width="12" height="5" rx="2.5" fill="#ff8a70"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- smiley patch -->
+        <div class="item smiley">
+          <img class="stk" src="stickers/smiley.png" alt="" onerror="this.parentElement.classList.add('no-img')">
+          <svg class="fb" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="27" fill="#ffd23f" stroke="#e6a817" stroke-width="2"/>
+            <circle cx="21" cy="25" r="3.4" fill="#4a3200"/><circle cx="39" cy="25" r="3.4" fill="#4a3200"/>
+            <path d="M19 37 q11 10 22 0" stroke="#4a3200" stroke-width="3" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="item washi"><div class="strip"><span>♥</span><span>♡</span><span>♥</span><span>♡</span><span>♥</span><span>♡</span><span>♥</span></div></div>
+      </div>
+
+      <div class="hinge"><i></i><i></i></div>
+
+      <!-- ── BASE ── -->
+      <div class="half">
+        <div class="wall"></div>
+        <div class="well"></div>
+
+        <span class="tinstar" style="left:36%;top:12%">✨</span>
+        <span class="tinstar" style="right:33%;top:80%">✦</span>
+        <span class="tinstar" style="left:3%;top:56%">⭐</span>
+
+        <!-- LETTER — stickers/envelope.png -->
+        <a class="item envelope" href="#/letter" aria-label="open the letter">
+          <span class="tag right">letter 💌</span>
+          <img class="stk" src="stickers/envelope.png" alt="" onerror="this.parentElement.classList.add('no-img')">
+          <svg class="fb" viewBox="0 0 170 118">
+            <defs>
+              <linearGradient id="env" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efe3c4"/><stop offset=".6" stop-color="#e7d7ae"/><stop offset="1" stop-color="#d9c491"/></linearGradient>
+              <radialGradient id="wax" cx="38%" cy="30%" r="75%"><stop offset="0" stop-color="#d8555f"/><stop offset=".7" stop-color="#a01f2c"/><stop offset="1" stop-color="#701018"/></radialGradient>
+            </defs>
+            <rect x="3" y="5" width="164" height="108" rx="7" fill="url(#env)" stroke="#c9b586" stroke-width="1.6"/>
+            <path d="M5 10 L85 68 L165 10" fill="none" stroke="#c9b586" stroke-width="2"/>
+            <path d="M5 111 L62 62 M165 111 L108 62" stroke="#cdb98a" stroke-width="1.6"/>
+            <ellipse cx="85" cy="64" rx="17" ry="16" fill="url(#wax)"/>
+            <path d="M85 60 c-8 0 -9 9 0 9 c9 0 8 -9 0 -9 z" fill="none" stroke="#e9a5ab" stroke-width="1.6" opacity=".8"/>
+            <circle cx="85" cy="64" r="12.5" fill="none" stroke="#7c1520" stroke-width="1.2" opacity=".7"/>
+          </svg>
+        </a>
+
+        <!-- PHOTO — stickers/polaroid.png -->
+        <a class="item polaroid-item" href="#/photo" aria-label="open photos">
+          <span class="tag left">photo 📷</span>
+          <img class="stk" src="stickers/polaroid.png" alt="" onerror="this.parentElement.classList.add('no-img')">
+          <svg class="fb" viewBox="0 0 240 330">
+            <defs>
+              <linearGradient id="chrome" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f4f6"/><stop offset=".45" stop-color="#9aa0ad"/><stop offset=".6" stop-color="#e8eaf0"/><stop offset="1" stop-color="#6f7683"/></linearGradient>
+            </defs>
+            <!-- crumpled heart -->
+            <path d="M38 30 c-9 -13 -30 -3 -21 11 c5 9 21 17 21 17 c0 0 15 -8 20 -17 c8 -14 -12 -24 -20 -11 z" fill="#b8434e"/>
+            <path d="M27 32 l10 6 M40 44 l7 -8" stroke="#8e2a34" stroke-width="1.4" opacity=".7"/>
+            <!-- lip print -->
+            <g transform="translate(160,14) rotate(8)" fill="#b01c2a">
+              <path d="M2 18 C10 2 26 6 33 14 C40 6 56 2 64 18 C50 26 40 27 33 24 C26 27 16 26 2 18 z"/>
+              <g stroke="#7e0f1a" stroke-width="1.6"><path d="M12 12 l3 8 M22 9 l2 10 M33 9 l0 12 M44 9 l-2 10 M54 12 l-3 8"/></g>
+            </g>
+            <!-- polaroid -->
+            <g transform="rotate(-1 120 170)">
+              <rect x="30" y="60" width="180" height="212" rx="4" fill="#fbfaf6" stroke="#e2ded2" stroke-width="1.5"/>
+              <rect x="42" y="72" width="156" height="150" fill="#0c0c10"/>
+            </g>
+            <!-- chrome star -->
+            <path d="M42 250 L54 274 L80 271 L62 290 L72 314 L46 302 L24 318 L30 291 L10 274 L36 272 Z" fill="url(#chrome)" stroke="#8b909c" stroke-width="1.4"/>
+            <!-- captions -->
+            <text x="150" y="245" text-anchor="middle" font-family="Playfair Display,serif" font-size="15" fill="#232323">you are my</text>
+            <rect x="66" y="252" width="170" height="30" rx="4" fill="#efe6cd" opacity=".9"/>
+            <text x="151" y="276" text-anchor="middle" font-family="Playfair Display,serif" font-weight="700" font-size="27" fill="#1d1d1d">favorite</text>
+            <text x="160" y="308" text-anchor="middle" font-family="Playfair Display,serif" font-style="italic" font-weight="600" font-size="26" fill="#161616">person</text>
+          </svg>
+        </a>
+
+        <!-- our playlist — stickers/cassette.png (decor) -->
+        <div class="item cassette">
+          <span class="tag top">our playlist 🎧</span>
+          <img class="stk" src="stickers/cassette.png" alt="" onerror="this.parentElement.classList.add('no-img')">
+          <svg class="fb" viewBox="0 0 250 165">
+            <defs><linearGradient id="cas" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#33333a"/><stop offset=".5" stop-color="#1c1c22"/><stop offset="1" stop-color="#0d0d12"/></linearGradient></defs>
+            <rect x="3" y="3" width="244" height="159" rx="12" fill="url(#cas)" stroke="#000" stroke-width="2.5"/>
+            <circle cx="16" cy="16" r="3.4" fill="#8d8d97"/><circle cx="234" cy="16" r="3.4" fill="#8d8d97"/>
+            <circle cx="16" cy="149" r="3.4" fill="#8d8d97"/><circle cx="234" cy="149" r="3.4" fill="#8d8d97"/>
+            <rect x="24" y="16" width="202" height="86" rx="6" fill="#e8e2d2"/>
+            <text x="125" y="42" text-anchor="middle" font-family="Gaegu,cursive" font-weight="700" font-size="26" fill="#20261c" transform="rotate(-1.5 125 42)">PLAYLIST</text>
+            <text x="38" y="44" font-family="Gaegu,cursive" font-weight="700" font-size="17" fill="#333">2</text>
+            <rect x="58" y="54" width="134" height="34" rx="17" fill="#2a2a31"/>
+            <circle cx="82" cy="71" r="13" fill="#f4f2ea"/><circle cx="168" cy="71" r="13" fill="#f4f2ea"/>
+            <g fill="#2a2a31"><rect x="79" y="61" width="6" height="7" rx="2"/><rect x="79" y="74" width="6" height="7" rx="2"/><rect x="165" y="61" width="6" height="7" rx="2"/><rect x="165" y="74" width="6" height="7" rx="2"/></g>
+            <rect x="98" y="63" width="54" height="16" rx="3" fill="#4b4b53"/>
+            <rect x="24" y="108" width="202" height="20" rx="3" fill="#111116"/>
+            <text x="34" y="123" font-family="Arial,helvetica,sans-serif" font-weight="700" font-size="13" fill="#e8e2d2" letter-spacing="1">BLACKWOOD</text>
+            <text x="160" y="123" font-family="Arial,helvetica,sans-serif" font-weight="700" font-size="13" fill="#55555e" letter-spacing="1">ORIGINAL</text>
+            <path d="M60 138 h12 M78 138 h8 M120 138 h12 M138 138 h8" stroke="#3a3a42" stroke-width="5"/>
+          </svg>
+        </div>
+
+        <!-- VIDEO — stickers/camera.png -->
+        <a class="item camera" href="#/video" aria-label="open the video">
+          <span class="tag right">video 🎥</span>
+          <img class="stk" src="stickers/camera.png" alt="" onerror="this.parentElement.classList.add('no-img')">
+          <svg class="fb" viewBox="0 0 300 210">
+            <defs>
+              <linearGradient id="cam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6e7ea"/><stop offset=".12" stop-color="#c3c6cc"/><stop offset=".8" stop-color="#aeb2ba"/><stop offset="1" stop-color="#84878f"/></linearGradient>
+              <radialGradient id="dial" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#d9dbe0"/><stop offset=".7" stop-color="#a6aab2"/><stop offset="1" stop-color="#787c85"/></radialGradient>
+            </defs>
+            <rect x="4" y="14" width="292" height="188" rx="20" fill="url(#cam)" stroke="#6f737b" stroke-width="2"/>
+            <rect x="4" y="14" width="292" height="34" rx="17" fill="#b7bac1" opacity=".7"/>
+            <circle cx="116" cy="31" r="10" fill="#2a2a30"/><circle cx="116" cy="31" r="6" fill="#101014"/>
+            <rect x="138" y="24" width="30" height="12" rx="6" fill="#8d9099"/>
+            <text x="52" y="70" font-family="Arial,helvetica,sans-serif" font-weight="700" font-size="17" fill="#3c3f45" font-style="italic">Canon</text>
+            <rect x="22" y="80" width="150" height="104" rx="6" fill="#3a3d43"/>
+            <rect x="30" y="88" width="134" height="88" fill="#fbfbfd"/>
+            <circle cx="228" cy="120" r="36" fill="url(#dial)" stroke="#6f737b" stroke-width="1.6"/>
+            <circle cx="228" cy="120" r="14" fill="#c9ccd2" stroke="#6f737b"/>
+            <circle cx="228" cy="68" r="10" fill="url(#dial)" stroke="#6f737b"/>
+            <circle cx="228" cy="172" r="10" fill="url(#dial)" stroke="#6f737b"/>
+            <g fill="#55585f"><circle cx="272" cy="96" r="2.2"/><circle cx="280" cy="104" r="2.2"/><circle cx="272" cy="112" r="2.2"/><circle cx="280" cy="120" r="2.2"/></g>
+            <g transform="translate(246,26) rotate(10) scale(.5)" fill="#8e1c28">
+              <path d="M2 18 C10 2 26 6 33 14 C40 6 56 2 64 18 C50 26 40 27 33 24 C26 27 16 26 2 18 z"/>
+            </g>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <p class="footer-credit">@made with love · <span>hover&nbsp;→&nbsp;click&nbsp;♥</span></p>
+  </div>
+</main>
+
+<!-- ═════════ PHOTO ═════════ -->
+<section data-view="photo" hidden>
+  <div class="page">
+    <a class="back" href="#/">← back to the tin</a>
+    <h2 class="script">our photos ♥</h2>
+    <p class="page-sub">press the red button — the camera prints us</p>
+
+    <div class="camera-stage" id="camStage">
+      <div class="toast" id="filmToast">out of film ♥</div>
+      <img class="onestep" src="stickers/onestep.png" alt="instant camera">
+      <div class="flashfx"></div>
+      <button class="shutter" id="shutterBtn" aria-label="press the red button to print a photo"></button>
+      <div class="chute" id="chute"></div>
+    </div>
+    <div class="film-row">film&nbsp;<span class="dots" id="filmDots"></span></div>
+    <div class="pile" id="pile"></div>
+  </div>
+</section>
+
+<!-- ═════════ STORY ═════════ -->
+<section data-view="story" hidden>
+  <div class="page">
+    <a class="back" href="#/">← back to the tin</a>
+    <h2 class="script">our story</h2>
+    <p class="page-sub">how we got here, one chapter at a time</p>
+    <div class="timeline">
+      <!-- STORY ENTRIES: edit dates, titles and text -->
+      <div class="tl-item">
+        <span class="tl-date">the beginning</span>
+        <div class="tl-card"><h3>the day we met</h3><p>Write how it started here — where you were, what you thought, the tiny detail you still remember.</p></div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-date">soon after</span>
+        <div class="tl-card"><h3>the first date</h3><p>Write about the first date — the nerves, the laughing, the moment you knew.</p></div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-date">along the way</span>
+        <div class="tl-card"><h3>a moment i'll never forget</h3><p>Write your favorite memory together here.</p></div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-date">today</span>
+        <div class="tl-card"><h3>one year of us</h3><p>Write where you are now, and everything you're still looking forward to.</p></div>
+      </div>
+    </div>
+    <p class="tl-end">to be continued… ♥</p>
+  </div>
+</section>
+
+<!-- ═════════ LETTER ═════════ -->
+<section data-view="letter" hidden>
+  <div class="page">
+    <a class="back" href="#/">← back to the tin</a>
+    <h2 class="script">a letter for you 💌</h2>
+    <p class="page-sub">being typed just for you…</p>
+    <div class="letter-paper" id="letterPaper" title="click to finish typing">
+      <span class="tape-corner tl"></span><span class="tape-corner tr"></span>
+      <div class="letter-text" id="letterText"></div>
+      <div class="wax-seal" id="waxSeal">♥</div>
+    </div>
+    <p class="type-hint">click the letter to skip the typing ♥</p>
+  </div>
+</section>
+
+<!-- ═════════ VIDEO ═════════ -->
+<section data-view="video" hidden>
+  <div class="page">
+    <a class="back" href="#/">← back to the tin</a>
+    <h2 class="script">our film 🎥</h2>
+    <p class="page-sub">press play on us</p>
+    <div class="tv">
+      <div class="screen">
+        <div class="static"></div>
+        <span class="insert">insert our tape ♥</span>
+        <!-- VIDEO SRC — pick ONE, uncomment it, and delete the two lines above (.static + .insert):
+
+          local video file (put the file next to this html):
+          <video controls src="our-video.mp4"></video>
+
+          or YouTube (replace VIDEO_ID):
+          <iframe src="https://www.youtube.com/embed/VIDEO_ID" allowfullscreen></iframe>
+        -->
+      </div>
+      <div class="tv-foot">
+        <span class="rec">● REC</span>
+        <div class="knobs"><i></i><i></i></div>
+      </div>
+    </div>
+    <p class="video-note">add your video in the code — look for “VIDEO SRC” inside this file</p>
+  </div>
+</section>
+
+<script>
+/* ── YOUR PHOTOS: put photo files next to this html file,
+      then set src:"my-photo.jpg" for each print.
+      Leave src:"" and the polaroid stays undeveloped (black). ── */
+var ourPhotos = [
+  { src:"", caption:"our first photo" },
+  { src:"", caption:"that day ♥" },
+  { src:"", caption:"you & me" },
+  { src:"", caption:"my favorite view" },
+  { src:"", caption:"always us" }
+];
+
+/* ── LETTER TEXT: edit these lines ── */
+var letterLines = [
+  "my love,",
+  "",
+  "happy anniversary. one whole year of you and me,",
+  "and somehow you still make my heart race like day one.",
+  "",
+  "thank you for every laugh, every late night,",
+  "every small ordinary moment that you make feel golden.",
+  "",
+  "here's to forever, one day at a time.",
+  "",
+  "yours, always ♥"
+];
+
+/* ── tiny hash router: #/photo #/story #/letter #/video ── */
+(function(){
+  var routes = ['photo','story','letter','video'];
+  var typeTimer = null;
+
+  function stopTyping(){ if(typeTimer){ clearTimeout(typeTimer); typeTimer = null; } }
+
+  function typeLetter(){
+    stopTyping();
+    var box = document.getElementById('letterText');
+    var seal = document.getElementById('waxSeal');
+    if(!box) return;
+    var full = letterLines.join('\n');
+    var i = 0;
+    box.innerHTML = '<span class="cursor"></span>';
+    seal.classList.remove('show');
+
+    function finish(){
+      stopTyping();
+      box.textContent = full;
+      seal.classList.add('show');
+    }
+    document.getElementById('letterPaper').onclick = finish;
+
+    function step(){
+      i++;
+      box.textContent = full.slice(0, i);
+      if(i < full.length){
+        var c = full.charAt(i-1);
+        var d = 24 + Math.random()*40;
+        if(c === '\n') d = 300;
+        if(c === ',' ) d = 220;
+        if(c === '.' ) d = 320;
+        box.insertAdjacentHTML('beforeend','<span class="cursor"></span>');
+        typeTimer = setTimeout(step, d);
+      } else { finish(); }
+    }
+    typeTimer = setTimeout(step, 400);
+  }
+
+  function render(){
+    var h = location.hash.replace('#/','').replace('#','');
+    var view = routes.indexOf(h) > -1 ? h : 'home';
+    document.querySelectorAll('[data-view]').forEach(function(el){
+      el.hidden = el.getAttribute('data-view') !== view;
+    });
+    window.scrollTo(0,0);
+    stopTyping();
+    if(view === 'letter') typeLetter();
+  }
+  window.addEventListener('hashchange', render);
+  render();
+
+  /* ── instant camera: press the red button, a polaroid prints out ── */
+  var printIdx = 0, printing = false;
+  var stage = document.getElementById('camStage');
+  var chute = document.getElementById('chute');
+  var pile  = document.getElementById('pile');
+  var dots  = document.getElementById('filmDots');
+  var toast = document.getElementById('filmToast');
+
+  function updateDots(){
+    var left = ourPhotos.length - printIdx;
+    dots.textContent = '▮'.repeat(left) + '▯'.repeat(printIdx);
+  }
+  updateDots();
+
+  function makePrint(p){
+    var el = document.createElement('div');
+    el.className = 'print';
+    var frame = '<img class="pframe" src="stickers/polaroid.png" alt="">';
+    var shot = p.src ? '<img class="shot" src="'+p.src+'" alt="" onerror="this.remove()">' : '';
+    el.innerHTML = frame + shot + '<div class="cap">'+p.caption+'</div>';
+    return el;
+  }
+
+  document.getElementById('shutterBtn').addEventListener('click', function(){
+    if(printing) return;
+    if(printIdx >= ourPhotos.length){
+      stage.classList.add('empty','shake');
+      toast.classList.add('on');
+      setTimeout(function(){ toast.classList.remove('on'); stage.classList.remove('shake'); }, 1500);
+      return;
+    }
+    printing = true;
+    stage.classList.add('flash','shake');
+    setTimeout(function(){ stage.classList.remove('flash','shake'); }, 600);
+
+    var el = makePrint(ourPhotos[printIdx]);
+    chute.appendChild(el);
+    void el.offsetWidth;             /* reflow so the animation starts */
+    el.classList.add('ejecting');
+
+    setTimeout(function(){
+      el.classList.remove('ejecting');
+      el.style.setProperty('--pr', (Math.random()*8-4).toFixed(1)+'deg');
+      pile.appendChild(el);
+      var shot = el.querySelector('.shot');
+      if(shot) shot.classList.add('dev');
+      printIdx++; printing = false; updateDots();
+    }, 2050);
+  });
+})();
+</script>
+</body>
+</html>

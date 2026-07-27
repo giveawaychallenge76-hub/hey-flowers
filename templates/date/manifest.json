@@ -1,0 +1,72 @@
+{
+  "id": "date",
+  "name": "ASK THEM OUT",
+  "tagline": "will you go on a date?",
+  "category": "Date",
+  "experienceTime": "1 min",
+  "description": "A dreamy 3D valley at dusk where the stars spell out your question — three little steps to ask someone on a date.",
+  "thumbnail": "thumbnail/dump-instagram-portrait-3.png",
+  "featured": true,
+  "trending": true,
+  "pages": [
+    {
+      "id": "main",
+      "label": "Main",
+      "mount": "#hf-stage",
+      "display": "block"
+    }
+  ],
+  "fields": [
+    {
+      "key": "question",
+      "type": "text",
+      "label": "Your question",
+      "default": "saj, will you go on a date with me?",
+      "placeholder": "will you go on a date with me?",
+      "required": true,
+      "page": "main"
+    },
+    {
+      "key": "sticker1",
+      "type": "image",
+      "label": "Sticker 1 — the star (above the mountain)",
+      "default": "",
+      "page": "main"
+    },
+    {
+      "key": "sticker2",
+      "type": "image",
+      "label": "Sticker 2 — smiley",
+      "default": "",
+      "page": "main"
+    },
+    {
+      "key": "sticker3",
+      "type": "image",
+      "label": "Sticker 3 — playlist tape",
+      "default": "",
+      "page": "main"
+    },
+    {
+      "key": "sticker4",
+      "type": "image",
+      "label": "Sticker 4 — envelope",
+      "default": "",
+      "page": "main"
+    },
+    {
+      "key": "accent",
+      "type": "color",
+      "label": "Accent colour",
+      "default": "#f2c94c",
+      "page": "main"
+    },
+    {
+      "key": "font_family",
+      "type": "font",
+      "label": "Font",
+      "default": "Special Elite",
+      "page": "main"
+    }
+  ]
+}

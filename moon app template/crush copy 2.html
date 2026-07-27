@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>naveenOS ♥</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<!--
+════════════════════════════════════════════════
+  naveenOS — a retro desktop confession.
+  CUSTOMIZE: the CONFIG block at the top of the script
+  (names, chat lines, captions, letter, license fields).
+  All images live in crush-assets/ (real uploaded pics).
+════════════════════════════════════════════════
+-->
+<style>
+:root{
+  --xp-blue1:#3b77e0; --xp-blue2:#1e48b0; --xp-face:#ece9d8; --xp-border:#0c3b8e;
+  --sel:#2456c4; --red:#d23b47; --gold:#ffd76a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:Tahoma,Verdana,'Segoe UI',sans-serif;
+  overflow:hidden;background:#000;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* ═══ boot screen ═══ */
+#boot{position:fixed;inset:0;z-index:100;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px}
+#boot .blogo{color:#fff;font-size:clamp(30px,6vw,44px);font-weight:700;letter-spacing:1px}
+#boot .blogo i{font-style:normal;color:#ff6b81}
+#boot .bbar{width:210px;height:16px;border:2px solid #8a8a9a;border-radius:4px;overflow:hidden;position:relative}
+#boot .bbar .blocks{position:absolute;top:2px;left:-70px;display:flex;gap:3px;animation:bslide 1.1s linear infinite}
+#boot .bbar .blocks i{width:12px;height:8px;background:linear-gradient(180deg,#7aa8ff,#2456c4);border-radius:1px}
+@keyframes bslide{0%{left:-70px}100%{left:220px}}
+#boot .bsub{color:#9aa0b8;font-size:12.5px;letter-spacing:.12em}
+#boot.off{display:none}
+
+/* ═══ desktop ═══ */
+#desk{
+  position:fixed;inset:0 0 40px 0;overflow:hidden;
+  background:url("crush-assets/wall-kitten.jpg") center/cover no-repeat #3a6ea5;
+}
+#desk::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 100% at 50% 20%, rgba(0,0,0,0) 60%, rgba(0,0,20,.25) 100%);pointer-events:none}
+
+/* icons */
+.icon{
+  position:absolute;width:92px;text-align:center;cursor:pointer;z-index:2;
+  padding:6px 2px;border-radius:4px;user-select:none;
+}
+.icon:hover{background:rgba(60,110,220,.25);outline:1px dotted rgba(255,255,255,.5)}
+.icon img{height:54px;max-width:82px;object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(1px 2px 2px rgba(0,0,0,.5))}
+.icon img.thumb{height:52px;width:70px;object-fit:cover;border:2px solid #fff;border-radius:2px;box-shadow:1px 2px 3px rgba(0,0,0,.5)}
+.icon .lb{margin-top:4px;font-size:11.5px;color:#fff;text-shadow:1px 1px 2px #000,0 0 6px rgba(0,0,0,.7);line-height:1.2;word-break:break-word}
+.icon .lock{position:absolute;right:14px;top:2px;font-size:17px;filter:drop-shadow(1px 1px 1px #000)}
+.icon.unlocked-anim{animation:icoPop .7s cubic-bezier(.2,1.6,.4,1)}
+@keyframes icoPop{0%{transform:scale(1)}40%{transform:scale(1.25) rotate(-4deg)}100%{transform:scale(1)}}
+.icon.opened .lb::after{content:" ✓";color:#8dffa8;text-shadow:0 0 4px #063}
+
+/* sticky note + real pin */
+#note{
+  position:absolute;right:26px;bottom:24px;width:190px;z-index:2;transform:rotate(-3deg);
+  background:#fdf292;box-shadow:3px 6px 14px rgba(0,0,0,.35);padding:30px 14px 12px;
+  font-family:'Caveat',cursive;font-weight:700;font-size:20px;line-height:1.15;color:#4a3a10;text-align:center;
+}
+#note img{position:absolute;left:50%;top:-26px;transform:translateX(-50%) rotate(8deg);width:44px;filter:drop-shadow(2px 4px 4px rgba(0,0,0,.4))}
+
+/* ═══ windows ═══ */
+.win{
+  position:absolute;z-index:10;width:min(400px,94vw);display:none;flex-direction:column;
+  background:var(--xp-face);border:1px solid var(--xp-border);border-radius:8px 8px 3px 3px;
+  box-shadow:2px 8px 26px rgba(0,10,40,.45);
+}
+.win.open{display:flex}
+.tbar{
+  display:flex;align-items:center;gap:8px;padding:5px 6px 5px 10px;cursor:grab;user-select:none;
+  border-radius:7px 7px 0 0;color:#fff;font-weight:700;font-size:12.5px;
+  background:linear-gradient(180deg,#5a92f2 0%,var(--xp-blue1) 10%,var(--xp-blue2) 55%,#2b5fd0 92%,#16368c 100%);
+  text-shadow:1px 1px 1px rgba(0,0,30,.6);
+}
+.tbar img{width:17px;height:17px;object-fit:contain}
+.tbar .ttl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbar .wx{
+  width:22px;height:22px;border-radius:4px;border:1px solid #fff8;cursor:pointer;flex:none;
+  background:linear-gradient(180deg,#f2a196,#dd4936 45%,#c03a24);color:#fff;font-weight:700;font-size:12px;
+  display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 1px #fff6;
+}
+.tbar .wx:hover{filter:brightness(1.15)}
+.wbody{padding:10px;overflow:auto;max-height:min(66vh,540px)}
+.wbody .inner{background:#fff;border:1px solid #b5b2a5;border-radius:2px;padding:10px}
+.whint{font-size:11px;color:#6a675a;padding:6px 4px 2px;text-align:center}
+
+/* chat window */
+.chat2{background:#fff;min-height:250px}
+.chat2 .chead{font-size:11px;color:#666;border-bottom:1px solid #e4e2d8;padding-bottom:5px;margin-bottom:8px;display:flex;justify-content:space-between}
+.b2{max-width:84%;margin:6px 0;padding:6px 11px 8px;border-radius:14px;border-bottom-left-radius:4px;
+  background:#e9e9ee;color:#222;font-size:14.5px;line-height:1.3;width:fit-content;animation:b2in .3s cubic-bezier(.2,1.3,.4,1)}
+@keyframes b2in{0%{transform:scale(.7) translateY(8px);opacity:0}100%{transform:none;opacity:1}}
+.b2.dots i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#9a9aa4;margin:0 1.5px;animation:d2 1s ease-in-out infinite}
+.b2.dots i:nth-child(2){animation-delay:.15s}.b2.dots i:nth-child(3){animation-delay:.3s}
+@keyframes d2{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-3px);opacity:1}}
+.b2 img{display:block;width:min(230px,60vw);border-radius:8px}
+.b2.imgb{background:transparent;padding:2px 0}
+
+/* memory grid */
+.memgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.memf{cursor:default}
+.memf img{width:100%;aspect-ratio:1.15;object-fit:cover;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);border-radius:2px}
+.memf .cap{font-size:10.5px;color:#333;line-height:1.25;margin-top:4px;word-break:break-word}
+.memrow{display:flex;gap:8px;align-items:center;font-size:12.5px;color:#333;margin-top:9px}
+.memrow i{font-style:normal}
+
+/* receipts window */
+.recwrap{display:flex;flex-direction:column;gap:12px;align-items:center}
+.recwrap img{max-width:78%;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))}
+.reccap{font-size:12.5px;color:#333;text-align:center;line-height:1.35}
+.reccap b{color:var(--red)}
+.rectot{font-family:'Special Elite',monospace;font-size:12.5px;background:#fffdf4;border:1px dashed #c2b394;border-radius:4px;padding:8px 12px;line-height:1.8;width:100%}
+
+/* paint window */
+.paintbar{display:flex;gap:10px;font-size:11px;color:#333;padding:2px 2px 6px}
+.paintbar span{text-decoration:underline}
+.paintimg{width:100%;border:1px solid #b5b2a5}
+.paintcap{font-family:'Caveat',cursive;font-weight:700;font-size:22px;text-align:center;line-height:1.2;margin-top:8px;min-height:2.4em;color:#222}
+.paintcap b{color:var(--red)}
+
+/* letter window (typewriter overlay) */
+.twwrap{position:relative;width:100%}
+.twwrap img{width:100%;display:block;border-radius:2px}
+.twtext{
+  position:absolute;left:15.1%;top:11.9%;width:69.5%;height:29.2%;
+  font-family:'Special Elite',monospace;font-size:clamp(8.5px,2.55vw,12.5px);line-height:1.5;color:#2c2318;
+  padding:4% 3%;white-space:pre-wrap;overflow:hidden;
+}
+@media (min-width:430px){ .twtext{font-size:11.5px} }
+.twsig{font-size:12px;color:#6a675a;text-align:center;margin-top:8px;font-style:italic}
+
+/* license window */
+.licwrap{position:relative;width:100%}
+.licwrap > img{width:100%;display:block;filter:drop-shadow(0 3px 8px rgba(0,0,0,.25))}
+.lf{position:absolute;font-family:'Caveat',cursive;font-weight:700;color:#1d2a6e;transform:rotate(-.8deg);white-space:nowrap;font-size:clamp(13px,4.2cqw,21px)}
+.licwrap{container-type:inline-size}
+.lf.f1{left:60%;top:20.5%}
+.lf.f2{left:62%;top:27%}
+.lf.f3{left:64%;top:33.2%}
+.lf.f4{left:64%;top:39.3%}
+.lf.sig{left:55%;top:79%;font-size:clamp(15px,5cqw,25px)}
+.lf.photo{left:8%;top:30%;width:38%;text-align:center;white-space:normal;font-size:clamp(15px,5.4cqw,26px);color:#8e2f4e;transform:rotate(-2deg)}
+.stamp2{
+  position:absolute;left:14%;top:34%;font-weight:700;color:var(--red);border:4px solid var(--red);border-radius:10px;
+  padding:4px 18px;font-size:clamp(22px,8cqw,40px);letter-spacing:.06em;transform:rotate(-14deg) scale(3);opacity:0;
+  transition:.35s cubic-bezier(.2,1.4,.4,1);mix-blend-mode:multiply;font-family:Tahoma,sans-serif;
+}
+.stamp2.on{opacity:.92;transform:rotate(-12deg) scale(1)}
+.qbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap;min-height:46px}
+.qq{font-family:'Caveat',cursive;font-weight:700;font-size:26px;width:100%;text-align:center;line-height:1}
+.ybtn{
+  font-family:Tahoma,sans-serif;font-weight:700;font-size:15px;color:#fff;cursor:pointer;border-radius:6px;
+  border:1px solid #7a1420;background:linear-gradient(180deg,#ff7080,var(--red) 55%,#a8202c);
+  padding:8px 30px 9px;box-shadow:inset 0 1px 1px #fff8, 0 3px 8px rgba(210,59,71,.4);
+}
+.ybtn:hover{filter:brightness(1.1);transform:scale(1.04)}
+.sbtn{font-family:Tahoma,sans-serif;font-size:12.5px;color:#333;cursor:pointer;border-radius:4px;border:1px solid #8a877a;background:linear-gradient(180deg,#fdfdfb,#e0dfd7);padding:7px 14px}
+.qnote2{font-size:12px;color:#6a675a;text-align:center;margin-top:8px;min-height:1.2em}
+
+/* ═══ dialogs (error / done) ═══ */
+.dlg{
+  position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:60;width:min(330px,90vw);
+  background:var(--xp-face);border:1px solid var(--xp-border);border-radius:8px 8px 3px 3px;
+  box-shadow:3px 10px 30px rgba(0,10,40,.55);display:none;
+}
+.dlg.on{display:block;animation:dlgin .25s ease}
+@keyframes dlgin{0%{transform:translate(-50%,-46%) scale(.9);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.dlg .dbody{display:flex;gap:12px;align-items:flex-start;padding:14px 14px 10px;font-size:12.5px;line-height:1.45;color:#222}
+.dlg .dbody .di{font-size:30px;flex:none;line-height:1}
+.dlg .dbtns{display:flex;justify-content:center;gap:10px;padding:4px 12px 12px}
+.dlg .okb{min-width:84px;font-family:Tahoma,sans-serif;font-size:12.5px;border-radius:4px;border:1px solid #003c74;background:linear-gradient(180deg,#fdfdfb,#e0dfd7);padding:5px 14px;cursor:pointer}
+.dlg .okb:hover{filter:brightness(1.05)}
+.dlg .dbody b{color:var(--red)}
+
+/* ═══ taskbar ═══ */
+#bar{
+  position:fixed;left:0;right:0;bottom:0;height:40px;z-index:50;display:flex;align-items:center;gap:8px;
+  background:linear-gradient(180deg,#3c81f3 0%,#2258cc 12%,#1b46ab 60%,#12327e 100%);
+  border-top:1px solid #6ea1ff;padding:0 8px 0 0;
+}
+#startBtn{
+  height:32px;margin:0 0 0 4px;display:flex;align-items:center;gap:7px;padding:0 16px 0 10px;cursor:pointer;
+  background:linear-gradient(180deg,#7ee383,#3fae5a 45%,#2c8a43);border-radius:8px;border:1px solid #1d6330;
+  color:#fff;font-weight:700;font-size:15px;font-style:italic;text-shadow:1px 1px 1px rgba(0,40,0,.5);
+  box-shadow:inset 0 1px 2px #fff7, 2px 0 4px rgba(0,0,30,.3);
+}
+#startBtn:hover{filter:brightness(1.08)}
+#barMsg{flex:1;color:#dfe8ff;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;opacity:.9}
+#tray{
+  height:30px;display:flex;align-items:center;gap:10px;padding:0 12px;color:#fff;font-size:12.5px;
+  background:linear-gradient(180deg,#4a90f5,#2258cc 60%,#1b46ab);border-radius:6px;border:1px solid #6ea1ff88;
+  box-shadow:inset 1px 1px 3px rgba(0,0,60,.35);
+}
+#tray .hearts{letter-spacing:1px;font-size:13px}
+#tray .hearts span{opacity:.35}
+#tray .hearts span.on{opacity:1;text-shadow:0 0 6px #ffb3c0}
+
+/* confetti + toast */
+.hb{position:fixed;z-index:90;pointer-events:none;font-size:20px;will-change:transform,opacity}
+#balloon{
+  position:fixed;right:14px;bottom:52px;z-index:70;background:#fffbe6;border:1px solid #d9c76a;border-radius:10px;
+  padding:10px 14px;font-size:12.5px;color:#4a3a10;max-width:250px;box-shadow:0 8px 22px rgba(0,0,0,.3);
+  display:none;line-height:1.4;
+}
+#balloon.on{display:block;animation:dlgin .25s ease}
+#balloon b{color:var(--red)}
+
+/* mobile */
+@media (max-width:640px){
+  .icon{width:84px}
+  #note{width:150px;font-size:17px;right:12px;bottom:14px;padding-top:26px}
+  .win{width:94vw!important;left:3vw!important;top:8vh!important}
+  .wbody{max-height:62vh}
+}
+</style>
+</head>
+<body>
+
+<!-- boot -->
+<div id="boot">
+  <div class="blogo">naveenOS <i>♥</i></div>
+  <div class="bbar"><div class="blocks"><i></i><i></i><i></i></div></div>
+  <div class="bsub">loading feelings… do not turn off</div>
+</div>
+
+<!-- desktop -->
+<div id="desk">
+  <div class="icon" style="left:14px;top:16px" data-open="wChat">
+    <img src="crush-assets/folder-charm.png" alt="">
+    <div class="lb">reminders.msg</div>
+  </div>
+  <div class="icon" style="left:14px;top:120px" data-open="wMem">
+    <img src="crush-assets/folder-homer.png" alt="">
+    <div class="lb">things i noticed</div>
+  </div>
+  <div class="icon" style="left:14px;top:224px" data-open="wRec">
+    <img src="crush-assets/folder-jake.png" alt="">
+    <div class="lb">the receipts</div>
+  </div>
+  <div class="icon" style="left:14px;top:328px" data-open="wPaint">
+    <img class="thumb" src="crush-assets/paint-art.jpg" alt="">
+    <div class="lb">whats_next.png</div>
+  </div>
+  <div class="icon" style="left:14px;top:432px" data-open="wLetter">
+    <img class="thumb" src="crush-assets/typewriter.jpg" alt="">
+    <div class="lb">letter.txt</div>
+  </div>
+  <div class="icon" id="icQ" style="left:14px;top:536px" data-open="wQ">
+    <img class="thumb" src="crush-assets/license-blank.png" alt="">
+    <span class="lock" id="qLock">🔒</span>
+    <div class="lb">the_question.exe</div>
+  </div>
+
+  <div id="note">
+    <img src="crush-assets/pin.png" alt="">
+    <span id="noteTxt">saj — open all of it.<br>then run the_question.exe ♥<br>— naveen</span>
+  </div>
+</div>
+
+<!-- windows -->
+<div class="win" id="wChat" style="left:16%;top:7%">
+  <div class="tbar"><img src="crush-assets/folder-charm.png" alt=""><span class="ttl">reminders.msg — from naveen</span><span class="wx">✕</span></div>
+  <div class="wbody"><div class="inner chat2">
+    <div class="chead"><span>to: <b id="chatTo">saj ♥</b></span><span>naveenOS messenger</span></div>
+    <div id="chatBody2"></div>
+  </div>
+  <div class="whint">to be loved is to be reminded ♥</div></div>
+</div>
+
+<div class="win" id="wMem" style="left:24%;top:12%">
+  <div class="tbar"><img src="crush-assets/folder-homer.png" alt=""><span class="ttl">things i noticed — 6 files</span><span class="wx">✕</span></div>
+  <div class="wbody"><div class="inner">
+    <div class="memgrid" id="memGrid"></div>
+    <div class="memrow"><i>📄</i><span>the way you laugh before your joke lands.txt</span></div>
+    <div class="memrow"><i>🔒</i><span>the day i almost said it (x3).txt</span></div>
+  </div>
+  <div class="whint">i've been paying attention for a while.</div></div>
+</div>
+
+<div class="win" id="wRec" style="left:30%;top:6%">
+  <div class="tbar"><img src="crush-assets/folder-jake.png" alt=""><span class="ttl">the receipts — proof of effort</span><span class="wx">✕</span></div>
+  <div class="wbody"><div class="inner recwrap">
+    <img src="crush-assets/receiptify.png" alt="">
+    <div class="reccap">exhibit A — songs i looped <b>thinking about you</b>.<br>(real data. embarrassing. worth it.)</div>
+    <img src="crush-assets/basket.png" alt="">
+    <div class="reccap">exhibit B — the grocery run i'd do for you.<br>snacks, fruit, the good muffins. no list needed.</div>
+    <div class="rectot">
+      thoughts of you / day ......... 1,442<br>
+      rehearsed hellos .............. 37<br>
+      almost-sent texts ............. 214<br>
+      courage gathered .............. 3 weeks<br>
+      refunds on feelings ........... none
+    </div>
+  </div></div>
+</div>
+
+<div class="win" id="wPaint" style="left:12%;top:18%">
+  <div class="tbar"><img src="crush-assets/paint-art.jpg" alt=""><span class="ttl">whats_next.png — Paint</span><span class="wx">✕</span></div>
+  <div class="wbody">
+    <div class="paintbar"><span>F</span>ile &nbsp;<span>E</span>dit &nbsp;<span>V</span>iew &nbsp;<span>I</span>mage &nbsp;<span>H</span>elp</div>
+    <div class="inner">
+      <img class="paintimg" src="crush-assets/paint-art.jpg" alt="">
+      <div class="paintcap" id="paintCap"></div>
+    </div>
+  </div>
+</div>
+
+<div class="win" id="wLetter" style="left:36%;top:9%">
+  <div class="tbar"><img src="crush-assets/typewriter.jpg" alt=""><span class="ttl">letter.txt — Notepad</span><span class="wx">✕</span></div>
+  <div class="wbody"><div class="inner" style="padding:6px">
+    <div class="twwrap">
+      <img src="crush-assets/typewriter.jpg" alt="">
+      <div class="twtext" id="twText"></div>
+    </div>
+    <div class="twsig">— typed slowly. meant completely.</div>
+  </div></div>
+</div>
+
+<div class="win" id="wQ" style="left:18%;top:14%">
+  <div class="tbar"><img src="crush-assets/license-blank.png" alt=""><span class="ttl">the_question.exe</span><span class="wx">✕</span></div>
+  <div class="wbody"><div class="inner" style="padding:8px">
+    <div class="licwrap">
+      <img src="crush-assets/license-blank.png" alt="">
+      <div class="lf f1" id="lf1"></div>
+      <div class="lf f2" id="lf2"></div>
+      <div class="lf f3" id="lf3"></div>
+      <div class="lf f4" id="lf4"></div>
+      <div class="lf sig" id="lf5"></div>
+      <div class="lf photo" id="lf6"></div>
+      <div class="stamp2" id="stamp2">APPROVED ♥</div>
+    </div>
+    <div class="qbar" id="qbar" style="visibility:hidden">
+      <div class="qq">so… will you be mine?</div>
+      <button class="ybtn" id="yesBtn">YES ♥</button>
+      <button class="sbtn" id="shyBtn">gimme a sec 🙈</button>
+    </div>
+    <div class="qnote2" id="qnote2"></div>
+  </div></div>
+</div>
+
+<!-- dialogs -->
+<div class="dlg" id="errDlg">
+  <div class="tbar" style="cursor:default"><span class="ttl">⛔ access denied</span></div>
+  <div class="dbody"><span class="di">⚠️</span><span id="errTxt"></span></div>
+  <div class="dbtns"><button class="okb" data-x="errDlg">OK</button></div>
+</div>
+
+<div class="dlg" id="doneDlg">
+  <div class="tbar" style="cursor:default"><span class="ttl">♥ match found</span></div>
+  <div class="dbody"><span class="di">💚</span><span id="doneTxt"></span></div>
+  <div class="dbtns"><button class="okb" data-x="doneDlg">best OK i've ever clicked</button></div>
+</div>
+
+<div id="balloon"></div>
+
+<!-- taskbar -->
+<div id="bar">
+  <div id="startBtn">♥ start</div>
+  <div id="barMsg">welcome to naveenOS — every file on this desktop is about you.</div>
+  <div id="tray">
+    <span class="hearts" id="trayHearts"><span>♥</span><span>♥</span><span>♥</span><span>♥</span><span>♥</span></span>
+    <span id="clock">--:--</span>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ══════════ CONFIG ══════════ */
+var HER = "saj";
+var HIM = "naveen";
+
+var CHAT2 = [
+  "hey you. daily reminders, from me:",
+  "drink water. you always forget.",
+  "eat something real, not just chips.",
+  "text me when you reach home.",
+  "don't fight your thoughts at 2am. sleep.",
+  "and if nobody said it today — you look really, really pretty."
+];
+
+var MEM_FILES = [
+  ["crush-assets/mem-cat.jpg",   "your 'five more minutes' energy.jpg"],
+  ["crush-assets/mem-subway.jpg","i'd take the long way home with you.jpg"],
+  ["crush-assets/mem-forest.jpg","my brain when you text first.jpg"],
+  ["crush-assets/mem-phone.jpg", "your playlists > everyone's playlists.jpg"]
+];
+
+var PAINT_CAP = "what's NOW: i really, really like you.\nwhat's NEXT: your call ♥";
+
+var LETTER2 =
+HER + ",\n" +
+"i've rewritten this 37 times.\n" +
+"so, simply:\n" +
+"you make ordinary days feel\n" +
+"like the good part of the movie.\n" +
+"i like you. a lot.\n" +
+"— " + HIM;
+
+var LIC_FIELDS = {
+  f1: HER,                       // issued to
+  f2: "the day we met",          // date of birth (of the crush)
+  f3: "everywhere i go",         // place of issue
+  f4: "",                        // date of issue (auto: today)
+  f5: HIM + " ツ",               // signature
+  f6: "♥\n(insert your face here)"
+};
+/* ════════════════════════════ */
+
+document.getElementById("chatTo").textContent = HER + " ♥";
+document.getElementById("noteTxt").innerHTML = HER + " — open all of it.<br>then run the_question.exe ♥<br>— " + HIM;
+
+/* sounds */
+var AC=null;
+function ac(){ if(!AC){ var C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C(); } return AC; }
+function beep(f,d,t,v,w){ var a=ac(); if(!a) return; var t0=a.currentTime+(w||0);
+  var o=a.createOscillator(),g=a.createGain(); o.type=t||"square"; o.frequency.value=f;
+  g.gain.setValueAtTime(v||.05,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g); g.connect(a.destination); o.start(t0); o.stop(t0+d+.02); }
+function sOpen(){ beep(660,.07,"triangle",.06); beep(990,.1,"triangle",.05,.06); }
+function sErr(){ beep(300,.16,"square",.06); beep(210,.26,"square",.06,.13); }
+function sTick(){ beep(1240,.05,"square",.035); }
+function sTada(){ [523,659,784,1046,1318].forEach(function(f,i){ beep(f,.28,"triangle",.08,i*.11); }); }
+
+/* boot */
+setTimeout(function(){ document.getElementById("boot").classList.add("off"); sOpen(); }, 1900);
+
+/* clock */
+function clock(){
+  var d = new Date();
+  document.getElementById("clock").textContent =
+    d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+}
+clock(); setInterval(clock, 20000);
+
+/* window manager */
+var zTop = 20;
+var seen = {};
+var EX = ["wChat","wMem","wRec","wPaint","wLetter"];
+var timers = {};
+function later(win, fn, ms){ (timers[win] = timers[win]||[]).push(setTimeout(fn, ms)); }
+function clearT(win){ (timers[win]||[]).forEach(clearTimeout); timers[win]=[]; }
+
+function bringFront(w){ zTop++; w.style.zIndex = zTop; }
+
+document.querySelectorAll(".win").forEach(function(w){
+  w.addEventListener("pointerdown", function(){ bringFront(w); });
+  var bar = w.querySelector(".tbar");
+  var wx = w.querySelector(".wx");
+  wx.addEventListener("click", function(e){ e.stopPropagation(); w.classList.remove("open"); clearT(w.id); });
+  /* drag */
+  var sx=0, sy=0, ox=0, oy=0, dragging=false;
+  bar.addEventListener("pointerdown", function(e){
+    if (e.target === wx) return;
+    dragging = true; bar.setPointerCapture(e.pointerId);
+    sx = e.clientX; sy = e.clientY;
+    var r = w.getBoundingClientRect(); ox = r.left; oy = r.top;
+  });
+  bar.addEventListener("pointermove", function(e){
+    if (!dragging) return;
+    var nx = Math.min(Math.max(ox + e.clientX - sx, -60), window.innerWidth - 90);
+    var ny = Math.min(Math.max(oy + e.clientY - sy, 0), window.innerHeight - 80);
+    w.style.left = nx + "px"; w.style.top = ny + "px";
+  });
+  bar.addEventListener("pointerup", function(){ dragging = false; });
+});
+
+function updateTray(){
+  var n = EX.filter(function(k){ return seen[k]; }).length;
+  var hs = document.querySelectorAll("#trayHearts span");
+  hs.forEach(function(h,i){ h.classList.toggle("on", i < n); });
+  document.getElementById("barMsg").textContent =
+    n < 5 ? (5-n) + " file" + (n===4?"":"s") + " left to open… then run the_question.exe ♥"
+          : "the_question.exe is UNLOCKED. she's one click away.";
+  if (n === 5 && !updateTray.done){
+    updateTray.done = true;
+    var ic = document.getElementById("icQ");
+    ic.classList.add("unlocked-anim");
+    document.getElementById("qLock").textContent = "💚";
+    balloon("<b>the_question.exe unlocked!</b><br>whenever you're ready ♥");
+    sTada();
+  }
+}
+
+/* balloon */
+var balT=null;
+function balloon(html){
+  var b = document.getElementById("balloon");
+  b.innerHTML = html; b.classList.add("on");
+  clearTimeout(balT); balT = setTimeout(function(){ b.classList.remove("on"); }, 3400);
+}
+
+/* dialogs */
+document.querySelectorAll(".dlg .okb").forEach(function(b){
+  b.addEventListener("click", function(){ document.getElementById(b.dataset.x).classList.remove("on"); });
+});
+
+/* open windows from icons */
+document.querySelectorAll(".icon").forEach(function(ic){
+  ic.addEventListener("click", function(){
+    var id = ic.dataset.open;
+    if (id === "wQ" && EX.filter(function(k){ return seen[k]; }).length < 5){
+      var n = EX.filter(function(k){ return seen[k]; }).length;
+      document.getElementById("errTxt").innerHTML =
+        "<b>the_question.exe</b> refuses to run.<br>open all 5 files first — she deserves the full story.<br><br>progress: <b>" + n + " / 5</b>";
+      document.getElementById("errDlg").classList.add("on");
+      sErr();
+      return;
+    }
+    openWin(id);
+    if (EX.indexOf(id) > -1 && !seen[id]){
+      seen[id] = true;
+      ic.classList.add("opened");
+      sTick();
+      updateTray();
+    }
+  });
+});
+
+function openWin(id){
+  var w = document.getElementById(id);
+  w.classList.add("open");
+  bringFront(w);
+  sOpen();
+  if (id === "wChat") runChat();
+  if (id === "wPaint") runPaint();
+  if (id === "wLetter") runLetter();
+  if (id === "wQ") runLicense();
+}
+
+/* ── chat ── */
+function runChat(){
+  clearT("wChat");
+  var body = document.getElementById("chatBody2");
+  body.innerHTML = "";
+  var t = 380;
+  CHAT2.forEach(function(msg){
+    later("wChat", function(){
+      var d = document.createElement("div");
+      d.className = "b2 dots"; d.innerHTML = "<i></i><i></i><i></i>";
+      body.appendChild(d); d.scrollIntoView({block:"nearest"});
+    }, t);
+    t += 560 + Math.min(msg.length * 11, 650);
+    later("wChat", function(){
+      var dd = body.querySelector(".dots"); if (dd) dd.remove();
+      var b = document.createElement("div");
+      b.className = "b2"; b.textContent = msg;
+      body.appendChild(b); b.scrollIntoView({block:"nearest"});
+      beep(1180,.05,"sine",.04);
+    }, t);
+    t += 240;
+  });
+  /* the real sticker, as the last message */
+  later("wChat", function(){
+    var b = document.createElement("div");
+    b.className = "b2 imgb";
+    b.innerHTML = '<img src="crush-assets/msg-beach.png" alt="wanna go to the beach?">';
+    body.appendChild(b); b.scrollIntoView({block:"nearest"});
+    sOpen();
+  }, t + 500);
+  later("wChat", function(){
+    var b = document.createElement("div");
+    b.className = "b2"; b.textContent = "(one day. officially. i'm working up to it —)";
+    body.appendChild(b); b.scrollIntoView({block:"nearest"});
+  }, t + 1300);
+}
+
+/* ── memories ── */
+(function buildMem(){
+  var g = document.getElementById("memGrid");
+  MEM_FILES.forEach(function(m){
+    var f = document.createElement("div");
+    f.className = "memf";
+    f.innerHTML = '<img src="' + m[0] + '" alt=""><div class="cap">🖼 ' + m[1] + '</div>';
+    g.appendChild(f);
+  });
+})();
+
+/* ── paint caption typing ── */
+function runPaint(){
+  clearT("wPaint");
+  var el = document.getElementById("paintCap");
+  el.innerHTML = "";
+  var i = 0;
+  function step(){
+    i++;
+    el.innerHTML = PAINT_CAP.slice(0, i).replace(/NOW/g,"<b>NOW</b>").replace(/NEXT/g,"<b>NEXT</b>").replace(/\n/g,"<br>");
+    if (i < PAINT_CAP.length) later("wPaint", step, 34);
+  }
+  later("wPaint", step, 400);
+}
+
+/* ── letter typing on the real typewriter paper ── */
+function runLetter(){
+  clearT("wLetter");
+  var el = document.getElementById("twText");
+  el.textContent = "";
+  var i = 0;
+  function step(){
+    i++;
+    el.textContent = LETTER2.slice(0, i);
+    if (LETTER2.charAt(i-1) !== " ") beep(1600 + Math.random()*500, .015, "square", .012);
+    if (i < LETTER2.length) later("wLetter", step, LETTER2.charAt(i-1) === "\n" ? 240 : 46);
+  }
+  later("wLetter", step, 500);
+}
+
+/* ── the license ── */
+var licDone = false;
+function runLicense(){
+  clearT("wQ");
+  if (licDone) return;
+  var today = new Date().toLocaleDateString(undefined,{day:"2-digit",month:"2-digit",year:"numeric"});
+  var fields = [
+    ["lf1", LIC_FIELDS.f1], ["lf2", LIC_FIELDS.f2], ["lf3", LIC_FIELDS.f3],
+    ["lf4", LIC_FIELDS.f4 || today], ["lf5", LIC_FIELDS.f5], ["lf6", LIC_FIELDS.f6]
+  ];
+  fields.forEach(function(f){ document.getElementById(f[0]).textContent = ""; });
+  var t = 500;
+  fields.forEach(function(f){
+    later("wQ", function(){
+      var el = document.getElementById(f[0]);
+      var i = 0;
+      (function tp(){
+        i++;
+        el.textContent = f[1].slice(0, i);
+        if (i < f[1].length){ later("wQ", tp, 50); }
+      })();
+      sTick();
+    }, t);
+    t += Math.max(f[1].length * 50 + 350, 700);
+  });
+  later("wQ", function(){
+    document.getElementById("qbar").style.visibility = "visible";
+    sOpen();
+  }, t + 200);
+}
+
+/* yes / shy */
+document.getElementById("shyBtn").addEventListener("click", function(){
+  var b = this;
+  document.getElementById("qnote2").textContent = "take your time… the button waits with you ♥";
+  b.textContent = "ok… YES ♥";
+  b.className = "ybtn";
+  b.id = "yesBtn2";
+  b.addEventListener("click", onYes);
+  sOpen();
+});
+document.getElementById("yesBtn").addEventListener("click", onYes);
+
+function burst(){
+  for (var i = 0; i < 30; i++){
+    var h = document.createElement("span");
+    h.className = "hb";
+    h.textContent = Math.random() < .8 ? "♥" : "★";
+    h.style.color = Math.random() < .6 ? "#ff5c7a" : "#ffd76a";
+    h.style.left = "50%"; h.style.top = "40%";
+    document.body.appendChild(h);
+    var a = Math.random() * Math.PI * 2, d = 110 + Math.random() * 280;
+    h.animate([
+      { transform:"translate(0,0) rotate(0) scale(1)", opacity:1 },
+      { transform:"translate(" + Math.cos(a)*d + "px," + (Math.sin(a)*d + 220) + "px) rotate(" + (Math.random()*480-240) + "deg) scale(.5)", opacity:0 }
+    ], { duration:1700 + Math.random()*800, easing:"cubic-bezier(.2,.7,.4,1)", fill:"forwards" });
+    setTimeout(function(el){ el.remove(); }.bind(null, h), 2700);
+  }
+}
+
+function onYes(){
+  if (licDone) return;
+  licDone = true;
+  document.getElementById("stamp2").classList.add("on");
+  document.getElementById("qbar").style.visibility = "hidden";
+  document.getElementById("qnote2").textContent = "";
+  sTada(); burst();
+  var now = new Date();
+  var stamp = now.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}) +
+              " · " + now.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+  setTimeout(function(){
+    document.getElementById("doneTxt").innerHTML =
+      "<b>" + HER + " + " + HIM + "</b> — it's official.<br>license approved on " + stamp +
+      ".<br><br>screenshot the license &amp; send it to " + HIM + " ♥<br>(he has been refreshing his phone all day)";
+    document.getElementById("doneDlg").classList.add("on");
+    document.getElementById("barMsg").textContent = "STATUS: she said yes ♥ " + stamp;
+  }, 1100);
+  setTimeout(burst, 800);
+}
+
+/* start button */
+document.getElementById("startBtn").addEventListener("click", function(){
+  balloon("naveenOS v1.0 — built with <b>100% courage</b>, 0% chill.<br>for " + HER + ", obviously ♥");
+  sOpen();
+});
+
+/* mobile: reflow icons into a grid */
+function mobileIcons(){
+  if (window.innerWidth > 640) return;
+  var icons = document.querySelectorAll(".icon");
+  icons.forEach(function(ic, i){
+    ic.style.left = (10 + (i % 3) * 96) + "px";
+    ic.style.top  = (14 + Math.floor(i / 3) * 110) + "px";
+  });
+}
+mobileIcons();
+window.addEventListener("resize", mobileIcons);
+})();
+</script>
+</body>
+</html>

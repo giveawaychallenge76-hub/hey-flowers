@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>wiki day · the cake</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;1,500&family=Dancing+Script:wght@600;700&family=Caveat:wght@700&family=Baloo+2:wght@600;700&display=swap" rel="stylesheet">
+<!--
+════════════════════════════════════════════════
+  page 2 — a birthday "printing money" scroll:
+  24 cakes (growing by year), chocolates, friends (named), real flowers,
+  10 photos, and letters from friends (red envelope). music on first interaction.
+  CUSTOMIZE: ROWS, PHOTOS, LETTERS, FRIENDS at the top of the script.
+════════════════════════════════════════════════
+-->
+<style>
+:root{ --navy:#16307a; --ink:#2a2a2a; }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'EB Garamond',Georgia,serif;background:#fff;color:var(--ink);overflow-x:hidden}
+
+#nav{position:fixed;left:0;right:0;top:0;height:52px;z-index:60;display:flex;align-items:center;
+  padding:0 20px;background:#fff;border-top:3px solid #2b2b2b;border-bottom:1px solid #e3e3e3;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+#nav .brand{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:26px;color:#b22222;line-height:1;white-space:nowrap}
+#nav .friends-line{margin-left:22px;flex:0 1 auto;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:clamp(16px,2.4vw,24px);color:#16307a;background:#b3d7ff;padding:2px 10px 4px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nav .spacer{flex:1}
+#nav .backbtn{margin-left:14px;font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:15px;color:#1a1a1a;background:#f5c518;border:0;border-radius:5px;padding:9px 22px;cursor:pointer;text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:filter .15s, transform .15s}
+#nav .backbtn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+@media(max-width:640px){ #nav{height:46px;padding:0 12px} #nav .brand{font-size:20px} #nav .friends-line{font-size:16px} #nav .backbtn{padding:7px 16px;font-size:14px} }
+
+#page{padding-top:78px;padding-bottom:70px}
+#hero{text-align:center;margin:6px auto 30px;padding:0 16px}
+#hero .big{font-weight:600;font-size:clamp(30px,5.2vw,54px);color:var(--navy);line-height:1.05}
+#hero .sub{font-style:italic;font-size:clamp(16px,2.4vw,22px);color:#6a6a6a;margin-top:6px}
+
+.row{margin:44px 0 60px}
+.row .cap{text-align:center;margin-bottom:14px;padding:0 14px}
+.row .cap .t{font-weight:600;font-size:clamp(24px,3.6vw,40px);color:var(--ink)}
+.row .cap .d{font-size:clamp(15px,2vw,22px);color:#6f6f6f;margin-left:6px}
+.strip{position:relative;width:100%;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
+.track{display:flex;width:max-content;align-items:center;will-change:transform}
+.track.bottom{align-items:flex-end}
+.track.left{animation:scrollL var(--sp) linear infinite}
+.track.right{animation:scrollR var(--sp) linear infinite}
+@keyframes scrollL{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes scrollR{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.strip:hover .track{animation-play-state:paused}
+.seq{display:flex;align-items:inherit}
+.item{flex:0 0 auto;margin:0 14px;display:flex;align-items:center;justify-content:center}
+.item img,.item svg{display:block;height:var(--h);width:auto;filter:drop-shadow(0 6px 8px rgba(20,30,60,.16))}
+.item.friendcol{flex-direction:column;gap:5px}
+.item.friendcol .frname{font-family:'EB Garamond',Georgia,serif;font-weight:600;font-size:15px;color:#8a7a55;line-height:1;text-align:center}
+
+.cakewrap{display:flex;flex-direction:column;align-items:center;gap:5px;margin:0 12px;flex:0 0 auto}
+.cakewrap img{display:block;height:var(--h);width:auto;filter:drop-shadow(0 6px 8px rgba(20,30,60,.16))}
+.cakewrap .yr{font-weight:600;font-size:15px;color:#8a7a55}
+
+.polaroid{flex:0 0 auto;margin:0 14px;background:#fff;padding:9px 9px 26px;border-radius:3px;box-shadow:0 8px 16px rgba(20,30,60,.2);transform:rotate(var(--pr))}
+.polaroid img{display:block;height:var(--h);width:var(--h);object-fit:cover;border-radius:2px;filter:none}
+.polaroid .pc{text-align:center;font-family:'Caveat',cursive;font-weight:700;font-size:18px;color:#3a332a;margin-top:6px;line-height:1}
+
+.letter{position:relative;flex:0 0 auto;margin:0 16px;height:var(--h)}
+.letter > img.env{height:100%;width:auto;display:block;filter:drop-shadow(0 8px 12px rgba(120,10,20,.28))}
+.letter .note{position:absolute;left:50%;top:31%;transform:translate(-50%,-50%) rotate(var(--lr));width:56%;text-align:center;background:transparent}
+.letter .note .msg{font-family:'Dancing Script',cursive;font-weight:700;font-size:19px;line-height:1.1;color:var(--navy)}
+.letter .note .frm{font-family:'Dancing Script',cursive;font-weight:600;font-size:15px;color:#b0231b;margin-top:3px}
+
+#closing{text-align:center;margin:46px auto 10px;padding:0 18px}
+#closing .l{font-style:italic;font-size:clamp(20px,3.2vw,34px);color:var(--navy);line-height:1.25}
+#closing .s{font-size:clamp(15px,2vw,20px);color:#777;margin-top:8px}
+
+#music{position:fixed;right:16px;bottom:14px;z-index:60;font-family:'Baloo 2',cursive;font-weight:700;font-size:14px;color:#1a1a1a;background:#f5c518;border:0;border-radius:999px;padding:8px 16px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+#music.off{background:#e6e6e6;color:#888}
+.conf{position:fixed;z-index:55;pointer-events:none;will-change:transform}
+</style>
+</head>
+<body>
+
+<div id="nav">
+  <span class="brand">wiki day.</span>
+  <span class="friends-line">happy birthday saj</span>
+  <span class="spacer"></span>
+  <button class="backbtn" id="cakeBack">← Back</button>
+</div>
+
+<div id="page">
+  <div id="hero">
+    <div class="big">happy 24th, saj ♥</div>
+    <div class="sub">a little scroll of everything you deserve</div>
+  </div>
+  <div id="rows"></div>
+  <div id="closing">
+    <div class="l">24 years of you making the world softer.</div>
+    <div class="s">— with all my love, naveen</div>
+  </div>
+</div>
+
+<button id="music" class="off">♪ music: off</button>
+
+<script>
+(function(){
+"use strict";
+
+/* ══════════ CONFIG ══════════ */
+var CHOCS=["choc-bueno","choc-snickers","choc-feastables","choc-dairymilk","choc-kitkat","choc-skittles"];
+var FLOWERS=["flower-1","flower-2","flower-3","flower-4","flower-5","flower-6"];
+var FRIENDS=[
+  {n:"dj-snoopy",anim:false,lbl:"dj snoopy"},{n:"piano-beethoven",anim:true,lbl:"beethoven"},{n:"guitar-boy",anim:true,lbl:"strummer"},
+  {n:"sax-snoopy",anim:false,lbl:"sax snoopy"},{n:"dance-tina",anim:true,lbl:"tina"},{n:"drummer",anim:false,lbl:"drummer"},
+  {n:"guitar-mickey",anim:false,lbl:"mickey"},{n:"dance-lisa",anim:true,lbl:"lisa"},{n:"violin-garfield",anim:false,lbl:"garfield"},
+  {n:"trombone-girl",anim:true,lbl:"trombone"},{n:"rock-snoopy",anim:false,lbl:"rockstar"},{n:"dance-baby",anim:true,lbl:"baby"},
+  {n:"guitar-frog",anim:false,lbl:"froggy"},{n:"guitar-pepe",anim:false,lbl:"pepe"},{n:"boombox-pirate",anim:false,lbl:"boombox"},
+  {n:"disco-ball",anim:false,lbl:"disco"},{n:"dance-naruto",anim:false,lbl:"naruto"},{n:"sing-snoopy",anim:false,lbl:"singer"},
+  {n:"disco-star-man",anim:true,lbl:"disco star"},{n:"tux-guy",anim:true,lbl:"the tux"}
+];
+
+/* 10 photos — replace each src with your own picture (same folder) */
+var PHOTOS=[
+  {src:"birthday-assets/photo-1.jpg", cap:"you ♥"},
+  {src:"birthday-assets/photo-1.jpg", cap:"that day"},
+  {src:"birthday-assets/photo-1.jpg", cap:"us"},
+  {src:"birthday-assets/photo-1.jpg", cap:"my favorite"},
+  {src:"birthday-assets/photo-1.jpg", cap:"always"},
+  {src:"birthday-assets/photo-1.jpg", cap:"cutie"},
+  {src:"birthday-assets/photo-1.jpg", cap:"the smile"},
+  {src:"birthday-assets/photo-1.jpg", cap:"sunshine"},
+  {src:"birthday-assets/photo-1.jpg", cap:"forever"},
+  {src:"birthday-assets/photo-1.jpg", cap:"♥ ♥ ♥"}
+];
+
+/* letters — one line each, signed by a friend */
+var LETTERS=[
+  {msg:"happy birthday saj", frm:"~ from kunl"},
+  {msg:"happy birthday saj", frm:"~ from naveen"},
+  {msg:"i really miss u saj", frm:"~ from aditya"},
+  {msg:"another year of you ♥", frm:"~ from riya"},
+  {msg:"so lucky to know you", frm:"~ from sara"},
+  {msg:"shine on, saj", frm:"~ from arjun"},
+  {msg:"you deserve the world", frm:"~ from meera"},
+  {msg:"happiest birthday ever", frm:"~ from dev"},
+  {msg:"stay exactly you", frm:"~ from ananya"},
+  {msg:"cheers to 24, saj", frm:"~ from rohan"},
+  {msg:"missing you today", frm:"~ from ishaan"},
+  {msg:"the best human i know", frm:"~ from priya"}
+];
+
+var ROWS=[
+  { t:"here are 24 cakes",    d:"(one for every year — watch them grow)", kind:"cake",   dir:"right", h:150, sp:40 },
+  { t:"chocolates",           d:"(because you love them)",  kind:"choc",   count:20, dir:"left",  h:120, sp:30 },
+  { t:"your favorite people", d:"(they all showed up)",     kind:"friend", count:20, dir:"right", h:150, sp:46 },
+  { t:"a garden of flowers",  d:"(one for every smile)",    kind:"flower", count:18, dir:"left",  h:150, sp:32 },
+  { t:"10 photos of you",     d:"(my favorite gallery)",    kind:"photo",  count:10, dir:"right", h:150, sp:34 },
+  { t:"letters from everyone",d:"(read them slowly ♥)",     kind:"letter", count:12, dir:"left",  h:205, sp:54 }
+];
+/* ════════════════════════════ */
+
+var rowsBox=document.getElementById("rows");
+
+function friendCol(i,h){ var f=FRIENDS[i%FRIENDS.length]; var src=f.anim?"birthday-assets/frozen/"+f.n+".png":"birthday-assets/"+f.n+".png"; var an=f.anim?"birthday-assets/anim/"+f.n+".webp":"";
+  return '<img src="'+src+'" alt="" style="--h:'+h+'px" '+(an?'data-anim="'+an+'"':'')+'><div class="frname">'+f.lbl+'</div>'; }
+
+function buildSeq(R){
+  var seq=document.createElement("div"); seq.className="seq";
+  if(R.kind==="cake"){
+    var N=24;
+    for(var i=0;i<N;i++){
+      var hh=Math.round(52 + (i/(N-1))*(158-52));
+      var w=document.createElement("div"); w.className="cakewrap";
+      w.innerHTML='<img src="birthday-assets/cake.png" alt="" style="--h:'+hh+'px"><span class="yr">'+(i+1)+'</span>';
+      seq.appendChild(w);
+    }
+  } else if(R.kind==="photo"){
+    PHOTOS.forEach(function(p){
+      var el=document.createElement("div"); el.className="polaroid";
+      el.style.setProperty("--pr",(Math.random()*6-3).toFixed(1)+"deg");
+      el.innerHTML='<img src="'+p.src+'" alt="" style="--h:'+R.h+'px"><div class="pc">'+p.cap+'</div>';
+      seq.appendChild(el);
+    });
+  } else if(R.kind==="letter"){
+    LETTERS.forEach(function(L){
+      var el=document.createElement("div"); el.className="letter"; el.style.setProperty("--h",R.h+"px");
+      el.style.setProperty("--lr",(Math.random()*4-2).toFixed(1)+"deg");
+      el.innerHTML='<img class="env" src="birthday-assets/envelope-red.png" alt=""><div class="note"><div class="msg">'+L.msg+'</div><div class="frm">'+L.frm+'</div></div>';
+      seq.appendChild(el);
+    });
+  } else {
+    for(var j=0;j<R.count;j++){
+      var it=document.createElement("div"); it.className="item"; it.style.setProperty("--h",R.h+"px");
+      if(R.kind==="choc") it.innerHTML='<img src="birthday-assets/'+CHOCS[j%CHOCS.length]+'.png" alt="">';
+      else if(R.kind==="flower") it.innerHTML='<img src="birthday-assets/'+FLOWERS[j%FLOWERS.length]+'.png" alt="">';
+      else if(R.kind==="friend"){ it.classList.add("friendcol"); it.innerHTML=friendCol(j,R.h); }
+      seq.appendChild(it);
+    }
+  }
+  return seq;
+}
+
+function buildRows(){
+  rowsBox.innerHTML='';
+  ROWS.forEach(function(R){
+    var row=document.createElement("div"); row.className="row";
+    var cap=document.createElement("div"); cap.className="cap";
+    cap.innerHTML='<span class="t">'+R.t+'</span><span class="d">'+R.d+'</span>';
+    row.appendChild(cap);
+    var strip=document.createElement("div"); strip.className="strip";
+    var track=document.createElement("div"); track.className="track "+R.dir+(R.kind==="cake"?" bottom":"");
+    track.style.setProperty("--sp",R.sp+"s");
+    track.appendChild(buildSeq(R));
+    track.appendChild(buildSeq(R));
+    strip.appendChild(track);
+    row.appendChild(strip);
+    rowsBox.appendChild(row);
+  });
+  document.querySelectorAll('img[data-anim]').forEach(function(img){ img.src=img.getAttribute("data-anim"); });
+}
+buildRows();
+
+/* ── music ── */
+var AC=null,MASTER=null,musicOn=false,started=false,tuneTimer=null;
+function ac(){ if(!AC){ var C=window.AudioContext||window.webkitAudioContext; if(C){ AC=new C(); var comp=AC.createDynamicsCompressor(); MASTER=AC.createGain(); MASTER.gain.value=.9; MASTER.connect(comp); comp.connect(AC.destination);} } if(AC&&AC.state==="suspended") AC.resume(); return AC; }
+var G=392,A=440,B=493.88,C=523.25,D=587.33,E=659.25,F=698.46,G5=783.99;
+var TUNE=[[G,.75],[G,.25],[A,1],[G,1],[C,1],[B,2],[G,.75],[G,.25],[A,1],[G,1],[D,1],[C,2],
+  [G,.75],[G,.25],[G5,1],[E,1],[C,1],[B,1],[A,2],[F,.75],[F,.25],[E,1],[C,1],[D,1],[C,2.5]];
+var BEAT=0.44;
+function tone(f,t0,dur){ var a=ac(); if(!a) return; var o=a.createOscillator(),o2=a.createOscillator(),g=a.createGain(),lp=a.createBiquadFilter();
+  o.type="triangle";o.frequency.value=f;o2.type="sine";o2.frequency.value=f*2;o2.detune.value=4;lp.type="lowpass";lp.frequency.value=2600;
+  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(.28,t0+.02);g.gain.exponentialRampToValueAtTime(.0006,t0+dur*.95);
+  o.connect(g);o2.connect(g);g.connect(lp);lp.connect(MASTER); o.start(t0);o.stop(t0+dur);o2.start(t0);o2.stop(t0+dur); }
+function playTune(){ var a=ac(); if(!a) return 8000; var t=a.currentTime+.06; TUNE.forEach(function(n){ var d=n[1]*BEAT; if(n[0]>0) tone(n[0],t,d*.92); t+=d; }); return (t-a.currentTime)*1000; }
+function musicStart(){ if(musicOn) return; musicOn=true; ac(); var loop=playTune(); tuneTimer=setInterval(playTune,loop+500); setBtn(); }
+function musicStop(){ musicOn=false; if(tuneTimer) clearInterval(tuneTimer); if(MASTER&&AC) MASTER.gain.setValueAtTime(0,AC.currentTime); setBtn(); }
+function setBtn(){ var b=document.getElementById("music"); b.textContent=musicOn?"♪ music: on":"♪ music: off"; b.classList.toggle("off",!musicOn); if(musicOn&&MASTER&&AC) MASTER.gain.setValueAtTime(.9,AC.currentTime); }
+document.getElementById("music").addEventListener("click",function(e){ e.stopPropagation(); started=true; musicOn?musicStop():musicStart(); });
+["scroll","click","touchstart","keydown"].forEach(function(ev){ window.addEventListener(ev,function(){ if(!started){ started=true; musicStart(); burst(50); } },{once:true,passive:true}); });
+
+var CC=["#ff5c8a","#ffcf3f","#5ad1ff","#7ee88a","#c78bff","#ff8a3a"];
+function burst(n){ for(var i=0;i<n;i++){ var c=document.createElement("span"); c.className="conf";
+  var sz=6+Math.random()*9; c.style.width=sz+"px"; c.style.height=(sz*.6)+"px"; c.style.background=CC[(Math.random()*CC.length)|0];
+  c.style.left=Math.random()*100+"vw"; c.style.top="54px"; c.style.borderRadius=Math.random()<.5?"50%":"2px"; document.body.appendChild(c);
+  var dx=Math.random()*160-80, dur=2800+Math.random()*2200;
+  c.animate([{transform:"translate(0,0) rotate(0)",opacity:1},{transform:"translate("+dx+"px,"+(window.innerHeight+40)+"px) rotate("+(Math.random()*720-360)+"deg)",opacity:.9}],{duration:dur,easing:"cubic-bezier(.3,.4,.6,1)",fill:"forwards"});
+  setTimeout(function(el){ el.remove(); }.bind(null,c),dur+100); } }
+
+/* ── talk to the party page that hosts this cake ── */
+window.addEventListener("message",function(e){ var d=e.data||{}; if(!d.__hfvals) return;
+  var fl=document.querySelector(".friends-line"); if(fl&&d.msg) fl.textContent=d.msg;
+  var cs=document.querySelector("#closing .s"); if(cs&&d.frm) cs.textContent="\u2014 with all my love, "+d.frm;
+  var changed=false;
+  if(d.photos && d.photos.length){
+    d.photos.forEach(function(p,i){ if(p && PHOTOS[i]){
+      if(p.src) PHOTOS[i].src=p.src; if(p.cap!=null&&p.cap!=='') PHOTOS[i].cap=p.cap; } });
+    changed=true;
+  }
+  if(d.letters && d.letters.length){
+    d.letters.forEach(function(L,i){ if(L && LETTERS[i]){
+      if(L.msg!=null&&L.msg!=='') LETTERS[i].msg=L.msg; if(L.frm!=null&&L.frm!=='') LETTERS[i].frm=L.frm; } });
+    changed=true;
+  }
+  if(changed) buildRows();
+});
+var cb=document.getElementById("cakeBack"); if(cb) cb.addEventListener("click",function(){ try{ parent.postMessage({__cakeBack:1},"*"); }catch(_){}});
+try{ parent.postMessage({__cakeReady:1},"*"); }catch(_){}
+})();
+</script>
+</body>
+</html>

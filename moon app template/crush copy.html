@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>the confession board ♥</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📌</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Special+Elite&family=Caveat:wght@600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+<!--
+════════════════════════════════════════════════
+  HOW TO CUSTOMIZE — the CONFIG at the top of the script:
+    HER_NAME, FROM_NAME, chat reminders, receipt lines,
+    memory list, and the final letter.
+════════════════════════════════════════════════
+-->
+<style>
+:root{
+  --cork:#c89b63; --cork-d:#a87c46; --wood:#8a5a2b; --wood-d:#6b4118;
+  --paper:#fffdf4; --cream:#f3e9c9; --ink:#241a10;
+  --red:#d23b47; --blue:#2f4bd8; --gold:#f2c94c; --pink:#ff8fb1;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Gaegu',cursive;color:var(--ink);
+  background:linear-gradient(160deg,#7a4f24,var(--wood) 40%,var(--wood-d));
+  min-height:100vh;padding:26px 14px 60px;
+  display:flex;flex-direction:column;align-items:center;
+  overflow-x:hidden;
+}
+
+/* ── the corkboard ── */
+.board-frame{
+  width:min(1020px,98vw);border-radius:18px;padding:16px;
+  background:
+    linear-gradient(120deg,rgba(255,255,255,.22),rgba(255,255,255,0) 30%),
+    linear-gradient(180deg,#9c6a35,#7c4f22);
+  box-shadow:0 24px 60px rgba(20,10,0,.55), inset 0 2px 3px rgba(255,255,255,.35), inset 0 -3px 8px rgba(30,10,0,.5);
+}
+.board{
+  position:relative;border-radius:10px;min-height:640px;
+  background:
+    radial-gradient(130% 100% at 20% 0%, rgba(255,255,255,.14), rgba(255,255,255,0) 45%),
+    linear-gradient(160deg,var(--cork),var(--cork-d));
+  box-shadow:inset 0 6px 18px rgba(60,30,0,.45), inset 0 -4px 12px rgba(60,30,0,.3);
+  overflow:hidden;
+}
+.board::after{  /* cork grain */
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+}
+
+/* header paper strip */
+.head-strip{
+  position:relative;z-index:3;width:min(560px,92%);margin:26px auto 8px;
+  background:var(--paper);border-radius:8px;padding:16px 22px 14px;text-align:center;
+  box-shadow:0 8px 20px rgba(40,20,0,.35);transform:rotate(-1deg);
+}
+.head-strip .at{font-weight:700;font-size:22px}
+.head-strip .at b{color:var(--blue)}
+.head-strip p{font-size:19px;line-height:1.25;margin-top:2px}
+.head-strip .warn{font-size:15px;color:#8a7a55;margin-top:6px;letter-spacing:.04em}
+.head-strip .warn b{color:var(--red)}
+
+/* pins + tape */
+.pin{position:absolute;left:50%;top:-9px;transform:translateX(-50%);width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#ff8a8a,var(--red) 55%,#8e1c28);
+  box-shadow:0 3px 5px rgba(30,10,0,.5), inset 0 1px 2px rgba(255,255,255,.6);z-index:4}
+.pin.blue{background:radial-gradient(circle at 34% 30%,#8fa4ff,var(--blue) 55%,#1a2a8e)}
+.pin.gold{background:radial-gradient(circle at 34% 30%,#ffe9a8,var(--gold) 55%,#b98a12)}
+.tape{position:absolute;width:76px;height:22px;background:rgba(255,240,190,.85);box-shadow:0 2px 4px rgba(40,20,0,.25);z-index:4}
+
+/* pinned items */
+.itm{position:absolute;z-index:3;cursor:pointer;transition:transform .22s ease, filter .22s ease;
+  filter:drop-shadow(0 10px 14px rgba(40,20,0,.35));-webkit-tap-highlight-color:transparent}
+.itm:hover{transform:scale(1.05) rotate(0deg)!important;z-index:6;filter:drop-shadow(0 14px 20px rgba(40,20,0,.45))}
+.itm .seen-tick{position:absolute;right:-8px;top:-8px;width:26px;height:26px;border-radius:50%;
+  background:#3fae5a;color:#fff;display:none;align-items:center;justify-content:center;
+  font-weight:700;font-size:15px;box-shadow:0 3px 6px rgba(0,0,0,.35);z-index:5}
+.itm.seen .seen-tick{display:flex}
+.deco{position:absolute;z-index:2;pointer-events:none;filter:drop-shadow(0 6px 8px rgba(40,20,0,.3))}
+
+/* ── exhibit A: crush license (flips) ── */
+.license{width:min(300px,64vw);perspective:900px}
+.license .flip{position:relative;width:100%;aspect-ratio:1.62;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,.8,.3,1)}
+.license.flipped .flip{transform:rotateY(180deg)}
+.lface{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;overflow:hidden;
+  background:linear-gradient(160deg,#f6ecc8,#eadfb4 60%,#e0d0a0);
+  box-shadow:inset 0 0 0 2px rgba(120,90,30,.25), inset 0 0 30px rgba(120,90,30,.2)}
+.lface.back{transform:rotateY(180deg);display:flex;align-items:center;justify-content:center;padding:8%}
+.lface.back .note{font-family:'Caveat',cursive;font-weight:600;font-size:clamp(17px,2.4vw,22px);line-height:1.3;text-align:center;color:#4a3a1a}
+.lstars{position:absolute;inset:5px;border:2px dashed rgba(90,60,10,.0);pointer-events:none;
+  background-image:radial-gradient(circle, transparent 0, transparent 100%);}
+.lface .starrow{display:flex;justify-content:space-between;padding:5px 10px 0;font-size:9px;color:#6b5326;letter-spacing:2px}
+.lbody{display:flex;gap:4%;padding:2% 5% 0}
+.lphoto{width:30%;aspect-ratio:.86;background:#fff;border:1px solid #c9b98a;border-radius:4px;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:clamp(28px,5vw,44px)}
+.lfields{flex:1;font-family:'Special Elite',monospace;font-size:clamp(8.5px,1.5vw,12px);color:#41320f;line-height:1.75}
+.lfields .t{text-align:center;font-size:clamp(9px,1.6vw,13px);letter-spacing:.08em;border-bottom:1.5px solid #6b5326;margin-bottom:4px;padding-bottom:1px;font-weight:700}
+.lfields .row{display:flex;gap:6px;border-bottom:1px dotted #a08a50}
+.lfields .row span{color:#7a6636;flex:none}
+.lfields .row b{font-family:'Caveat',cursive;font-size:clamp(11px,1.9vw,15px);font-weight:700;color:#2a1f08}
+.lstamp{position:absolute;right:6%;bottom:7%;font-family:'Oswald',sans-serif;font-size:clamp(8px,1.4vw,11px);
+  color:#5a86c9;border:2px solid #5a86c9;border-radius:6px;padding:2px 7px;transform:rotate(-9deg);
+  letter-spacing:.1em;opacity:.75}
+.lsig{position:absolute;left:38%;bottom:6%;font-family:'Caveat',cursive;font-size:clamp(13px,2.2vw,18px);color:#2a1f08}
+
+/* ── exhibit B: phone ── */
+.phone{width:min(120px,26vw)}
+.phone .shell{background:#1c1c22;border-radius:20px;padding:8px 7px;box-shadow:inset 0 1px 2px rgba(255,255,255,.3)}
+.phone .scr{background:#fff;border-radius:14px;aspect-ratio:.52;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.phone .scr .em{font-size:30px}
+.phone .scr .lbl{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.14em;color:#666;text-align:center}
+.phone .scr .badge{position:absolute;top:6px;right:8px;background:var(--red);color:#fff;font-size:11px;font-weight:700;border-radius:99px;padding:0 6px}
+
+/* ── exhibit C: receipt machine ── */
+.atm{width:min(170px,36vw)}
+.atm .box{background:linear-gradient(180deg,#5560a8,var(--blue) 55%,#22348e);border-radius:12px;padding:10px 10px 12px;text-align:center;box-shadow:inset 0 2px 3px rgba(255,255,255,.4), inset 0 -4px 8px rgba(0,0,40,.4)}
+.atm .lbl{font-family:'Oswald',sans-serif;color:#fff;font-size:11px;letter-spacing:.18em}
+.atm .slot{height:8px;background:#101532;border-radius:99px;margin:8px 6px;box-shadow:inset 0 2px 4px #000}
+.atm .paper-tip{width:70%;margin:0 auto;background:var(--paper);height:16px;border-radius:0 0 4px 4px;
+  font-family:'Special Elite',monospace;font-size:8px;color:#777;overflow:hidden}
+.atm .hint2{font-family:'Gaegu',cursive;color:#dfe6ff;font-size:13px;margin-top:6px}
+
+/* ── exhibit D: memory card ── */
+.sdcard{width:min(120px,26vw)}
+.sdcard .sd{position:relative;background:linear-gradient(160deg,#3a3a44,#191921);border-radius:8px 22px 8px 8px;aspect-ratio:.78;padding:12px 8px 8px;box-shadow:inset 0 1px 2px rgba(255,255,255,.25)}
+.sdcard .teeth{position:absolute;top:-6px;left:10px;right:26px;display:flex;gap:4px}
+.sdcard .teeth i{flex:1;height:12px;background:linear-gradient(180deg,#e8cf7a,#b9962e);border-radius:1px}
+.sdcard .cap{font-family:'Caveat',cursive;color:#fff;font-size:clamp(14px,2.4vw,17px);line-height:1.15;text-align:center;margin-top:18%}
+.sdcard .gb{position:absolute;bottom:6px;right:8px;color:#9aa;font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.12em}
+
+/* ── exhibit E: frog list ── */
+.froglist{width:min(120px,25vw)}
+.froglist .card{background:var(--paper);border-radius:8px;padding:10px 8px;text-align:center;box-shadow:0 4px 8px rgba(40,20,0,.25)}
+.froglist .card .tt{font-size:13px;font-weight:700;line-height:1.15}
+.froglist .card .fr{font-size:30px;line-height:1.2}
+.froglist .card .yy{font-family:'Special Elite',monospace;font-size:10px;color:#3fae5a;letter-spacing:.14em}
+
+/* ── exhibit F: the envelope (locked) ── */
+.envelope{width:min(200px,44vw)}
+.envelope .env{position:relative;aspect-ratio:1.45;background:linear-gradient(180deg,#f3e6c1,#e8d7a8);border-radius:10px;box-shadow:inset 0 0 0 1.5px rgba(120,90,30,.3);overflow:visible}
+.envelope .flap{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,50% 58%);background:linear-gradient(180deg,#eee0b6,#dcc890);border-radius:10px 10px 0 0;box-shadow:inset 0 -2px 4px rgba(120,90,30,.25)}
+.envelope .seal{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#ff6b74,var(--red) 60%,#8e1c28);display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;box-shadow:0 3px 7px rgba(142,28,40,.5)}
+.envelope .lock{position:absolute;right:-10px;top:-12px;background:#33333d;color:#ffd166;font-size:17px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 8px rgba(0,0,0,.4)}
+.envelope .etag{position:absolute;left:50%;bottom:-24px;transform:translateX(-50%);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.22em;color:#fff;background:rgba(30,15,0,.55);border-radius:99px;padding:3px 12px;white-space:nowrap}
+.envelope.unlocked .lock{background:#3fae5a;color:#fff}
+.envelope.unlocked .env{animation:envGlow 1.6s ease-in-out infinite}
+@keyframes envGlow{0%,100%{box-shadow:inset 0 0 0 1.5px rgba(120,90,30,.3),0 0 14px rgba(255,209,102,.35)}50%{box-shadow:inset 0 0 0 1.5px rgba(120,90,30,.3),0 0 30px rgba(255,209,102,.8)}}
+.envelope.deny{animation:shakeNo .45s ease}
+@keyframes shakeNo{0%,100%{transform:rotate(var(--r,0deg))}25%{transform:rotate(var(--r,0deg)) translateX(-7px)}65%{transform:rotate(var(--r,0deg)) translateX(7px)}}
+
+/* decorative bits */
+.polacard{background:#fff;border-radius:6px;padding:10px 10px 8px;text-align:center;box-shadow:0 8px 16px rgba(40,20,0,.3)}
+.polacard .b{font-size:34px;line-height:1.3}
+.polacard .c{font-family:'Caveat',cursive;font-weight:600;font-size:17px}
+.sticker-word{background:#fff;border-radius:999px;padding:4px 14px 6px;font-weight:700;font-size:18px;box-shadow:0 4px 8px rgba(40,20,0,.3);border:2px solid #111}
+.sticker-word b{color:var(--red)}
+.badge-pin{width:74px;height:74px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b8,var(--gold) 60%,#c9971a);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:10.5px;line-height:1.15;padding:8px;box-shadow:0 5px 10px rgba(40,20,0,.35), inset 0 2px 3px rgba(255,255,255,.7);transform:rotate(8deg)}
+.station{display:flex;align-items:center;gap:8px;background:#fff;border:2.5px solid #1a3a8e;border-radius:999px;padding:4px 14px 5px;font-family:'Oswald',sans-serif;box-shadow:0 5px 10px rgba(40,20,0,.3)}
+.station .no{background:#1a3a8e;color:#fff;border-radius:99px;padding:1px 8px;font-size:12px}
+.station .nm{font-size:14px;letter-spacing:.06em;color:#12234e}
+.sticky{background:#fdf292;padding:14px 12px 10px;box-shadow:0 6px 12px rgba(40,20,0,.3);font-family:'Caveat',cursive;font-weight:700;font-size:24px;text-align:center;color:#4a3a10}
+.deco img{width:100%;height:auto;display:block}
+
+/* ── effort meter ── */
+#meter{
+  position:fixed;top:16px;right:16px;z-index:40;background:var(--paper);border-radius:10px;
+  padding:9px 14px 10px;box-shadow:0 8px 20px rgba(20,10,0,.4);transform:rotate(1.5deg);text-align:center;
+}
+#meter .mt{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.24em;color:#8a7a55}
+#meter .hearts{font-size:19px;letter-spacing:3px;line-height:1.2}
+#meter .hearts span{color:#d9cba8;transition:color .4s, text-shadow .4s}
+#meter .hearts span.on{color:var(--red);text-shadow:0 0 8px rgba(210,59,71,.4)}
+#meter .ms{font-size:13px;color:#8a7a55;line-height:1}
+
+/* ── modals ── */
+#overlay{position:fixed;inset:0;z-index:50;background:rgba(20,10,5,.6);backdrop-filter:blur(5px);
+  display:none;align-items:center;justify-content:center;padding:16px}
+#overlay.on{display:flex}
+.modal{width:min(400px,94vw);max-height:88vh;overflow:auto;background:var(--paper);border-radius:14px;
+  padding:22px 22px 20px;position:relative;box-shadow:0 30px 70px rgba(0,0,0,.5);
+  animation:mIn .4s cubic-bezier(.2,1.3,.4,1)}
+@keyframes mIn{0%{transform:scale(.75) translateY(24px);opacity:0}100%{transform:none;opacity:1}}
+.modal .mx{position:absolute;right:12px;top:8px;font-size:22px;cursor:pointer;color:#a89868;font-weight:700}
+.modal .mx:hover{color:var(--red)}
+.mh{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.26em;color:#8a7a55;text-align:center}
+.mt2{font-family:'Caveat',cursive;font-weight:700;font-size:30px;text-align:center;line-height:1.05;margin:2px 0 12px}
+
+/* chat modal */
+.chat{background:#f2f3f7;border-radius:12px;padding:12px 10px;min-height:280px}
+.chat .cname{text-align:center;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;color:#666;border-bottom:1px solid #e0e0e8;padding-bottom:6px;margin-bottom:10px}
+.bub{max-width:82%;margin:6px 0;padding:7px 12px 9px;border-radius:16px;font-size:17px;line-height:1.25;
+  background:#e7e7ec;color:#222;border-bottom-left-radius:4px;width:fit-content;
+  animation:bubIn .3s cubic-bezier(.2,1.3,.4,1)}
+@keyframes bubIn{0%{transform:scale(.7) translateY(8px);opacity:0}100%{transform:none;opacity:1}}
+.bub.dots i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#9a9aa4;margin:0 1.5px;animation:dotB 1s ease-in-out infinite}
+.bub.dots i:nth-child(2){animation-delay:.15s}.bub.dots i:nth-child(3){animation-delay:.3s}
+@keyframes dotB{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-4px);opacity:1}}
+.chat-cap{text-align:center;font-size:16px;color:#8a7a55;margin-top:10px;line-height:1.3}
+.chat-cap b{color:var(--red)}
+
+/* receipt modal */
+.rwrap2{overflow:hidden;display:flex;justify-content:center}
+.receipt2{
+  width:min(280px,80vw);background:#fffdf6;font-family:'Special Elite',monospace;font-size:14px;line-height:1.7;
+  color:#33291a;padding:16px 18px 18px;box-shadow:0 12px 26px rgba(0,0,0,.25);
+  transform:translateY(-102%);transition:transform 1.6s cubic-bezier(.3,.8,.4,1);
+  -webkit-mask:linear-gradient(#000 0 0) padding-box, radial-gradient(5px at 5px 100%, transparent 97%, #000) -5px 100%/10px 10px repeat-x padding-box;
+}
+.receipt2.out{transform:translateY(0)}
+.receipt2 h4{text-align:center;font-size:14px;letter-spacing:.1em;font-weight:400}
+.receipt2 .rl{border-top:1.5px dashed #c2b394;margin:8px 0}
+.receipt2 .rr{display:flex;justify-content:space-between;gap:8px}
+.receipt2 .rr span:last-child{white-space:nowrap}
+.receipt2 .tot{font-weight:700}
+.receipt2 .bc{height:26px;margin-top:10px;background:repeating-linear-gradient(90deg,#33291a 0 2px,transparent 2px 5px,#33291a 5px 6px,transparent 6px 9px)}
+.receipt2 .tiny{text-align:center;font-size:11px;color:#8a7a55;margin-top:5px}
+
+/* memory modal */
+.files{background:#20242e;border-radius:10px;padding:12px 14px;font-family:'Special Elite',monospace}
+.files .path{color:#8fa4ff;font-size:12px;border-bottom:1px solid #3a4050;padding-bottom:6px;margin-bottom:8px}
+.files .f{color:#e8ecf8;font-size:14.5px;line-height:1.5;margin:7px 0;display:flex;gap:9px;opacity:0;transform:translateX(-8px);transition:.4s}
+.files .f.in{opacity:1;transform:none}
+.files .f i{font-style:normal;flex:none}
+.mem-cap{text-align:center;font-size:16px;color:#8a7a55;margin-top:10px}
+.mem-cap b{color:var(--red)}
+
+/* list modal */
+.biglist{font-family:'Special Elite',monospace;background:#fffdf6;border:1.5px dashed #c2b394;border-radius:8px;padding:14px 18px;font-size:17px;line-height:2}
+.biglist b{color:var(--red)}
+.frogline{text-align:center;font-size:40px;margin-top:8px}
+
+/* letter modal + question */
+.letter2{font-family:'Special Elite',monospace;font-size:15.5px;line-height:1.8;color:#33291a;min-height:150px;white-space:pre-wrap}
+.caret2{display:inline-block;width:8px;height:16px;background:#33291a;vertical-align:-2px;animation:ca 1s steps(1) infinite}
+@keyframes ca{50%{opacity:0}}
+.qrow{display:flex;justify-content:center;gap:18px;margin-top:16px;min-height:52px;flex-wrap:wrap}
+.yes2{font-family:'Gaegu',cursive;font-weight:700;font-size:24px;color:#fff;border:0;cursor:pointer;border-radius:999px;padding:7px 34px 10px;
+  background:linear-gradient(180deg,#ff5c6c,var(--red));box-shadow:0 5px 0 #8e1c28, 0 0 22px rgba(210,59,71,.45);transition:transform .15s}
+.yes2:hover{transform:scale(1.07) rotate(-1deg)}
+.shy2{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:#8a7a55;background:#efe6c8;border:0;cursor:pointer;border-radius:999px;padding:7px 18px 9px}
+.qnote{text-align:center;font-size:14px;color:#a89868;margin-top:10px;min-height:1.2em}
+
+/* final card */
+.finalwrap{text-align:center}
+.finalpol{position:relative;width:min(240px,66vw);margin:6px auto 10px;transform:rotate(-2.5deg);filter:drop-shadow(0 14px 26px rgba(0,0,0,.35))}
+.finalpol img{width:100%;display:block}
+.finalpol .ov{position:absolute;left:12.6%;top:17.3%;width:67.3%;height:57%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#fff;padding:4%}
+.finalpol .o1{font-family:'Caveat',cursive;font-weight:700;font-size:clamp(20px,5vw,27px);color:#ffd7e6;line-height:1.05}
+.finalpol .o2{font-family:'Special Elite',monospace;font-size:clamp(11px,2.4vw,13px)}
+.finalpol .fb{width:100%;aspect-ratio:.844;background:linear-gradient(160deg,#3a3a55,#191926);border-radius:6px}
+.final-note{font-size:17px;color:#8a7a55;line-height:1.35}
+.final-note b{color:var(--red)}
+
+/* hearts + toast */
+.hbit{position:fixed;z-index:60;pointer-events:none;font-size:20px;will-change:transform,opacity}
+.trail{position:fixed;z-index:35;pointer-events:none;font-size:13px;color:rgba(210,59,71,.8);animation:tUp 1s ease forwards}
+@keyframes tUp{0%{opacity:.9;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-26px) scale(.6)}}
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);z-index:55;
+  background:var(--paper);border-radius:999px;padding:8px 20px 10px;font-weight:700;font-size:17px;
+  box-shadow:0 10px 26px rgba(20,10,0,.4);transition:transform .4s cubic-bezier(.2,1.3,.4,1);white-space:nowrap}
+#toast.on{transform:translateX(-50%) translateY(0)}
+#toast b{color:var(--red)}
+
+/* mobile: stack the board */
+@media (max-width:720px){
+  .board{min-height:0;padding:14px 12px 26px;display:flex;flex-direction:column;align-items:center;gap:30px}
+  .itm,.deco{position:static!important;transform:rotate(var(--r,0deg));}
+  .head-strip{margin-top:8px}
+  #meter{top:10px;right:10px;padding:7px 10px 8px}
+}
+</style>
+</head>
+<body>
+
+<div id="meter">
+  <div class="mt">EFFORT METER</div>
+  <div class="hearts" id="meterHearts"><span>♥</span><span>♥</span><span>♥</span><span>♥</span><span>♥</span></div>
+  <div class="ms" id="meterSub">0 / 5 opened</div>
+</div>
+
+<div class="board-frame">
+  <div class="board" id="board">
+
+    <div class="head-strip">
+      <span class="pin blue" style="left:14%"></span><span class="pin blue" style="left:86%"></span>
+      <div class="at">from <b>@naveen</b>, pinned with courage</div>
+      <p>i really like you. everything on this board is about you.</p>
+      <div class="warn">open <b>all 5</b> pinned things… then the envelope will unlock ♥</div>
+    </div>
+
+    <!-- A: crush license -->
+    <div class="itm license" id="exLicense" style="left:4%;top:24%;--r:-3deg;transform:rotate(-3deg)">
+      <span class="pin"></span><span class="seen-tick">✓</span>
+      <div class="flip">
+        <div class="lface front">
+          <div class="starrow">★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★</div>
+          <div class="lbody">
+            <div class="lphoto">🙂</div>
+            <div class="lfields">
+              <div class="t">PERMANENT LICENSE OF CRUSH</div>
+              <div class="row"><span>Issued to</span><b id="licFrom">naveen</b></div>
+              <div class="row"><span>Crushing on</span><b id="licHer">saj</b></div>
+              <div class="row"><span>Since</span><b>the first day</b></div>
+              <div class="row"><span>Status</span><b>hopeless (happily)</b></div>
+            </div>
+          </div>
+          <div class="lstamp">CALL ME IF YOU SAY YES</div>
+          <div class="lsig" id="licSig">— naveen ツ</div>
+          <div class="starrow" style="position:absolute;bottom:4px;left:0;right:0">★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★</div>
+        </div>
+        <div class="lface back">
+          <div class="note">i carry this everywhere.<br>it certifies that i'm officially,<br>legally, permanently<br>allowed to like you.<br><br>(no expiry date. i checked.)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B: phone -->
+    <div class="itm phone" id="exPhone" style="left:39%;top:26%;--r:2deg;transform:rotate(2deg)">
+      <span class="pin gold"></span><span class="seen-tick">✓</span>
+      <div class="shell"><div class="scr">
+        <span class="badge">1</span>
+        <span class="em">💬</span>
+        <span class="lbl">THE TEXTS I'D<br>SEND YOU</span>
+      </div></div>
+    </div>
+
+    <!-- C: receipt machine -->
+    <div class="itm atm" id="exReceipt" style="right:6%;top:22%;--r:2.5deg;transform:rotate(2.5deg)">
+      <span class="pin blue"></span><span class="seen-tick">✓</span>
+      <div class="box">
+        <div class="lbl">EFFORT-O-MAT</div>
+        <div class="slot"></div>
+        <div class="paper-tip">· · · · · · ·</div>
+        <div class="hint2">pull my receipt ♥</div>
+      </div>
+    </div>
+
+    <!-- D: memory card -->
+    <div class="itm sdcard" id="exMemory" style="left:8%;top:63%;--r:4deg;transform:rotate(4deg)">
+      <span class="pin gold"></span><span class="seen-tick">✓</span>
+      <div class="sd">
+        <div class="teeth"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="cap">everything i noticed about you</div>
+        <div class="gb">∞ GB</div>
+      </div>
+    </div>
+
+    <!-- E: frog list -->
+    <div class="itm froglist" id="exList" style="left:31%;top:66%;--r:-3deg;transform:rotate(-3deg)">
+      <span class="pin"></span><span class="seen-tick">✓</span>
+      <div class="card">
+        <div class="tt">a list of my most<br>important things…</div>
+        <div class="fr">🐸📜</div>
+        <div class="yy">YOU YOU YOU</div>
+      </div>
+    </div>
+
+    <!-- F: the envelope -->
+    <div class="itm envelope" id="exEnvelope" style="right:8%;top:60%;--r:-2deg;transform:rotate(-2deg)">
+      <span class="pin"></span>
+      <div class="env">
+        <div class="flap"></div>
+        <div class="seal">♥</div>
+        <div class="lock" id="envLock">🔒</div>
+        <div class="etag" id="envTag">OPEN LAST · LOCKED</div>
+      </div>
+    </div>
+
+    <!-- decor -->
+    <div class="deco" style="left:26.5%;top:14%;width:60px;transform:rotate(-8deg)">
+      <img src="stickers/star-red.png" alt="" onerror="this.parentElement.style.display='none'">
+    </div>
+    <div class="deco" style="right:27%;top:64%;width:56px;transform:rotate(10deg)">
+      <img src="stickers/smiley.png" alt="" onerror="this.parentElement.style.display='none'">
+    </div>
+    <div class="deco polacard" style="right:24%;top:8%;width:120px;transform:rotate(4deg)">
+      <span class="pin gold"></span>
+      <div class="b">🦝💐</div><div class="c">for u &lt;3</div>
+    </div>
+    <div class="deco sticker-word" style="left:52%;top:12%;transform:rotate(-5deg)">I <b>♥</b> U</div>
+    <div class="deco badge-pin" style="left:60%;top:58%">I REHEARSED THIS 37 TIMES</div>
+    <div class="deco sticky" style="left:57%;top:76%;transform:rotate(3deg)">
+      <span class="tape" style="left:50%;top:-12px;transform:translateX(-50%) rotate(-3deg);width:56px;height:16px"></span>
+      saj ♥
+    </div>
+    <div class="deco station" style="left:36%;top:90%;transform:rotate(-1deg)">
+      <span class="no">133</span><span class="nm">CRUSH STATION ( 짝사랑역 )</span>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- modals -->
+<div id="overlay">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ══════════ CONFIG — make it yours ══════════ */
+var HER_NAME  = "saj";
+var FROM_NAME = "naveen";
+
+var CHAT_MSGS = [
+  "hey. daily reminders, from me:",
+  "drink water. you always forget.",
+  "eat properly, ah? not just chips.",
+  "text me when you reach home safe.",
+  "don't stay up fighting with your thoughts.",
+  "and if nobody told you today — you look really, really pretty."
+];
+var CHAT_CAPTION = "to be loved is to be <b>reminded</b>.<br>i'd remind you every single day.";
+
+var RECEIPT_LINES = [
+  ["thoughts of you / day", "1,442"],
+  ["rehearsed hellos", "37"],
+  ["almost-sent texts", "214"],
+  ["your name in my drafts", "yes"],
+  ["courage gathered", "3 weeks"],
+  ["backup plan if you say no", "none"]
+];
+
+var MEMORIES = [
+  ["📁", "the way you tuck your hair when you focus"],
+  ["📁", "your laugh arrives before your joke does"],
+  ["📁", "you say 'last episode' and lie every time"],
+  ["📁", "you wave at dogs. every single dog."],
+  ["📁", "how you turn boring days into plans"],
+  ["🔒", "the day i almost told you (3 times)"]
+];
+
+var LETTER_TEXT =
+HER_NAME + ",\n\n" +
+"i'm not good at saying this out loud,\n" +
+"so i built you a whole board instead.\n\n" +
+"you've seen the receipts. the reminders.\n" +
+"the memory card that's somehow full of you.\n\n" +
+"so here it is, pinned where i can't take it back:\n" +
+"i like you. completely. stubbornly. on purpose.\n\n" +
+"will you be mine?";
+/* ═══════════════════════════════════════════ */
+
+document.getElementById("licFrom").textContent = FROM_NAME;
+document.getElementById("licHer").textContent = HER_NAME;
+document.getElementById("licSig").textContent = "— " + FROM_NAME + " ツ";
+
+/* sounds */
+var AC=null;
+function ac(){ if(!AC){ var C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C(); } return AC; }
+function beep(f,d,t,v,w){ var a=ac(); if(!a) return; var t0=a.currentTime+(w||0);
+  var o=a.createOscillator(),g=a.createGain(); o.type=t||"square"; o.frequency.value=f;
+  g.gain.setValueAtTime(v||.05,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g); g.connect(a.destination); o.start(t0); o.stop(t0+d+.02); }
+function sPop(){ beep(880,.08,"triangle",.06); }
+function sTick(){ beep(1240,.06,"square",.04); beep(1560,.09,"square",.04,.06); }
+function sPrint(){ for(var i=0;i<8;i++) beep(1900,.02,"square",.014,i*.08); }
+function sYes(){ [523,659,784,1046].forEach(function(f,i){ beep(f,.3,"triangle",.08,i*.13); }); }
+function sDeny(){ beep(200,.2,"sawtooth",.05); beep(160,.3,"sawtooth",.05,.14); }
+
+/* effort meter */
+var seen = {};
+var EXHIBITS = ["license","phone","receipt","memory","list"];
+function seenCount(){ return EXHIBITS.filter(function(k){ return seen[k]; }).length; }
+function markSeen(key, el){
+  if (seen[key]) return;
+  seen[key] = true;
+  el.classList.add("seen");
+  sTick();
+  var n = seenCount();
+  var hearts = document.querySelectorAll("#meterHearts span");
+  for (var i = 0; i < 5; i++) hearts[i].classList.toggle("on", i < n);
+  document.getElementById("meterSub").textContent = n + " / 5 opened";
+  if (n === 5){
+    var env = document.getElementById("exEnvelope");
+    env.classList.add("unlocked");
+    document.getElementById("envLock").textContent = "🔓";
+    document.getElementById("envTag").textContent = "UNLOCKED · OPEN ME ♥";
+    toast("the envelope is <b>unlocked</b> ♥");
+    sYes();
+  }
+}
+
+/* toast */
+var toastEl = document.getElementById("toast"), toastT = null;
+function toast(html){
+  toastEl.innerHTML = html;
+  toastEl.classList.add("on");
+  clearTimeout(toastT);
+  toastT = setTimeout(function(){ toastEl.classList.remove("on"); }, 2200);
+}
+
+/* modal plumbing */
+var overlay = document.getElementById("overlay");
+var modalBox = document.getElementById("modalBox");
+var modalTimers = [];
+function later(fn, ms){ modalTimers.push(setTimeout(fn, ms)); }
+function openModal(html){
+  modalTimers.forEach(clearTimeout); modalTimers = [];
+  modalBox.innerHTML = '<span class="mx" title="close">✕</span>' + html;
+  overlay.classList.add("on");
+  modalBox.querySelector(".mx").addEventListener("click", closeModal);
+  sPop();
+}
+function closeModal(){
+  overlay.classList.remove("on");
+  modalTimers.forEach(clearTimeout); modalTimers = [];
+}
+overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
+
+/* hearts burst */
+function burst(){
+  for (var i = 0; i < 26; i++){
+    var h = document.createElement("span");
+    h.className = "hbit";
+    h.textContent = Math.random() < .8 ? "♥" : "★";
+    h.style.color = Math.random() < .6 ? "#d23b47" : "#f2c94c";
+    h.style.left = "50%"; h.style.top = "42%";
+    document.body.appendChild(h);
+    var a = Math.random() * Math.PI * 2, d = 110 + Math.random() * 260;
+    h.animate([
+      { transform: "translate(0,0) rotate(0) scale(1)", opacity: 1 },
+      { transform: "translate(" + Math.cos(a) * d + "px," + (Math.sin(a) * d + 200) + "px) rotate(" + (Math.random() * 480 - 240) + "deg) scale(.5)", opacity: 0 }
+    ], { duration: 1600 + Math.random() * 800, easing: "cubic-bezier(.2,.7,.4,1)", fill: "forwards" });
+    setTimeout(function(el){ el.remove(); }.bind(null, h), 2600);
+  }
+}
+
+/* ── A: license (flip in place) ── */
+var lic = document.getElementById("exLicense");
+lic.addEventListener("click", function(){
+  lic.classList.toggle("flipped");
+  markSeen("license", lic);
+  sPop();
+});
+
+/* ── B: phone → chat modal ── */
+document.getElementById("exPhone").addEventListener("click", function(){
+  var el = this;
+  openModal(
+    '<div class="mh">EXHIBIT 2 — THE REMINDERS</div>' +
+    '<div class="mt2">texts i\'d send you ♥</div>' +
+    '<div class="chat"><div class="cname">' + HER_NAME + ' ♥ · iMessage</div><div id="chatBody"></div></div>' +
+    '<div class="chat-cap">' + CHAT_CAPTION + '</div>'
+  );
+  var body = modalBox.querySelector("#chatBody");
+  var t = 350;
+  CHAT_MSGS.forEach(function(msg){
+    later(function(){
+      var dots = document.createElement("div");
+      dots.className = "bub dots"; dots.innerHTML = "<i></i><i></i><i></i>";
+      body.appendChild(dots);
+      body.parentElement.scrollTop = 1e5;
+    }, t);
+    t += 620 + Math.min(msg.length * 12, 700);
+    later(function(){
+      var d = body.querySelector(".dots"); if (d) d.remove();
+      var b = document.createElement("div");
+      b.className = "bub"; b.textContent = msg;
+      body.appendChild(b);
+      beep(1180, .05, "sine", .04);
+      body.parentElement.scrollTop = 1e5;
+    }, t);
+    t += 260;
+  });
+  markSeen("phone", el);
+});
+
+/* ── C: receipt ── */
+document.getElementById("exReceipt").addEventListener("click", function(){
+  var el = this;
+  var rows = RECEIPT_LINES.map(function(r){
+    return '<div class="rr"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>';
+  }).join("");
+  openModal(
+    '<div class="mh">EXHIBIT 3 — PROOF OF EFFORT</div>' +
+    '<div class="mt2">the effort receipt</div>' +
+    '<div class="rwrap2"><div class="receipt2" id="rc2">' +
+      '<h4>EFFORT-O-MAT ★ OFFICIAL</h4>' +
+      '<div style="text-align:center;font-size:12px">customer: my heart · re: ' + HER_NAME + '</div>' +
+      '<div class="rl"></div>' + rows + '<div class="rl"></div>' +
+      '<div class="rr tot"><span>TOTAL</span><span>everything i\'ve got</span></div>' +
+      '<div class="bc"></div>' +
+      '<div class="tiny">no refunds on feelings ♥</div>' +
+    '</div></div>'
+  );
+  later(function(){ modalBox.querySelector("#rc2").classList.add("out"); sPrint(); }, 120);
+  markSeen("receipt", el);
+});
+
+/* ── D: memory card ── */
+document.getElementById("exMemory").addEventListener("click", function(){
+  var el = this;
+  var items = MEMORIES.map(function(m){
+    return '<div class="f"><i>' + m[0] + '</i><span>' + m[1] + '</span></div>';
+  }).join("");
+  openModal(
+    '<div class="mh">EXHIBIT 4 — MEMORY CARD (∞ GB)</div>' +
+    '<div class="mt2">things i noticed about you</div>' +
+    '<div class="files"><div class="path">DCIM &gt; ' + HER_NAME + ' &gt; things_i_noticed</div>' + items + '</div>' +
+    '<div class="mem-cap">i\'ve been paying attention <b>for a while</b>.</div>'
+  );
+  var fs = modalBox.querySelectorAll(".files .f");
+  fs.forEach(function(f, i){ later(function(){ f.classList.add("in"); beep(900 + i * 60, .04, "sine", .03); }, 300 + i * 340); });
+  markSeen("memory", el);
+});
+
+/* ── E: frog list ── */
+document.getElementById("exList").addEventListener("click", function(){
+  var el = this;
+  openModal(
+    '<div class="mh">EXHIBIT 5 — PRIORITIES</div>' +
+    '<div class="mt2">a list of my most important things</div>' +
+    '<div class="biglist">' +
+      '1. <b>you</b><br>2. <b>you</b><br>3. <b>you</b><br>4. <b>you</b><br>5. see 1–4.' +
+    '</div>' +
+    '<div class="frogline">🐸📜♥</div>'
+  );
+  markSeen("list", el);
+});
+
+/* ── F: the envelope → the question ── */
+document.getElementById("exEnvelope").addEventListener("click", function(){
+  var env = this;
+  if (seenCount() < 5){
+    env.classList.remove("deny"); void env.offsetWidth; env.classList.add("deny");
+    sDeny();
+    toast("read everything first ♥ <b>" + seenCount() + " / 5</b>");
+    return;
+  }
+  openModal(
+    '<div class="mh">FINAL EXHIBIT — THE QUESTION</div>' +
+    '<div class="mt2">from ' + FROM_NAME + ', with all of it</div>' +
+    '<div class="letter2" id="lt2"></div>' +
+    '<div class="qrow" id="qrow" style="visibility:hidden">' +
+      '<button class="yes2" id="yesBtn">yes ♥</button>' +
+      '<button class="shy2" id="shyBtn">give me a sec 🙈</button>' +
+    '</div><div class="qnote" id="qnote"></div>'
+  );
+  var box = modalBox.querySelector("#lt2");
+  var i = 0;
+  box.innerHTML = '<span class="caret2"></span>';
+  function step(){
+    i++;
+    box.textContent = LETTER_TEXT.slice(0, i);
+    if (i < LETTER_TEXT.length){
+      var c = LETTER_TEXT.charAt(i - 1);
+      var d = 22 + Math.random() * 30;
+      if (c === "\n") d = 160; if (c === ".") d = 260;
+      box.insertAdjacentHTML("beforeend", '<span class="caret2"></span>');
+      later(step, d);
+    } else {
+      modalBox.querySelector("#qrow").style.visibility = "visible";
+    }
+  }
+  later(step, 500);
+  modalBox.addEventListener("click", function(e){
+    if (e.target.id === "yesBtn") onYes();
+    if (e.target.id === "shyBtn"){
+      var b = e.target;
+      modalBox.querySelector("#qnote").textContent = "take your time… the button will wait with you ♥";
+      b.textContent = "ok… yes ♥";
+      b.className = "yes2";
+      b.id = "yesBtn";
+      sPop();
+    }
+  });
+});
+
+/* YES */
+function onYes(){
+  sYes(); burst();
+  var now = new Date();
+  var stamp = now.toLocaleDateString(undefined, { day:"numeric", month:"short", year:"numeric" }) +
+              " · " + now.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" });
+  openModal(
+    '<div class="finalwrap">' +
+      '<div class="mh">CASE CLOSED</div>' +
+      '<div class="mt2">she said yes ♥</div>' +
+      '<div class="finalpol">' +
+        '<img src="stickers/polaroid.png" alt="" onerror="this.style.display=\'none\';this.parentElement.insertAdjacentHTML(\'afterbegin\',\'<div class=&quot;fb&quot;></div>\')">' +
+        '<div class="ov"><div class="o1">' + HER_NAME + ' + ' + FROM_NAME + '</div><div class="o2">official since<br>' + stamp + '</div></div>' +
+      '</div>' +
+      '<div class="final-note">screenshot this &amp; send it to <b>' + FROM_NAME + '</b> ♥<br>(he\'s been refreshing his phone all day)</div>' +
+    '</div>'
+  );
+  later(burst, 700);
+}
+
+/* heart cursor trail on the board */
+var lastTrail = 0;
+document.getElementById("board").addEventListener("pointermove", function(e){
+  var t = Date.now();
+  if (t - lastTrail < 90) return;
+  lastTrail = t;
+  var s = document.createElement("span");
+  s.className = "trail"; s.textContent = "♥";
+  s.style.left = (e.clientX + 6) + "px";
+  s.style.top = (e.clientY + 6) + "px";
+  document.body.appendChild(s);
+  setTimeout(function(){ s.remove(); }, 1000);
+});
+})();
+</script>
+</body>
+</html>

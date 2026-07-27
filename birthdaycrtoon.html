@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>♥</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎉</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<!--
+════════════════════════════════════════════════
+  the party wall — white page → your friends gather
+  across the screen (still) → their names appear →
+  click ANY of them and the whole gang starts dancing.
+  CUSTOMIZE: CONFIG block at the top of the script.
+════════════════════════════════════════════════
+-->
+<style>
+:root{ --navy:#16307a; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Baloo 2',cursive;background:#fff;overflow:hidden;color:var(--navy);
+  -webkit-tap-highlight-color:transparent}
+
+#wall{position:fixed;inset:0;overflow:hidden}
+
+/* ── top nav bar (Wiki-Spy style) ── */
+#nav{position:fixed;left:0;right:0;top:0;height:52px;z-index:40;display:flex;align-items:center;
+  padding:0 20px;background:#fff;border-top:3px solid #2b2b2b;border-bottom:1px solid #e3e3e3;
+  box-shadow:0 2px 6px rgba(0,0,0,.05)}
+#nav .brand{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:26px;color:#b22222;
+  letter-spacing:.01em;line-height:1;white-space:nowrap}
+#nav .friends-line{margin-left:22px;flex:0 1 auto;font-family:Georgia,'Times New Roman',serif;font-weight:700;
+  font-size:clamp(18px,3vw,30px);color:#16307a;background:#b3d7ff;padding:2px 12px 4px;border-radius:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em}
+#nav .spacer{flex:1}
+#nav .nextbtn{margin-left:14px;flex:0 0 auto;font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:15px;color:#1a1a1a;
+  background:#f5c518;border:0;border-radius:5px;padding:9px 22px;cursor:pointer;text-decoration:none;
+  box-shadow:0 1px 2px rgba(0,0,0,.15);transition:filter .15s, transform .15s}
+#nav .nextbtn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+@media(max-width:900px){ #nav .friends-line{display:none} }
+@media(max-width:640px){ #nav{height:46px;padding:0 12px} #nav .brand{font-size:20px} #nav .fakesearch{display:none} #nav .nextbtn{padding:7px 16px;font-size:14px} }
+
+/* stickers */
+.st{position:absolute;will-change:transform,opacity;opacity:0;cursor:pointer;
+  transition:opacity .5s ease, transform .9s cubic-bezier(.2,1.1,.35,1);
+  transform:translate(var(--fx),var(--fy)) rotate(var(--fr)) scale(.4);
+  filter:drop-shadow(0 6px 9px rgba(20,30,60,.18))}
+.st img{width:100%;height:auto;display:block;pointer-events:none}
+.st.in{opacity:1;transform:translate(0,0) rotate(var(--r)) scale(1)}
+/* everyone dances once the party is live */
+body.live .st{animation:party var(--dd) ease-in-out infinite;animation-delay:var(--da)}
+@keyframes party{
+  0%,100%{transform:translateY(0) rotate(var(--r)) scale(1)}
+  25%{transform:translateY(-13px) rotate(calc(var(--r) - 6deg)) scale(1.05)}
+  50%{transform:translateY(0) rotate(var(--r)) scale(1)}
+  75%{transform:translateY(-8px) rotate(calc(var(--r) + 6deg)) scale(1.04)}
+}
+.st.tap{animation:tapPop .4s ease}
+@keyframes tapPop{0%{transform:rotate(var(--r)) scale(1)}45%{transform:rotate(var(--r)) scale(1.22)}100%{transform:rotate(var(--r)) scale(1)}}
+
+/* name labels — separate layer so they stay upright & don't move with the dance */
+.lbl{position:absolute;z-index:15;transform:translateX(-50%);pointer-events:none;white-space:nowrap;
+  font-family:'Baloo 2',cursive;font-weight:700;font-size:12px;letter-spacing:.02em;color:var(--navy);
+  background:rgba(255,255,255,.82);border-radius:999px;padding:1px 9px 2px;
+  box-shadow:0 2px 6px rgba(20,40,90,.14);opacity:0;transition:opacity .5s ease;}
+.lbl.show{opacity:1}
+
+/* intro line */
+#hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;text-align:center;
+  font-family:'Caveat',cursive;font-weight:700;color:#9fb0d8;font-size:30px;transition:opacity .6s}
+#hint.gone{opacity:0}
+
+/* subtle start cue (not a button) */
+#cue{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:18;pointer-events:none;
+  font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;letter-spacing:.06em;color:var(--navy);
+  background:rgba(255,255,255,.7);border-radius:999px;padding:6px 18px 7px;
+  box-shadow:0 4px 14px rgba(20,40,90,.16);opacity:0;transition:opacity .6s;animation:cueBob 1.7s ease-in-out infinite}
+#cue.on{opacity:1}
+#cue.gone{opacity:0}
+@keyframes cueBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-6px)}}
+
+.mnote{position:fixed;z-index:23;pointer-events:none;font-size:26px;will-change:transform,opacity}
+.conf{position:fixed;z-index:22;pointer-events:none;will-change:transform}
+
+#credit{position:fixed;right:16px;bottom:12px;z-index:20;font-weight:600;font-size:13px;color:#8fa0c8;
+  letter-spacing:.06em;opacity:0;transition:opacity .8s}
+body.live #credit{opacity:.9}
+#replay{position:fixed;left:16px;bottom:12px;z-index:20;font-weight:700;font-size:12px;letter-spacing:.1em;
+  color:#fff;background:rgba(22,48,122,.85);border:0;border-radius:999px;padding:6px 14px;cursor:pointer;
+  opacity:0;transition:opacity .8s}
+body.live #replay{opacity:.85}
+#replay:hover{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="nav">
+  <span class="brand">wiki day.</span>
+  <span class="friends-line">happy birthday saj</span>
+  <span class="spacer"></span>
+  <a class="nextbtn" href="birthdaycake.html">Next →</a>
+</div>
+
+<div id="wall"></div>
+
+<div id="hint">gathering your friends…</div>
+<div id="cue">tap anyone to start the music ♫</div>
+
+<div id="credit"></div>
+<button id="replay">↺ again</button>
+
+<script>
+(function(){
+"use strict";
+
+/* ══════════ CONFIG ══════════ */
+var FROM = "naveen";
+
+/* every character: n=file, anim=frozen-until-tap, w=width, lbl=small name shown above it */
+var CAST = [
+  { n:"piano-beethoven", anim:true,  w:170, lbl:"beethoven" },
+  { n:"dance-baby",      anim:true,  w:120, lbl:"baby" },
+  { n:"dance-lisa",      anim:true,  w:110, lbl:"lisa" },
+  { n:"heart-golfer",    anim:true,  w:130, lbl:"mr. heart" },
+  { n:"disco-star-man",  anim:true,  w:110, lbl:"disco star" },
+  { n:"dance-tina",      anim:true,  w:105, lbl:"tina" },
+  { n:"trombone-girl",   anim:true,  w:100, lbl:"trombone" },
+  { n:"tux-guy",         anim:true,  w:110, lbl:"the tux" },
+  { n:"dance-suit",      anim:true,  w:95,  lbl:"smooth" },
+  { n:"banjo-cowboy",    anim:true,  w:120, lbl:"banjo" },
+  { n:"guitar-boy",      anim:true,  w:110, lbl:"strummer" },
+  { n:"dance-cartoon",   anim:true,  w:115, lbl:"hey!" },
+  { n:"dj-snoopy",       anim:false, w:150, lbl:"dj snoopy" },
+  { n:"sax-snoopy",      anim:false, w:100, lbl:"sax snoopy" },
+  { n:"piano-snoopy",    anim:false, w:150, lbl:"maestro" },
+  { n:"sing-snoopy",     anim:false, w:130, lbl:"singer" },
+  { n:"rock-snoopy",     anim:false, w:120, lbl:"rockstar" },
+  { n:"drummer",         anim:false, w:130, lbl:"drummer" },
+  { n:"violin-garfield", anim:false, w:120, lbl:"garfield" },
+  { n:"guitar-pepe",     anim:false, w:100, lbl:"pepe" },
+  { n:"guitar-frog",     anim:false, w:135, lbl:"froggy" },
+  { n:"boombox-pirate",  anim:false, w:115, lbl:"boombox" },
+  { n:"disco-ball",      anim:false, w:120, lbl:"disco" },
+  { n:"dance-dobby",     anim:false, w:100, lbl:"dobby" },
+  { n:"dance-naruto",    anim:false, w:95,  lbl:"naruto" },
+  { n:"guitar-mickey",   anim:false, w:140, lbl:"mickey" },
+  { n:"dj-kid",          anim:false, w:120, lbl:"the dj" }
+];
+/* ════════════════════════════ */
+
+var wall = document.getElementById("wall");
+var hint = document.getElementById("hint");
+var cue = document.getElementById("cue");
+var els = [], labels = [];
+
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=(Math.random()*(i+1))|0; var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+function build(){
+  var vw=window.innerWidth, vh=window.innerHeight, mobile=vw<720;
+  var BAR=mobile?46:52;
+  var list=shuffle(CAST.slice());
+  var cols=mobile?4:6, rows=Math.ceil(list.length/cols);
+  var cw=vw/cols, ch=(vh-BAR-10)/rows;
+  list.forEach(function(s,i){
+    var c=i%cols, r=(i/cols)|0;
+    var w=Math.min(s.w, cw*1.0)*(mobile?.78:.9);
+    var jx=(Math.random()-.5)*cw*0.42, jy=(Math.random()-.5)*ch*0.42;
+    var cx=c*cw+cw/2+jx, cy=BAR+22 + r*ch+ch/2+jy;
+    cy=Math.max(cy, BAR+22+ch*0.5);   /* leave headroom for label + navbar */
+
+    var el=document.createElement("div");
+    el.className="st";
+    el.style.setProperty("--r",(Math.random()*16-8)+"deg");
+    el.style.setProperty("--dd",(1.5+Math.random()*1.2).toFixed(2)+"s");
+    el.style.setProperty("--da",(Math.random()*1).toFixed(2)+"s");
+    var side=i%4;
+    el.style.setProperty("--fx", side===0?"-70vw":side===1?"70vw":(Math.random()*40-20)+"vw");
+    el.style.setProperty("--fy", side===2?"-70vh":side===3?"70vh":(Math.random()*40-20)+"vh");
+    el.style.setProperty("--fr",(Math.random()*120-60)+"deg");
+    el.style.width=w+"px";
+    el.style.left=(cx-w/2)+"px";
+    el.style.top=(cy-w/2)+"px";
+    el.style.zIndex=2+(i%6);
+    var src = s.anim ? "birthday-assets/frozen/"+s.n+".png" : "birthday-assets/"+s.n+".png";
+    el.innerHTML='<img src="'+src+'" alt="" '+(s.anim?'data-anim="birthday-assets/anim/'+s.n+'.webp"':'')+'>';
+    el.addEventListener("click", function(){ tap(el); });
+    wall.appendChild(el);
+    els.push(el);
+  });
+}
+build();
+
+/* after 2s: friends fly in one by one, then the cue */
+setTimeout(function(){
+  hint.classList.add("gone");
+  els.forEach(function(el,i){ setTimeout(function(){ el.classList.add("in"); pop(); }, i*90); });
+  var doneAt = els.length*90 + 500;
+  setTimeout(function(){ cue.classList.add("on"); }, doneAt + 300);
+}, 2000);
+
+/* tiny land blips */
+var AC=null;
+function ac(){ if(!AC){ var C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C(); } if(AC&&AC.state==="suspended") AC.resume(); return AC; }
+function pop(){ var a=ac(); if(!a) return; var t=a.currentTime; var o=a.createOscillator(),g=a.createGain();
+  o.type="sine"; o.frequency.setValueAtTime(320+Math.random()*460,t);
+  g.gain.setValueAtTime(.022,t); g.gain.exponentialRampToValueAtTime(.0005,t+.1);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+.12); }
+
+/* ══════════ MUSIC — happy birthday ══════════ */
+var MASTER=null, playing=false;
+function master(){ var a=ac(); if(!a) return null;
+  if(!MASTER){ var comp=a.createDynamicsCompressor(); MASTER=a.createGain(); MASTER.gain.value=.9; MASTER.connect(comp); comp.connect(a.destination); }
+  return MASTER; }
+var G=392,A=440,B=493.88,C=523.25,D=587.33,E=659.25,F=698.46,G5=783.99;
+var TUNE=[[G,.75],[G,.25],[A,1],[G,1],[C,1],[B,2],
+  [G,.75],[G,.25],[A,1],[G,1],[D,1],[C,2],
+  [G,.75],[G,.25],[G5,1],[E,1],[C,1],[B,1],[A,2],
+  [F,.75],[F,.25],[E,1],[C,1],[D,1],[C,2.5]];
+var BEAT=0.44;
+function tone(f,t0,dur){ var a=ac(),out=master(); if(!a||!out) return;
+  var o=a.createOscillator(),o2=a.createOscillator(),g=a.createGain(),lp=a.createBiquadFilter();
+  o.type="triangle"; o.frequency.value=f; o2.type="sine"; o2.frequency.value=f*2; o2.detune.value=4;
+  lp.type="lowpass"; lp.frequency.value=2600;
+  g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(.3,t0+.02);
+  g.gain.exponentialRampToValueAtTime(.0006,t0+dur*0.95);
+  o.connect(g);o2.connect(g);g.connect(lp);lp.connect(out); o.start(t0);o.stop(t0+dur);o2.start(t0);o2.stop(t0+dur); }
+function playTune(){ var a=ac(); if(!a) return 8000; var t=a.currentTime+.06;
+  TUNE.forEach(function(n){ var dur=n[1]*BEAT; if(n[0]>0) tone(n[0],t,dur*0.92); t+=dur; });
+  return (t-a.currentTime)*1000; }
+
+/* ══════════ click any sticker → everyone dances ══════════ */
+function tap(el){
+  el.classList.remove("tap"); void el.offsetWidth; el.classList.add("tap");
+  if(!playing) goLive();
+}
+function goLive(){
+  if(playing) return;
+  playing=true;
+  ac(); master();
+  cue.classList.add("gone");
+  document.body.classList.add("live");
+  document.querySelectorAll('img[data-anim]').forEach(function(img){ img.src = img.getAttribute("data-anim"); });
+  var loop=playTune();
+  setInterval(playTune, loop+500);
+  setInterval(sprinkle, BEAT*1000*2);
+  burst(70); setInterval(function(){ burst(10); }, 1500);
+  document.getElementById("credit").textContent = "— with love, " + FROM + " ♥";
+}
+
+var CC=["#ff5c8a","#ffcf3f","#5ad1ff","#7ee88a","#c78bff","#ff8a3a"];
+function burst(n){
+  for(var i=0;i<n;i++){
+    var c=document.createElement("span"); c.className="conf";
+    var sz=6+Math.random()*9; c.style.width=sz+"px"; c.style.height=(sz*.6)+"px";
+    c.style.background=CC[(Math.random()*CC.length)|0];
+    c.style.left=Math.random()*100+"vw"; c.style.top="-18px";
+    c.style.borderRadius=Math.random()<.5?"50%":"2px";
+    document.body.appendChild(c);
+    var dx=Math.random()*160-80, dur=2600+Math.random()*2400;
+    c.animate([{transform:"translate(0,0) rotate(0)",opacity:1},
+      {transform:"translate("+dx+"px,"+(window.innerHeight+40)+"px) rotate("+(Math.random()*720-360)+"deg)",opacity:.9}],
+      {duration:dur,easing:"cubic-bezier(.3,.4,.6,1)",fill:"forwards"});
+    setTimeout(function(el){ el.remove(); }.bind(null,c),dur+100);
+  }
+}
+function sprinkle(){
+  for(var i=0;i<2;i++){
+    var n=document.createElement("span"); n.className="mnote";
+    n.textContent=Math.random()<.5?"♪":"♫"; n.style.color=CC[(Math.random()*CC.length)|0];
+    n.style.left=Math.random()*100+"vw"; n.style.top=(45+Math.random()*45)+"vh";
+    document.body.appendChild(n);
+    n.animate([{transform:"translateY(0)",opacity:1},{transform:"translateY(-120px) rotate("+(Math.random()*60-30)+"deg)",opacity:0}],
+      {duration:2200,easing:"ease-out",fill:"forwards"});
+    setTimeout(function(el){ el.remove(); }.bind(null,n),2300);
+  }
+}
+
+document.getElementById("replay").addEventListener("click", function(){ location.reload(); });
+})();
+</script>
+</body>
+</html>

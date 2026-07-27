@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>heyflowers — admin</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{--bg:#0c0f16;--bg2:#141824;--edge:#242a3a;--ink:#eef1f8;--soft:#8b93a7;--yellow:#ffc94b;--blue:#3d8bff;--green:#4fd08a}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Outfit',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:26px}
+  a{color:var(--blue)}
+  .head{display:flex;align-items:center;gap:12px;max-width:1000px;margin:0 auto 26px}
+  .logo{font-family:'Fredoka';font-weight:700;font-size:22px}
+  .logo .hey{color:var(--yellow)} .logo .fl{color:#ff5b6e}
+  .tag{font-size:12px;letter-spacing:.16em;color:var(--soft);text-transform:uppercase;margin-left:6px}
+  .sp{flex:1}
+  .btn{font:inherit;font-weight:600;font-size:14px;border:0;border-radius:999px;padding:9px 18px;cursor:pointer;
+    background:var(--yellow);color:#3a2a00;transition:.15s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.ghost{background:rgba(255,255,255,.06);color:var(--ink)}
+  .wrap{max-width:1000px;margin:0 auto}
+
+  /* login */
+  .gate{max-width:360px;margin:8vh auto 0;background:var(--bg2);border:1px solid var(--edge);border-radius:22px;padding:28px 24px;text-align:center}
+  .gate h1{font-family:'Fredoka';font-size:22px;margin-bottom:4px}
+  .gate p{color:var(--soft);font-size:14px;margin-bottom:18px}
+  .gate input{width:100%;background:#0e1220;border:1px solid var(--edge);border-radius:12px;padding:12px 14px;color:var(--ink);font:inherit;margin-bottom:10px}
+  .gate input:focus{outline:none;border-color:var(--blue)}
+  .msg{min-height:18px;font-size:13px;margin-top:10px;color:#ff8a8a}
+
+  /* dashboard */
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+  @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}}
+  .card{background:var(--bg2);border:1px solid var(--edge);border-radius:18px;padding:20px}
+  .card .k{font-size:13px;color:var(--soft);letter-spacing:.04em}
+  .card .v{font-family:'Fredoka';font-weight:700;font-size:38px;line-height:1.1;margin-top:6px}
+  .card .sub{font-size:12px;color:var(--soft);margin-top:4px}
+  .card.accent .v{color:var(--yellow)}
+  .card.green .v{color:var(--green)}
+
+  .panel{background:var(--bg2);border:1px solid var(--edge);border-radius:18px;padding:20px;margin-bottom:22px}
+  .panel h2{font-family:'Fredoka';font-size:17px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .bars{display:flex;flex-direction:column;gap:10px}
+  .bar{display:grid;grid-template-columns:90px 1fr 44px;align-items:center;gap:10px;font-size:14px}
+  .bar .track{height:12px;border-radius:999px;background:#0e1220;overflow:hidden}
+  .bar .fill{height:100%;border-radius:999px;background:var(--blue)}
+  .bar.free  .fill{background:#5b6478}
+  .bar.month .fill{background:var(--blue)}
+  .bar.annual .fill{background:var(--yellow)}
+  .bar.life  .fill{background:var(--green)}
+  .bar .n{text-align:right;color:var(--soft)}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{text-align:left;color:var(--soft);font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--edge)}
+  td{padding:10px;border-bottom:1px solid rgba(255,255,255,.04)}
+  tr:last-child td{border-bottom:0}
+  .pill{display:inline-block;font-size:12px;padding:2px 10px;border-radius:999px;background:rgba(255,255,255,.07);color:var(--soft)}
+  .pill.paid{background:rgba(255,201,75,.16);color:var(--yellow)}
+  .empty{color:var(--soft);font-size:14px;padding:14px 4px}
+  .hidden{display:none}
+  .foot{max-width:1000px;margin:16px auto 0;color:var(--soft);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <span class="logo"><span class="hey">hey</span><span class="fl">flowers</span></span>
+  <span class="tag">admin</span>
+  <span class="sp"></span>
+  <button class="btn ghost hidden" id="logout">Log out</button>
+</div>
+
+<!-- login gate -->
+<div class="gate" id="gate">
+  <h1>Owner sign-in</h1>
+  <p>Only the admin account can open this page.</p>
+  <input type="email" id="email" placeholder="you@email.com" autocomplete="email">
+  <input type="password" id="pass" placeholder="password" autocomplete="current-password">
+  <button class="btn" id="login" style="width:100%">Log in</button>
+  <div class="msg" id="msg"></div>
+</div>
+
+<!-- dashboard -->
+<div class="wrap hidden" id="dash">
+  <div class="cards">
+    <div class="card accent"><div class="k">Members</div><div class="v" id="cMembers">—</div><div class="sub">total signups</div></div>
+    <div class="card"><div class="k">Visits</div><div class="v" id="cVisits">—</div><div class="sub">page loads logged</div></div>
+    <div class="card green"><div class="k">Gifts made</div><div class="v" id="cGifts">—</div><div class="sub">saved to accounts</div></div>
+    <div class="card"><div class="k">Paying</div><div class="v" id="cPaying">—</div><div class="sub">on a paid plan</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>📊 Plans</h2>
+    <div class="bars" id="bars"></div>
+  </div>
+
+  <div class="panel">
+    <h2>🌱 Recent members</h2>
+    <table>
+      <thead><tr><th>Email</th><th>Plan</th><th>Joined</th></tr></thead>
+      <tbody id="rows"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="foot" id="setupNote"></div>
+
+<script>
+/* Same PUBLIC keys as auth.js (the anon key is safe to expose — RLS is what
+   protects the data; only your admin account can read the tables). */
+const SUPABASE_URL = 'https://qzobweooybjemvsjmmet.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6b2J3ZW9veWJqZW12c2ptbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MzU0NzUsImV4cCI6MjEwMDUxMTQ3NX0.0ZRwKt29i3V8k22TjMFNRzelnY9LCTo1PejHIfE0k88';
+
+const $ = id => document.getElementById(id);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const fmt = n => (n ?? 0).toLocaleString();
+const PLANS = [
+  { key:'free',   label:'Free',     cls:'free'   },
+  { key:'monthly',label:'Monthly',  cls:'month'  },
+  { key:'annual', label:'Annual',   cls:'annual' },
+  { key:'lifetime',label:'Lifetime',cls:'life'   }
+];
+
+function show(dash){ $('gate').classList.toggle('hidden', dash); $('dash').classList.toggle('hidden', !dash); $('logout').classList.toggle('hidden', !dash); }
+function note(t){ $('setupNote').innerHTML = t || ''; }
+
+async function login(){
+  $('msg').textContent = '';
+  const email = $('email').value.trim(), password = $('pass').value;
+  if (!email || !password){ $('msg').textContent = 'Enter your email and password.'; return; }
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error){ $('msg').textContent = error.message; return; }
+  gateOrDash(data.user);
+}
+
+async function gateOrDash(user){
+  if (!user){ show(false); return; }
+  // am I an admin?
+  const { data: me, error } = await sb.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
+  if (error && (error.code === 'PGRST205' || /does not exist|schema cache/i.test(error.message || ''))){
+    show(false);
+    $('msg').innerHTML = "Database isn't set up yet — open Supabase → SQL Editor and run <b>supabase/schema.sql</b>, then log in again.";
+    return;
+  }
+  if (!me || !me.is_admin){
+    show(false);
+    $('msg').innerHTML = "That account isn't an admin. In the SQL editor run:<br><code>update public.profiles set is_admin=true where email='"+ (user.email||'you@email.com') +"';</code>";
+    return;
+  }
+  show(true);
+  load();
+}
+
+async function load(){
+  // members
+  const { data: profiles } = await sb.from('profiles').select('email,plan,created_at').order('created_at', { ascending:false });
+  const list = profiles || [];
+  $('cMembers').textContent = fmt(list.length);
+
+  // plan breakdown
+  const counts = { free:0, monthly:0, annual:0, lifetime:0 };
+  list.forEach(p => { counts[p.plan] = (counts[p.plan] || 0) + 1; });
+  const paying = counts.monthly + counts.annual + counts.lifetime;
+  $('cPaying').textContent = fmt(paying);
+  const max = Math.max(1, ...PLANS.map(p => counts[p.key] || 0));
+  $('bars').innerHTML = PLANS.map(p => `
+    <div class="bar ${p.cls}">
+      <span>${p.label}</span>
+      <span class="track"><span class="fill" style="width:${((counts[p.key]||0)/max*100).toFixed(0)}%"></span></span>
+      <span class="n">${fmt(counts[p.key]||0)}</span>
+    </div>`).join('');
+
+  // recent members table
+  $('rows').innerHTML = list.length ? list.slice(0, 25).map(p => `
+    <tr>
+      <td>${(p.email||'—').replace(/[<>]/g,'')}</td>
+      <td><span class="pill ${p.plan!=='free'?'paid':''}">${p.plan||'free'}</span></td>
+      <td>${p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}</td>
+    </tr>`).join('') : `<tr><td colspan="3" class="empty">No members yet.</td></tr>`;
+
+  // visits + gifts counts (head:true = count only, no rows pulled)
+  const { count: visits } = await sb.from('visits').select('*', { count:'exact', head:true });
+  $('cVisits').textContent = fmt(visits);
+  const { count: gifts } = await sb.from('gifts').select('*', { count:'exact', head:true });
+  $('cGifts').textContent = fmt(gifts);
+
+  note('Live from Supabase · RLS-protected · <a href="index.html">← back to site</a>');
+}
+
+$('login').onclick = login;
+$('pass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+$('logout').onclick = async () => { await sb.auth.signOut(); show(false); };
+
+// resume an existing admin session
+sb.auth.getSession().then(({ data }) => gateOrDash(data.session ? data.session.user : null));
+</script>
+</body>
+</html>

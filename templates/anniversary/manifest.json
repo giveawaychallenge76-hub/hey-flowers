@@ -1,0 +1,212 @@
+{
+  "id": "anniversary",
+  "name": "ANNIVERSARY TIN",
+  "tagline": "a keepsake for us",
+  "category": "Anniversary",
+  "experienceTime": "2 min",
+  "description": "A little tin of memories — a headline, a scrapbook of polaroids and stickers, your story, and a hand-typed love letter that seals with wax.",
+  "thumbnail": "thumbnail/dump-page-3-5.png",
+  "featured": true,
+  "trending": true,
+  "pages": [
+    {
+      "id": "cover",
+      "label": "Cover",
+      "mount": "#hf-stage",
+      "display": "block",
+      "route": "#/"
+    },
+    {
+      "id": "photos",
+      "label": "Photos",
+      "mount": "#hf-stage",
+      "display": "block",
+      "route": "#/photo"
+    },
+    {
+      "id": "story",
+      "label": "Story",
+      "mount": "#hf-stage",
+      "display": "block",
+      "route": "#/story"
+    },
+    {
+      "id": "letter",
+      "label": "Letter",
+      "mount": "#hf-stage",
+      "display": "block",
+      "route": "#/letter"
+    },
+    {
+      "id": "video",
+      "label": "Video",
+      "mount": "#hf-stage",
+      "display": "block",
+      "route": "#/video"
+    }
+  ],
+  "fields": [
+    {
+      "key": "heading_small",
+      "type": "text",
+      "label": "Heading — line 1",
+      "default": "happy anniversary,",
+      "page": "cover"
+    },
+    {
+      "key": "heading_big",
+      "type": "text",
+      "label": "Heading — their pet name",
+      "default": "my love",
+      "required": true,
+      "page": "cover"
+    },
+    {
+      "key": "photo1",
+      "type": "image",
+      "label": "Photo 1",
+      "default": "",
+      "page": "photos"
+    },
+    {
+      "key": "photo2",
+      "type": "image",
+      "label": "Photo 2",
+      "default": "",
+      "page": "photos"
+    },
+    {
+      "key": "photo3",
+      "type": "image",
+      "label": "Photo 3",
+      "default": "",
+      "page": "photos"
+    },
+    {
+      "key": "photo4",
+      "type": "image",
+      "label": "Photo 4",
+      "default": "",
+      "page": "photos"
+    },
+    {
+      "key": "photo5",
+      "type": "image",
+      "label": "Photo 5",
+      "default": "",
+      "page": "photos"
+    },
+    {
+      "key": "story1_title",
+      "type": "text",
+      "label": "Story 1 — title",
+      "default": "the day we met",
+      "page": "story"
+    },
+    {
+      "key": "story1_text",
+      "type": "paragraph",
+      "label": "Story 1 — text",
+      "default": "Write how it started here — where you were, what you thought, the tiny detail you still remember.",
+      "page": "story"
+    },
+    {
+      "key": "story2_title",
+      "type": "text",
+      "label": "Story 2 — title",
+      "default": "the first date",
+      "page": "story"
+    },
+    {
+      "key": "story2_text",
+      "type": "paragraph",
+      "label": "Story 2 — text",
+      "default": "Write about the first date — the nerves, the laughing, the moment you knew.",
+      "page": "story"
+    },
+    {
+      "key": "story3_title",
+      "type": "text",
+      "label": "Story 3 — title",
+      "default": "a moment i'll never forget",
+      "page": "story"
+    },
+    {
+      "key": "story3_text",
+      "type": "paragraph",
+      "label": "Story 3 — text",
+      "default": "Write your favorite memory together here.",
+      "page": "story"
+    },
+    {
+      "key": "story4_title",
+      "type": "text",
+      "label": "Story 4 — title",
+      "default": "one year of us",
+      "page": "story"
+    },
+    {
+      "key": "story4_text",
+      "type": "paragraph",
+      "label": "Story 4 — text",
+      "default": "Write where you are now, and everything you're still looking forward to.",
+      "page": "story"
+    },
+    {
+      "key": "letter_to",
+      "type": "text",
+      "label": "Letter — greeting",
+      "default": "my love,",
+      "page": "letter"
+    },
+    {
+      "key": "letter_1",
+      "type": "paragraph",
+      "label": "Letter — line 1",
+      "default": "happy anniversary. one whole year of you and me,",
+      "page": "letter"
+    },
+    {
+      "key": "letter_2",
+      "type": "paragraph",
+      "label": "Letter — line 2",
+      "default": "and somehow you still make my heart race like day one.",
+      "page": "letter"
+    },
+    {
+      "key": "letter_end",
+      "type": "paragraph",
+      "label": "Letter — closing",
+      "default": "here's to forever, one day at a time.",
+      "page": "letter"
+    },
+    {
+      "key": "letter_sign",
+      "type": "text",
+      "label": "Letter — signature",
+      "default": "yours, always ♥",
+      "page": "letter"
+    },
+    {
+      "key": "video_url",
+      "type": "video",
+      "label": "Our video (plays in the TV)",
+      "default": "",
+      "page": "video"
+    },
+    {
+      "key": "accent",
+      "type": "color",
+      "label": "Accent colour",
+      "default": "#2733e0",
+      "page": "cover"
+    },
+    {
+      "key": "font_family",
+      "type": "font",
+      "label": "Font",
+      "default": "Playfair Display",
+      "page": "cover"
+    }
+  ]
+}

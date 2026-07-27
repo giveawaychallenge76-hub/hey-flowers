@@ -1,0 +1,15 @@
+# os / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# logs & temp
+*.log
+node_modules/
+.cache/
+tmp/
+
+# local claude config (keep launch.json if you want it shared)
+.claude/settings.local.json

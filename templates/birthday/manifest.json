@@ -1,0 +1,141 @@
+{
+  "id": "birthday",
+  "name": "BIRTHDAY",
+  "tagline": "blow the candle",
+  "category": "Birthday",
+  "experienceTime": "1 min",
+  "description": "An envelope, a candle they blow out with their mic, and a scroll of little notes written just for them.",
+  "thumbnail": "thumbnail/birthday.png",
+  "featured": true,
+  "trending": true,
+  "assetsBaseURL": "https://giveawaychallenge76-hub.github.io/latenight/",
+  "pages": [
+    {
+      "id": "front",
+      "label": "Front page",
+      "mount": "#front-page",
+      "display": "flex"
+    },
+    {
+      "id": "letter",
+      "label": "The letter",
+      "mount": "#surprise-content",
+      "display": "flex"
+    }
+  ],
+  "fields": [
+    {
+      "key": "question",
+      "type": "text",
+      "label": "Opening question",
+      "default": "Is it your birthday?? 🎂",
+      "page": "front"
+    },
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Their name",
+      "placeholder": "ashika",
+      "required": true,
+      "page": "letter"
+    },
+    {
+      "key": "note1_title",
+      "type": "text",
+      "label": "Note 1 — title",
+      "default": "she is so cute....",
+      "page": "letter"
+    },
+    {
+      "key": "note1_text",
+      "type": "paragraph",
+      "label": "Note 1 — text",
+      "default": "the one reading this note right now. 🥰",
+      "page": "letter"
+    },
+    {
+      "key": "note2_title",
+      "type": "text",
+      "label": "Note 2 — title",
+      "default": "No matter how much time passes...",
+      "page": "letter"
+    },
+    {
+      "key": "note2_text",
+      "type": "paragraph",
+      "label": "Note 2 — text",
+      "default": "You will always have such a beautiful heart! ❤️",
+      "page": "letter"
+    },
+    {
+      "key": "note3_title",
+      "type": "text",
+      "label": "Note 3 — title",
+      "default": "Your beautiful smile...",
+      "page": "letter"
+    },
+    {
+      "key": "note3_text",
+      "type": "paragraph",
+      "label": "Note 3 — text",
+      "default": "Makes every single day feel worth celebrating. ✨",
+      "page": "letter"
+    },
+    {
+      "key": "note4_title",
+      "type": "text",
+      "label": "Final note — title",
+      "default": "Happy Birthday",
+      "page": "letter"
+    },
+    {
+      "key": "note4_text",
+      "type": "paragraph",
+      "label": "Final note — text",
+      "default": "YOU<br>YOU<br>YOU❤️",
+      "page": "letter"
+    },
+    {
+      "key": "photo_url",
+      "type": "image",
+      "label": "Background photo",
+      "default": "1000076281.jpg",
+      "page": "style"
+    },
+    {
+      "key": "music_url",
+      "type": "music",
+      "label": "Their song",
+      "default": "YTDown.com_Shorts_Ariana-Grande-Hate-That-I-Made-You-Love-_Media_5b-pz-Fm_XI_008_128k.mp3",
+      "page": "style"
+    },
+    {
+      "key": "bg_tint",
+      "type": "color",
+      "label": "Background tint",
+      "default": "#f4a5b5",
+      "page": "style"
+    },
+    {
+      "key": "envelope_color",
+      "type": "color",
+      "label": "Envelope colour",
+      "default": "#eed070",
+      "page": "style"
+    },
+    {
+      "key": "accent_color",
+      "type": "color",
+      "label": "Text & accent colour",
+      "default": "#c0435a",
+      "page": "style"
+    },
+    {
+      "key": "font_family",
+      "type": "font",
+      "label": "Font",
+      "default": "Georgia",
+      "page": "style"
+    }
+  ]
+}

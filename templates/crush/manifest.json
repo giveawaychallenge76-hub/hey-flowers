@@ -1,0 +1,263 @@
+{
+  "id": "crush",
+  "name": "THE FIELD",
+  "tagline": "a field i made for you",
+  "category": "Crush",
+  "experienceTime": "2 min",
+  "description": "A dreamy field with hidden hotspots — daily reminders, little memories, and a message you almost never sent. Made for the person you like.",
+  "thumbnail": "thumbnail/dump-page-2-4.png",
+  "featured": true,
+  "trending": true,
+  "pages": [
+    {
+      "id": "profile",
+      "label": "Profile",
+      "mount": "#hf-stage",
+      "display": "block"
+    },
+    {
+      "id": "reminders",
+      "label": "Reminders",
+      "mount": "#hf-stage",
+      "display": "block"
+    },
+    {
+      "id": "receipt",
+      "label": "Receipt",
+      "mount": "#hf-stage",
+      "display": "block"
+    },
+    {
+      "id": "memories",
+      "label": "Memories",
+      "mount": "#hf-stage",
+      "display": "block"
+    },
+    {
+      "id": "bemine",
+      "label": "Be mine",
+      "mount": "#hf-stage",
+      "display": "block"
+    }
+  ],
+  "fields": [
+    {
+      "key": "her",
+      "type": "text",
+      "label": "Their name",
+      "default": "saj",
+      "required": true,
+      "page": "profile"
+    },
+    {
+      "key": "him",
+      "type": "text",
+      "label": "Your name",
+      "default": "naveen",
+      "page": "profile"
+    },
+    {
+      "key": "lic_born",
+      "type": "text",
+      "label": "License — 'date of birth' line",
+      "default": "the day we met",
+      "page": "profile"
+    },
+    {
+      "key": "lic_place",
+      "type": "text",
+      "label": "License — 'place of issue' line",
+      "default": "everywhere i go",
+      "page": "profile"
+    },
+    {
+      "key": "chat_open",
+      "type": "text",
+      "label": "Reminder — opener",
+      "default": "hey you. daily reminders, from me:",
+      "page": "reminders"
+    },
+    {
+      "key": "chat_1",
+      "type": "text",
+      "label": "Reminder 1",
+      "default": "drink water. you always forget.",
+      "page": "reminders"
+    },
+    {
+      "key": "chat_2",
+      "type": "text",
+      "label": "Reminder 2",
+      "default": "eat something real, not just chips.",
+      "page": "reminders"
+    },
+    {
+      "key": "chat_3",
+      "type": "text",
+      "label": "Reminder 3",
+      "default": "text me when you reach home.",
+      "page": "reminders"
+    },
+    {
+      "key": "chat_4",
+      "type": "text",
+      "label": "Reminder 4",
+      "default": "don't fight your thoughts at 2am. sleep.",
+      "page": "reminders"
+    },
+    {
+      "key": "chat_end",
+      "type": "paragraph",
+      "label": "Reminder — closer",
+      "default": "and if nobody said it today — you look really, really pretty.",
+      "page": "reminders"
+    },
+    {
+      "key": "r1l",
+      "type": "text",
+      "label": "Receipt 1 — label",
+      "default": "thoughts of you / day",
+      "page": "receipt"
+    },
+    {
+      "key": "r1v",
+      "type": "text",
+      "label": "Receipt 1 — value",
+      "default": "1,442",
+      "page": "receipt"
+    },
+    {
+      "key": "r2l",
+      "type": "text",
+      "label": "Receipt 2 — label",
+      "default": "rehearsed hellos",
+      "page": "receipt"
+    },
+    {
+      "key": "r2v",
+      "type": "text",
+      "label": "Receipt 2 — value",
+      "default": "37",
+      "page": "receipt"
+    },
+    {
+      "key": "r3l",
+      "type": "text",
+      "label": "Receipt 3 — label",
+      "default": "almost-sent texts",
+      "page": "receipt"
+    },
+    {
+      "key": "r3v",
+      "type": "text",
+      "label": "Receipt 3 — value",
+      "default": "214",
+      "page": "receipt"
+    },
+    {
+      "key": "r4l",
+      "type": "text",
+      "label": "Receipt 4 — label",
+      "default": "your name in my drafts",
+      "page": "receipt"
+    },
+    {
+      "key": "r4v",
+      "type": "text",
+      "label": "Receipt 4 — value",
+      "default": "yes",
+      "page": "receipt"
+    },
+    {
+      "key": "r5l",
+      "type": "text",
+      "label": "Receipt 5 — label",
+      "default": "courage gathered",
+      "page": "receipt"
+    },
+    {
+      "key": "r5v",
+      "type": "text",
+      "label": "Receipt 5 — value",
+      "default": "3 weeks",
+      "page": "receipt"
+    },
+    {
+      "key": "r6l",
+      "type": "text",
+      "label": "Receipt 6 — label",
+      "default": "backup plan if you say no",
+      "page": "receipt"
+    },
+    {
+      "key": "r6v",
+      "type": "text",
+      "label": "Receipt 6 — value",
+      "default": "none",
+      "page": "receipt"
+    },
+    {
+      "key": "mem1",
+      "type": "text",
+      "label": "Memory 1",
+      "default": "the way you tuck your hair when you focus",
+      "page": "memories"
+    },
+    {
+      "key": "mem2",
+      "type": "text",
+      "label": "Memory 2",
+      "default": "your laugh arrives before your joke does",
+      "page": "memories"
+    },
+    {
+      "key": "mem3",
+      "type": "text",
+      "label": "Memory 3",
+      "default": "you say 'last episode' and lie every time",
+      "page": "memories"
+    },
+    {
+      "key": "mem4",
+      "type": "text",
+      "label": "Memory 4",
+      "default": "you wave at dogs. every single dog.",
+      "page": "memories"
+    },
+    {
+      "key": "mem5",
+      "type": "text",
+      "label": "Memory 5",
+      "default": "how you turn boring days into plans",
+      "page": "memories"
+    },
+    {
+      "key": "mem6",
+      "type": "text",
+      "label": "Memory 6 (locked)",
+      "default": "the day i almost told you (3 times)",
+      "page": "memories"
+    },
+    {
+      "key": "bemine_q",
+      "type": "text",
+      "label": "The big question",
+      "default": "so… will you be mine?",
+      "page": "bemine"
+    },
+    {
+      "key": "accent",
+      "type": "color",
+      "label": "Accent colour",
+      "default": "#c93a45",
+      "page": "profile"
+    },
+    {
+      "key": "font_family",
+      "type": "font",
+      "label": "Font",
+      "default": "Baloo 2",
+      "page": "profile"
+    }
+  ]
+}
