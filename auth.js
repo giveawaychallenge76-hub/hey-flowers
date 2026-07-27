@@ -18,6 +18,18 @@
    Every sign-up lands under Authentication → Users. To ALSO see them in a
    normal table (and power the admin dashboard) run supabase/schema.sql.
    ═══════════════════════════════════════════════════════════════════ */
+/* ── Which social buttons to SHOW ──────────────────────────────────────
+   A provider must be fully set up in Supabase (Authentication → Providers)
+   before you flip it on here, or the button just errors for real users.
+
+     google : needs an OAuth Client ID + Secret from Google Cloud Console
+     apple  : needs a paid Apple Developer account ($99/yr) for a Service ID
+
+   Flip to true the moment the provider actually works — nothing else to
+   change; the button appears and is already wired.                      */
+const SHOW_GOOGLE = false;
+const SHOW_APPLE  = false;
+
 const SUPABASE_URL      = 'https://qzobweooybjemvsjmmet.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6b2J3ZW9veWJqZW12c2ptbWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MzU0NzUsImV4cCI6MjEwMDUxMTQ3NX0.0ZRwKt29i3V8k22TjMFNRzelnY9LCTo1PejHIfE0k88';
 
@@ -140,9 +152,17 @@ window.HF_SB = HF_SB;   // app.js uses the same client for drafts / uploads
       if (e.key === 'Escape' && document.body.classList.contains('auth-open')) closeModal();
     });
 
-    /* Google / Apple */
-    document.querySelectorAll('[data-oauth]').forEach(b =>
-      b.onclick = () => oauth(b.dataset.oauth));
+    /* Google / Apple — only show the ones that are actually set up, so
+       nobody clicks a button that can only fail */
+    const SHOW = { google: SHOW_GOOGLE, apple: SHOW_APPLE };
+    let anyOAuth = false;
+    document.querySelectorAll('[data-oauth]').forEach(b => {
+      if (SHOW[b.dataset.oauth]){ b.onclick = () => oauth(b.dataset.oauth); anyOAuth = true; }
+      else b.remove();
+    });
+    // with no social buttons the "or" divider has nothing to divide
+    if (!anyOAuth) document.querySelectorAll('.oauth, .oauth-or').forEach(e => e.remove());
+    document.body.classList.toggle('no-oauth', !anyOAuth);
 
     setMode('login');
 

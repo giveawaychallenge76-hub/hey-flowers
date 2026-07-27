@@ -63,6 +63,10 @@ body.editing .hf-nav{display:none}
   font-size:14px;border-radius:999px;padding:7px 16px 7px 9px;transition:.2s var(--ease)}
 .nav-me:hover{background:var(--ink);color:#10131b}
 .nav-me .me-dot{font-size:15px;line-height:1}
+/* no social sign-in configured → drop the Google mark from the nav button,
+   otherwise it promises a Google flow that isn't there */
+body.no-oauth .nav-signin svg{display:none}
+body.no-oauth .nav-signin{padding:8px 18px}
 body.authed  .nav-signin{display:none}
 body.authed  .nav-me{display:inline-flex}
 body.auth-off .nav-signin{display:none}
