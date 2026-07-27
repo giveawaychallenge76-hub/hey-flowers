@@ -5,10 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>heyflowers — create your stunning gift, share link</title>
 <meta name="description" content="Pick a template, make it yours — colours, stickers, fonts — and send it as a link. It opens in their browser and something happens.">
+
+<!-- Share preview. A gift lives in the URL hash, which never reaches a
+     server, so every link shares this one card — written to read warmly
+     whether it's a gift someone was sent or the site itself. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="heyflowers">
+<meta property="og:title" content="🌼 Someone made you something">
+<meta property="og:description" content="Tap to open it — it plays right in your browser. No app, no account.">
+<meta property="og:url" content="https://hey-flowers.vercel.app/">
+<meta property="og:image" content="https://hey-flowers.vercel.app/share-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="heyflowers — a gift made by hand">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🌼 Someone made you something">
+<meta name="twitter:description" content="Tap to open it — it plays right in your browser. No app, no account.">
+<meta name="twitter:image" content="https://hey-flowers.vercel.app/share-card.png">
+<meta name="theme-color" content="#4aa9f5">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@700;800;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=21">
+<link rel="stylesheet" href="styles.css?v=22">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
@@ -219,14 +238,23 @@
 <!-- ══ the gift itself ══ -->
 <div class="viewer" id="viewer" hidden>
   <div class="viewer-bar">
+    <span class="v-brand"><span class="hey">hey</span><span class="flowers">flowers</span></span>
     <span id="viewerTag"></span>
     <button class="vbtn" id="replayBtn">↻ Replay</button>
+    <button class="vbtn cta-mini" id="makeOwnBtn" hidden>Make one back 🌼</button>
     <button class="vbtn" id="closeBtn">✕ Close</button>
   </div>
-  <div class="viewer-stage"><iframe id="viewFrame" title="Your gift" allow="microphone; autoplay"></iframe></div>
+  <div class="viewer-stage">
+    <iframe id="viewFrame" title="Your gift" allow="microphone; autoplay"></iframe>
+    <!-- a small maker's mark, not a watermark: it credits the sender first -->
+    <div class="made-mark" id="madeMark" hidden>
+      <span class="mm-hand">made by hand on</span>
+      <span class="mm-logo"><span class="hey">hey</span><span class="flowers">flowers</span></span>
+    </div>
+  </div>
 </div>
 
 <script src="auth.js?v=4"></script>
-<script src="app.js?v=14"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>
