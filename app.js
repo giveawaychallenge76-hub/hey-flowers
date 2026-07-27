@@ -263,9 +263,16 @@ const CONTROL = {
                      style="font-family:${esc(ft.css)}">${esc(ft.name)}</option>`).join('')}</select>`
 };
 
+/* set when a signed-out visitor picks a template — we reopen it for them
+   the moment they finish signing in, instead of dumping them on the shelf */
+let pendingOpen = null;
 function openEditor(id, preset, resumeKey){
   // browse freely, but you must be signed in to actually make a gift
-  if (window.HFAuth && !window.HFAuth.isIn()){ window.HFAuth.open('signup'); return; }
+  if (window.HFAuth && !window.HFAuth.isIn()){
+    pendingOpen = { id, preset, resumeKey };
+    window.HFAuth.open('signup');
+    return;
+  }
   current = TEMPLATES.find(t => t.id === id);
   if (!current) return;
   draftKey = resumeKey !== undefined ? resumeKey : null;
@@ -1046,6 +1053,15 @@ openSentBtn.onclick = () => openGift(current, values);
 previewBtn.onclick  = () => openGift(current, values);
 wrapBtn.onclick     = wrap;
 
+/* just signed in: pick up whatever they were trying to do, and repaint the
+   profile since the drafts/sent storage is now scoped to their account */
+document.addEventListener('hf:signedin', () => {
+  const p = pendingOpen;
+  pendingOpen = null;
+  if (p) openEditor(p.id, p.preset, p.resumeKey);
+  else if (document.getElementById('mine').classList.contains('on')) paintMine();
+});
+
 /* a gift link opens straight into the gift */
 function routeFromHash(){
   const m = location.hash.match(/^#g=(.+)$/);
@@ -1059,11 +1075,20 @@ function routeFromHash(){
 addEventListener('hashchange', routeFromHash);
 
 /* ───────────────────────── 7. gifts I've sent (this device) ──────── */
-function makeStore(key){
+/* Keys are scoped to the signed-in account, so two people sharing a browser
+   never see each other's drafts or sent gifts. Signed out (or with Supabase
+   unconfigured) it falls back to the plain key. */
+function makeStore(base){
   let mem = [];
+  const key = () => {
+    try{
+      const u = window.HFAuth && window.HFAuth.user && window.HFAuth.user();
+      return u ? base + '.' + String(u.id).slice(0, 8) : base;
+    }catch{ return base; }
+  };
   return {
-    read(){ try{ return JSON.parse(localStorage.getItem(key)) || []; }catch{ return mem; } },
-    write(list){ try{ localStorage.setItem(key, JSON.stringify(list)); }catch{ mem = list; } }
+    read(){ try{ return JSON.parse(localStorage.getItem(key())) || []; }catch{ return mem; } },
+    write(list){ try{ localStorage.setItem(key(), JSON.stringify(list)); }catch{ mem = list; } }
   };
 }
 const store  = makeStore('sunflower.sent');    // link generated
@@ -1123,7 +1148,11 @@ function paintMine(){
   const dr   = drafts.read();
 
   const ps = document.getElementById('pstat');
-  if (ps) ps.textContent = `${sent.length} sent · ${dr.length} draft${dr.length===1?'':'s'} · kept on this device`;
+  if (ps){
+    const synced = !!(window.HFAuth && window.HFAuth.user && window.HFAuth.user());
+    ps.textContent = `${sent.length} sent · ${dr.length} draft${dr.length===1?'':'s'} · `
+      + (synced ? 'saved to your account' : 'kept on this device');
+  }
 
   const tpl    = id => TEMPLATES.find(x => x.id === id);
   const title  = id => (tpl(id) || {}).name || id;

@@ -1,0 +1,22 @@
+# Source material kept in the repo but NOT needed by the live site.
+# Everything the site actually loads lives in templates/, stickers/,
+# thumbnail/, and the root html/css/js. Excluding these cuts the deploy
+# from ~74MB to ~40MB. Delete this file if you ever want them shipped.
+
+# unused leftovers (verified: zero references from index.html/app.js/templates)
+moon app template/
+stickers-king/
+anniversay-stickers/
+birthday-assets/
+
+# the standalone HTML these templates were converted FROM
+anniversary-tin.html
+birthdaycrtoon.html
+birthdaycake.html
+crush copy 4.html
+sunflower-single-file.html
+
+# local tooling
+.claude/
+supabase/
+.DS_Store

@@ -46,10 +46,15 @@ window.HF_SB = HF_SB;   // app.js uses the same client for drafts / uploads
 
   /* logged in → reveal the app chrome (profile, editing) + close modal */
   function setAuthed(user){
+    const was = currentUser && currentUser.id;
     currentUser = user || null;
     document.body.classList.toggle('authed', !!user);
     const e = $('userEmail'); if (e) e.textContent = user ? (user.email || 'you') : '@you';
-    if (user) closeModal();
+    if (user){
+      closeModal();
+      // tell the app so it can resume the template they picked before signing in
+      if (was !== user.id) document.dispatchEvent(new CustomEvent('hf:signedin'));
+    }
   }
 
   function msg(text, ok){
