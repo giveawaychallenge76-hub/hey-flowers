@@ -23,10 +23,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
 /* ── the logo: "hey" bubble letters + "flowers" on a red block ── */
 .logo,.foot-logo{display:inline-flex;align-items:baseline;gap:2px;line-height:1}
+/* no outline on "hey" — just the clean bubble letters */
 .hey{
   font-family:'Fredoka';font-weight:700;font-size:26px;color:var(--yellow);
-  text-shadow:-2px -2px 0 var(--deep),2px -2px 0 var(--deep),
-              -2px 2px 0 var(--deep),2px 2px 0 var(--deep),0 3px 0 var(--deep);
   letter-spacing:.01em;
 }
 .flowers{
@@ -38,30 +37,37 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 /* ── nav ── */
 .hf-nav{position:fixed;inset:16px 16px auto;z-index:60}
 body.editing .hf-nav{display:none}
+/* cream sticker bar — solid, chunky outline, hard drop shadow, same
+   treatment as the red "flowers" block so it reads as part of the brand */
 .nav-in{
   max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:16px;
-  background:rgba(14,17,24,.82);backdrop-filter:blur(16px);
-  border:1px solid var(--edge);border-radius:999px;padding:10px 12px 10px 18px;
-  box-shadow:0 22px 55px -20px rgba(0,0,0,.78), 0 4px 14px -6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
+  background:#fffdf5;color:#16224a;
+  border:2.5px solid #16224a;border-radius:999px;padding:8px 10px 8px 16px;
+  box-shadow:0 5px 0 #16224a, 0 14px 26px -12px rgba(10,35,80,.55);
 }
-.nav-pill{display:flex;gap:4px;margin:0 auto;background:rgba(255,255,255,.06);
+/* yellow would vanish on cream — the wordmark goes navy inside the bar */
+.nav-in .hey{color:#16224a}
+.nav-pill{display:flex;gap:4px;margin:0 auto;background:#eef1f9;
   border-radius:999px;padding:4px}
-.nav-pill button{padding:8px 18px;border-radius:999px;font-size:14px;color:var(--soft);
-  transition:.2s var(--ease)}
-.nav-pill button.on,.nav-pill button:hover{background:var(--ink);color:#10131b}
+.nav-pill button{padding:8px 18px;border-radius:999px;font-size:14px;
+  color:#69718c;font-weight:500;transition:.2s var(--ease)}
+.nav-pill button.on,.nav-pill button:hover{background:#fff;color:#16224a;font-weight:600;
+  box-shadow:0 2px 6px -1px rgba(22,34,74,.28)}
 /* only one lit at a time: while hovering the pill, the hovered button wins
    and any persistently-selected one steps back */
-.nav-pill:hover button.on:not(:hover){background:transparent;color:var(--soft)}
+.nav-pill:hover button.on:not(:hover){background:transparent;color:#69718c;box-shadow:none}
 /* right side: Sign in (logged out) ↔ profile (logged in) */
 .nav-auth{display:flex;align-items:center;gap:8px}
-.nav-signin{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#1f2430;
-  font-weight:600;font-size:14px;border-radius:999px;padding:8px 17px 8px 13px;transition:.18s var(--ease);
-  box-shadow:0 10px 22px -12px rgba(0,0,0,.7)}
-.nav-signin:hover{transform:translateY(-1px)}
+.nav-signin{display:inline-flex;align-items:center;gap:8px;background:var(--yellow);color:#4a3305;
+  font-weight:700;font-size:14px;border-radius:999px;padding:8px 17px 8px 13px;transition:.16s var(--ease);
+  border:2px solid #16224a;box-shadow:0 3px 0 #16224a}
+.nav-signin:hover{transform:translateY(-2px);box-shadow:0 5px 0 #16224a}
+.nav-signin:active{transform:translateY(1px);box-shadow:0 1px 0 #16224a}
 .nav-signin svg{width:18px;height:18px;flex:none}
-.nav-me{display:none;align-items:center;gap:7px;background:rgba(255,255,255,.07);color:var(--ink);
-  font-size:14px;border-radius:999px;padding:7px 16px 7px 9px;transition:.2s var(--ease)}
-.nav-me:hover{background:var(--ink);color:#10131b}
+.nav-me{display:none;align-items:center;gap:7px;background:#fff;color:#16224a;font-weight:600;
+  font-size:14px;border-radius:999px;padding:6px 16px 6px 9px;transition:.16s var(--ease);
+  border:2px solid #16224a;box-shadow:0 3px 0 #16224a}
+.nav-me:hover{transform:translateY(-2px);box-shadow:0 5px 0 #16224a}
 .nav-me .me-dot{font-size:15px;line-height:1}
 /* no social sign-in configured → drop the Google mark from the nav button,
    otherwise it promises a Google flow that isn't there */
@@ -71,11 +77,13 @@ body.authed  .nav-signin{display:none}
 body.authed  .nav-me{display:inline-flex}
 body.auth-off .nav-signin{display:none}
 /* "+999 people creating" pill above the headline */
+/* matching sticker treatment — white on the blue sky, so it actually pops */
 .count-pill{
   display:inline-flex;align-items:center;gap:9px;margin-bottom:26px;
-  background:rgba(10,14,22,.55);border:1px solid rgba(255,255,255,.12);
-  border-radius:999px;padding:9px 18px;
-  font-size:13px;font-weight:600;letter-spacing:.09em;color:#fff;
+  background:#fffdf5;border:2.5px solid #16224a;
+  border-radius:999px;padding:8px 18px;
+  box-shadow:0 4px 0 #16224a, 0 12px 22px -12px rgba(10,35,80,.5);
+  font-size:13px;font-weight:700;letter-spacing:.08em;color:#16224a;
 }
 .count-pill .rd{width:8px;height:8px;border-radius:50%;background:#ff4b3e;flex:none;
   animation:pulse 1.6s ease-in-out infinite}
@@ -84,9 +92,11 @@ body.auth-off .nav-signin{display:none}
 /* ── landing ── */
 #gallery{
   background:linear-gradient(180deg,#5ab3f8 0%,var(--blue) 46%,#3d97ea 100%);
-  min-height:100vh;padding-top:108px;color:#fff;
+  min-height:100vh;padding-top:100px;color:#fff;
 }
-.hero{text-align:center;padding:48px 20px 34px;max-width:960px;margin:0 auto}
+/* #gallery's padding already clears the fixed nav — keep the hero's own
+   top padding small or the two stack into a huge empty band */
+.hero{text-align:center;padding:14px 20px 34px;max-width:960px;margin:0 auto}
 /* the brand font (Fredoka), thickly outlined so it reads on any background */
 .hero-h{
   font-family:'Fredoka',system-ui,sans-serif;font-weight:700;
@@ -489,8 +499,7 @@ textarea{resize:vertical;min-height:76px}
 @media (max-width:620px){
   .hf-nav{inset:10px 10px auto}
   .nav-in{gap:8px;padding:7px 8px 7px 12px}
-  .hey{font-size:19px;text-shadow:-1.5px -1.5px 0 var(--deep),1.5px -1.5px 0 var(--deep),
-       -1.5px 1.5px 0 var(--deep),1.5px 1.5px 0 var(--deep),0 2px 0 var(--deep)}
+  .hey{font-size:19px}
   .flowers{font-size:14px;padding:2px 5px 3px}
   .nav-pill{gap:2px;padding:3px;margin:0;flex:0 1 auto;min-width:0}
   .nav-pill button{padding:6px 10px;font-size:12.5px;white-space:nowrap}
@@ -499,8 +508,9 @@ textarea{resize:vertical;min-height:76px}
   .nav-signin svg{width:15px;height:15px}
   .nav-me{padding:6px 12px 6px 8px;font-size:12.5px}
 
-  /* hero: give it room under the (now shorter) nav */
-  .hero{padding-top:86px}
+  /* the nav is shorter here, so #gallery needs less clearance */
+  #gallery{padding-top:74px}
+  .hero{padding-top:14px}
   .count-pill{font-size:11px;padding:7px 13px;margin-bottom:18px;letter-spacing:.06em}
   .hero-p{font-size:15px}
   /* the 3px outline was built for a 78px headline — at phone size it closed
