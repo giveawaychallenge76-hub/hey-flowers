@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true,
-  "trailingSlash": false,
+  "_comment": "cleanUrls is OFF on purpose: it rewrote /templates/<id>/index.html to /templates/<id> (no trailing slash), so the templates' relative asset paths resolved one directory too high and every image 404'd when a template URL was opened directly.",
+  "cleanUrls": false,
   "headers": [
     {
       "source": "/(.*)",
