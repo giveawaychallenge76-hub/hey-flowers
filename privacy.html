@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy &amp; Terms — heyflowers</title>
+<meta name="description" content="What heyflowers stores, what it doesn't, and the terms of using it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#5aa2f0;--deep:#1b4f96;--yellow:#ffc94b;--red:#e0323f;--ink:#0f1420}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Outfit',system-ui,sans-serif;color:#fff;line-height:1.7;
+    background:linear-gradient(180deg,#5ab3f8 0%,var(--blue) 42%,#3d97ea 100%);
+    min-height:100vh;padding:26px 20px 60px;
+  }
+  .bar{max-width:760px;margin:0 auto 26px;display:flex;align-items:center;gap:14px}
+  .logo{display:inline-flex;align-items:baseline;gap:2px;line-height:1;text-decoration:none}
+  .hey{font-family:'Fredoka';font-weight:700;font-size:24px;color:var(--yellow);
+    text-shadow:-2px -2px 0 var(--deep),2px -2px 0 var(--deep),-2px 2px 0 var(--deep),2px 2px 0 var(--deep),0 3px 0 var(--deep)}
+  .flowers{font-family:'Fredoka';font-weight:600;font-size:18px;color:var(--yellow);
+    background:var(--red);padding:3px 8px 4px;border-radius:4px;transform:rotate(-2deg) translateY(-1px);display:inline-block}
+  .sp{flex:1}
+  .back{background:rgba(10,14,22,.4);border:1px solid rgba(255,255,255,.35);color:#fff;
+    border-radius:999px;padding:9px 18px;font:inherit;font-size:14px;text-decoration:none;transition:.18s}
+  .back:hover{background:rgba(10,14,22,.62)}
+  .card{
+    max-width:760px;margin:0 auto;background:rgba(9,22,45,.55);
+    border:1px solid rgba(255,255,255,.18);border-radius:26px;padding:36px 32px;
+    backdrop-filter:blur(10px);
+  }
+  h1{font-family:'Fredoka';font-weight:700;font-size:clamp(28px,6vw,42px);line-height:1.1;margin-bottom:6px}
+  .updated{color:rgba(255,255,255,.7);font-size:13.5px;margin-bottom:26px}
+  h2{font-family:'Fredoka';font-weight:600;font-size:21px;margin:30px 0 10px;color:var(--yellow)}
+  h2:first-of-type{margin-top:0}
+  p{margin-bottom:13px;color:rgba(255,255,255,.92)}
+  ul{margin:0 0 13px 20px}
+  li{margin-bottom:8px;color:rgba(255,255,255,.92)}
+  b{color:#fff}
+  a{color:var(--yellow)}
+  .note{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+    border-radius:16px;padding:16px 18px;margin:18px 0}
+  hr{border:0;border-top:1px solid rgba(255,255,255,.18);margin:36px 0}
+  .foot{max-width:760px;margin:26px auto 0;text-align:center;color:rgba(255,255,255,.72);font-size:13px}
+  @media(max-width:620px){ .card{padding:26px 20px;border-radius:20px} }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <a class="logo" href="index.html"><span class="hey">hey</span><span class="flowers">flowers</span></a>
+  <span class="sp"></span>
+  <a class="back" href="index.html">← Back to site</a>
+</div>
+
+<main class="card">
+  <h1>Privacy &amp; Terms</h1>
+  <p class="updated">Last updated 27 July 2026</p>
+
+  <h2>The short version</h2>
+  <p>
+    heyflowers lets you customise a gift template and share it as a link. We keep
+    as little about you as we can get away with: an email address so you can sign
+    in, and a record of the gifts you've made. That's it.
+  </p>
+
+  <div class="note">
+    <b>Your gift content lives in the link, not on our servers.</b> When you finish
+    a gift, everything in it — your words, colours, stickers and any photos you
+    added — is encoded into the link itself. Anyone with that link can open it.
+    Treat a gift link like the gift: only send it to the person it's for.
+  </div>
+
+  <h2>What we store</h2>
+  <ul>
+    <li><b>Your email address</b> — so you can sign in and get back to your work. If you use Google sign-in, Google tells us your email address and name.</li>
+    <li><b>Your gifts</b> — the template used, a title, and the share link, so they show up in your profile.</li>
+    <li><b>Basic visit counts</b> — the page visited, where you arrived from, and your browser type. We use this to see whether anyone's using the site.</li>
+  </ul>
+  <p>
+    Drafts you haven't sent stay in your own browser's storage, on your device.
+    Clearing your browser data deletes them.
+  </p>
+
+  <h2>What we don't do</h2>
+  <ul>
+    <li>We don't sell your data or share it with advertisers.</li>
+    <li>We don't run advertising or third-party tracking pixels.</li>
+    <li>We never see your password. Sign-in is handled by Supabase.</li>
+  </ul>
+
+  <h2>Who else is involved</h2>
+  <p>
+    Two services make this site work: <b>Supabase</b> handles accounts and stores
+    your data, and <b>Vercel</b> serves the website. Both can see the technical
+    information needed to do that job. If you sign in with Google, Google is
+    involved in that step too.
+  </p>
+
+  <h2>Photos, music and video you upload</h2>
+  <p>
+    Files you add to a gift are embedded in the gift itself rather than kept in a
+    public gallery. Because they travel inside the share link, anyone holding that
+    link can see them. Please don't upload anything you'd be upset to have seen by
+    someone the link gets forwarded to.
+  </p>
+
+  <h2>Deleting your account</h2>
+  <p>
+    Email <a href="mailto:pakwalakra01@gmail.com">pakwalakra01@gmail.com</a> and
+    we'll delete your account and everything attached to it. Links you've already
+    shared will keep working, because the content is inside the link and not
+    something we can reach.
+  </p>
+
+  <h2>Children</h2>
+  <p>heyflowers isn't intended for children under 13.</p>
+
+  <hr>
+
+  <h2 id="terms">Terms of use</h2>
+  <p>
+    Use heyflowers to make gifts for people. Don't use it to harass anyone, to
+    impersonate someone, or to share anything illegal or that you don't have the
+    rights to. We can suspend accounts that do.
+  </p>
+  <p>
+    <b>Pricing.</b> Everything is free at the moment, including the plans shown on
+    the pricing page. If that changes we'll say so clearly before charging anyone.
+  </p>
+  <p>
+    <b>The honest bit.</b> This is a small, new site run by one person. It's
+    provided as-is, without guarantees of uptime, and gift links depend on the site
+    staying online. Please keep your own copy of anything you'd hate to lose.
+  </p>
+  <p>
+    <b>Your work is yours.</b> We claim no ownership over the gifts you make. The
+    templates, artwork and code stay ours.
+  </p>
+
+  <h2>Questions</h2>
+  <p>
+    Email <a href="mailto:pakwalakra01@gmail.com">pakwalakra01@gmail.com</a> —
+    it reaches a person.
+  </p>
+</main>
+
+<div class="foot">© 2026 heyflowers · made by xykunl</div>
+
+</body>
+</html>
