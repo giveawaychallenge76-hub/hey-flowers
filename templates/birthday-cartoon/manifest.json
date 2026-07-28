@@ -47,6 +47,21 @@
       "page": "friends"
     },
     {
+      "key": "song",
+      "type": "music",
+      "label": "Your own song (upload an audio file)",
+      "default": "",
+      "page": "friends"
+    },
+    {
+      "key": "song_url",
+      "type": "text",
+      "label": "…or paste a YouTube link",
+      "default": "",
+      "placeholder": "https://youtu.be/…",
+      "page": "friends"
+    },
+    {
       "key": "cphoto1",
       "type": "image",
       "label": "Photo 1",

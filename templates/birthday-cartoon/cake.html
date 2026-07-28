@@ -245,6 +245,14 @@ function burst(n){ for(var i=0;i<n;i++){ var c=document.createElement("span"); c
   setTimeout(function(el){ el.remove(); }.bind(null,c),dur+100); } }
 
 /* ── talk to the party page that hosts this cake ── */
+/* the parent tells us when we're the visible page — go quiet otherwise,
+   or page 1's music and ours play on top of each other */
+var wasOn=false;
+window.addEventListener("message",function(e){
+  var d=e.data||{};
+  if(d.__audio==='off'){ wasOn=musicOn; if(musicOn) musicStop(); return; }
+  if(d.__audio==='on'){ if(wasOn && !musicOn) musicStart(); return; }
+});
 window.addEventListener("message",function(e){ var d=e.data||{}; if(!d.__hfvals) return;
   var fl=document.querySelector(".friends-line"); if(fl&&d.msg) fl.textContent=d.msg;
   var cs=document.querySelector("#closing .s"); if(cs&&d.frm) cs.textContent="\u2014 with all my love, "+d.frm;

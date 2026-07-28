@@ -116,8 +116,18 @@ body.live #replay{opacity:.85}
     letters:[{msg:"{{cl1m}}",frm:"{{cl1f}}"},{msg:"{{cl2m}}",frm:"{{cl2f}}"},{msg:"{{cl3m}}",frm:"{{cl3f}}"},{msg:"{{cl4m}}",frm:"{{cl4f}}"},{msg:"{{cl5m}}",frm:"{{cl5f}}"},{msg:"{{cl6m}}",frm:"{{cl6f}}"},{msg:"{{cl7m}}",frm:"{{cl7f}}"},{msg:"{{cl8m}}",frm:"{{cl8f}}"},{msg:"{{cl9m}}",frm:"{{cl9f}}"},{msg:"{{cl10m}}",frm:"{{cl10f}}"},{msg:"{{cl11m}}",frm:"{{cl11f}}"},{msg:"{{cl12m}}",frm:"{{cl12f}}"}] };
   var frame=document.getElementById('cake-frame'), btn=document.getElementById('toCake');
   function send(){ try{ frame.contentWindow.postMessage({__hfvals:1,msg:HF.msg,frm:HF.frm,photos:HF.photos,letters:HF.letters},"*"); }catch(_){}}
-  function showCake(){ frame.style.display='block'; send(); }
-  function hideCake(){ frame.style.display='none'; }
+  function tell(m){ try{ frame.contentWindow.postMessage(m,"*"); }catch(_){} }
+  /* only the page you're looking at is allowed to make noise */
+  function showCake(){
+    frame.style.display='block'; send();
+    if(window.__partyAudio) window.__partyAudio(false);   // hush page 1
+    tell({__audio:'on'});
+  }
+  function hideCake(){
+    frame.style.display='none';
+    tell({__audio:'off'});                                 // hush the cake
+    if(window.__partyAudio) window.__partyAudio(true);
+  }
   if(btn) btn.addEventListener('click', showCake);
   window.addEventListener('message',function(e){
     var d=e.data||{};
@@ -233,8 +243,46 @@ function pop(){ var a=ac(); if(!a) return; var t=a.currentTime; var o=a.createOs
   g.gain.setValueAtTime(.022,t); g.gain.exponentialRampToValueAtTime(.0005,t+.1);
   o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+.12); }
 
-/* ══════════ MUSIC — happy birthday ══════════ */
-var MASTER=null, playing=false;
+/* ══════════ MUSIC ══════════
+   The sender can supply their own song — an uploaded file, or a YouTube
+   link. If neither is given we fall back to the built-in chiptune. */
+var SONG_FILE = "{{song}}";       // data: or https: audio
+var SONG_URL  = "{{song_url}}";   // a YouTube link
+var customEl=null, ytFrame=null;
+
+function ytId(u){
+  var m=String(u||"").match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:"";
+}
+function customStart(){
+  if (SONG_FILE){
+    if(!customEl){
+      customEl=new Audio(SONG_FILE); customEl.loop=true; customEl.volume=.85;
+    }
+    customEl.play().catch(function(){});
+    return true;
+  }
+  var id=ytId(SONG_URL);
+  if (id){
+    if(!ytFrame){
+      ytFrame=document.createElement("iframe");
+      ytFrame.allow="autoplay";
+      ytFrame.style.cssText="position:fixed;width:1px;height:1px;opacity:.01;pointer-events:none;bottom:0;left:0;border:0";
+      ytFrame.src="https://www.youtube-nocookie.com/embed/"+id+
+        "?autoplay=1&loop=1&playlist="+id+"&controls=0&playsinline=1";
+      document.body.appendChild(ytFrame);
+    }
+    return true;
+  }
+  return false;
+}
+function customStop(){
+  if(customEl){ try{ customEl.pause(); }catch(_){} }
+  if(ytFrame){ ytFrame.remove(); ytFrame=null; }
+}
+var hasCustom = !!(SONG_FILE || ytId(SONG_URL));
+
+var MASTER=null, playing=false, muted=false;
 function master(){ var a=ac(); if(!a) return null;
   if(!MASTER){ var comp=a.createDynamicsCompressor(); MASTER=a.createGain(); MASTER.gain.value=.9; MASTER.connect(comp); comp.connect(a.destination); }
   return MASTER; }
@@ -244,7 +292,7 @@ var TUNE=[[G,.75],[G,.25],[A,1],[G,1],[C,1],[B,2],
   [G,.75],[G,.25],[G5,1],[E,1],[C,1],[B,1],[A,2],
   [F,.75],[F,.25],[E,1],[C,1],[D,1],[C,2.5]];
 var BEAT=0.44;
-function tone(f,t0,dur){ var a=ac(),out=master(); if(!a||!out) return;
+function tone(f,t0,dur){ if(muted) return; var a=ac(),out=master(); if(!a||!out) return;
   var o=a.createOscillator(),o2=a.createOscillator(),g=a.createGain(),lp=a.createBiquadFilter();
   o.type="triangle"; o.frequency.value=f; o2.type="sine"; o2.frequency.value=f*2; o2.detune.value=4;
   lp.type="lowpass"; lp.frequency.value=2600;
@@ -260,19 +308,45 @@ function tap(el){
   el.classList.remove("tap"); void el.offsetWidth; el.classList.add("tap");
   if(!playing) goLive();
 }
+var tuneTimer=null;
 function goLive(){
   if(playing) return;
   playing=true;
-  ac(); master();
   cue.classList.add("gone");
   document.body.classList.add("live");
   document.querySelectorAll('img[data-anim]').forEach(function(img){ img.src = img.getAttribute("data-anim"); });
-  var loop=playTune();
-  setInterval(playTune, loop+500);
+  // their song wins; the built-in tune is only the fallback
+  if(!customStart()){
+    ac(); master();
+    var loop=playTune();
+    tuneTimer=setInterval(playTune, loop+500);
+  }
   setInterval(sprinkle, BEAT*1000*2);
   burst(70); setInterval(function(){ burst(10); }, 1500);
   document.getElementById("credit").textContent = "— with love, " + FROM + " ♥";
 }
+
+/* Page 1 and the cake each have their own audio. Whichever page you're
+   NOT looking at must go quiet, or they play over each other.
+   `muted` is the source of truth and is also checked in tone(), so this
+   works even if it's called before the AudioContext exists. */
+window.__partyAudio = function(on){
+  muted = !on;
+  if (hasCustom){
+    if(on){ if(playing) customStart(); } else customStop();
+    return;
+  }
+  try{
+    var a=ac();
+    if(MASTER && a) MASTER.gain.setValueAtTime(on ? .9 : 0, a.currentTime);
+  }catch(_){}
+  if(!on){                                  // stop scheduling new notes too
+    if(tuneTimer){ clearInterval(tuneTimer); tuneTimer=null; }
+  } else if(playing && !tuneTimer){
+    var loop=playTune();
+    tuneTimer=setInterval(playTune, loop+500);
+  }
+};
 
 var CC=["#ff5c8a","#ffcf3f","#5ad1ff","#7ee88a","#c78bff","#ff8a3a"];
 function burst(n){

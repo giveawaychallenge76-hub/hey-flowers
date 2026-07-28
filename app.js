@@ -1009,36 +1009,24 @@ function posterHTML(){
 }
 
 /* ───────────────────────── 5. open the gift for real ─────────────── */
-/* Two audiences, two framings:
-   · the sender previewing their own work wants the template name and a
-     way back to the editor
-   · someone who was SENT this should never see the template's catalogue
-     name — that quietly reframes a handmade thing as a stock one. They
-     get who it's for, a small maker's mark, and a way to make one back. */
+/* The gift should feel like it came from the sender and nobody else — no
+   branding, no "made with", no template name (that last one quietly
+   reframes something handmade as something picked off a shelf). The
+   person who was sent it just sees who it's for. */
 function openGift(tpl, vals, opts = {}){
   const forYou = !!opts.recipient;
   const to = draftLabel(tpl, vals);
   viewerTag.textContent = forYou
-    ? (to && to !== 'someone' ? `for ${to}` : 'made for you')
+    ? (to && to !== 'someone' ? `for ${to}` : '')
     : `${tpl.category} · ${tpl.tagline || ''}`;
 
   document.body.classList.toggle('as-recipient', forYou);
-  makeOwnBtn.hidden = !forYou;
-  closeBtn.hidden   = forYou;          // nothing to close back to — they arrived here
-  madeMark.hidden   = !forYou;
+  closeBtn.hidden = forYou;            // nothing to close back to — they arrived here
 
   viewer.hidden = false;
   document.body.style.overflow = 'hidden';
   viewFrame.srcdoc = inject(tpl, vals);
   window._viewing = { tpl, vals, recipient: forYou };
-  if (forYou) armMadeMark();
-}
-/* the mark fades in a few seconds late, so the gift lands first */
-let markTimer;
-function armMadeMark(){
-  clearTimeout(markTimer);
-  madeMark.classList.remove('in');
-  markTimer = setTimeout(() => madeMark.classList.add('in'), 4000);
 }
 function closeGift(){
   viewer.hidden = true;
@@ -1048,19 +1036,9 @@ function closeGift(){
 }
 replayBtn.onclick = () => {
   const v = window._viewing;
-  if (!v) return;
-  viewFrame.srcdoc = inject(v.tpl, v.vals);
-  if (v.recipient) armMadeMark();
+  if (v) viewFrame.srcdoc = inject(v.tpl, v.vals);
 };
 closeBtn.onclick  = closeGift;
-/* they liked it enough to want their own — send them to the shelf */
-makeOwnBtn.onclick = () => {
-  closeGift();
-  document.body.classList.remove('as-recipient');
-  go('gallery');
-  const t = document.querySelector('#shelf');
-  if (t) glideTo(t);
-};
 addEventListener('keydown', e => { if (e.key === 'Escape' && !viewer.hidden) closeGift(); });
 
 /* ───────────────────────── 6. wrap it: the link IS the gift ──────── */

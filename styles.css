@@ -467,42 +467,15 @@ textarea{resize:vertical;min-height:76px}
 .viewer-stage iframe{width:100%;height:100%;border:0;display:block;background:#fff}
 
 /* ── what the person who was SENT the gift sees ───────────────────────
-   The point is that THEY made this. Our mark is a small signature in the
-   corner — late, quiet, and easy to ignore — never a watermark over it. */
-.viewer-bar .v-brand{display:none;flex:none;align-items:baseline;gap:2px;opacity:.9}
-.viewer-bar .v-brand .hey{font-size:15px}
-.viewer-bar .v-brand .flowers{font-size:12px;padding:2px 5px 3px}
-body.as-recipient .viewer-bar .v-brand{display:inline-flex}
+   Nothing of ours. No wordmark, no "made with", no template name — the
+   gift should read as the sender's own work, start to finish. */
 body.as-recipient .viewer-bar span#viewerTag{color:var(--ink);font-weight:500}
-.vbtn.cta-mini{background:var(--yellow);color:#4a3305;font-weight:600;border:0;white-space:nowrap}
-.vbtn.cta-mini:hover{filter:brightness(1.06)}
 .viewer-bar span#viewerTag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .viewer-bar .vbtn{white-space:nowrap;flex:none}
 @media (max-width:620px){
   .viewer-bar{gap:7px;padding:8px 10px}
   .viewer-bar .vbtn{padding:7px 11px;font-size:12.5px}
   .viewer-bar span#viewerTag{font-size:12px}
-  /* on a narrow bar the word "Replay" is the first thing worth losing */
-  body.as-recipient .viewer-bar #replayBtn{font-size:0;padding:7px 10px}
-  body.as-recipient .viewer-bar #replayBtn::before{content:'↻';font-size:15px}
-}
-
-.made-mark{
-  position:absolute;right:14px;bottom:14px;z-index:3;pointer-events:none;
-  display:flex;align-items:center;gap:7px;
-  background:rgba(10,18,34,.42);backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 13px 6px 12px;
-  opacity:0;transform:translateY(6px);transition:opacity .7s ease,transform .7s ease;
-}
-.made-mark.in{opacity:.72;transform:none}
-.made-mark[hidden]{display:none}
-.mm-hand{font-size:11px;letter-spacing:.03em;color:rgba(255,255,255,.9)}
-.mm-logo{display:inline-flex;align-items:baseline;gap:1px}
-.mm-logo .hey{font-size:13px}
-.mm-logo .flowers{font-size:10.5px;padding:1px 4px 2px}
-@media (max-width:620px){
-  .made-mark{right:10px;bottom:10px;padding:5px 10px}
-  .mm-hand{font-size:10px}
 }
 
 /* ── toast ── */
