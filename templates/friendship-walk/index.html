@@ -161,7 +161,35 @@ body{font-family:var(--hf-font),'Gaegu',cursive;color:var(--ink);background:var(
 #opening{position:fixed;left:6%;top:26%;z-index:14;width:min(520px,46vw);font-size:clamp(19px,2.3vw,27px);line-height:1.4;color:var(--ink);
   transition:opacity .6s;text-shadow:0 1px 0 rgba(255,255,255,.6)}
 #opening.gone{opacity:0}
-@media(max-width:700px){ #bird{width:110px;left:15%} .note{width:66vw} #opening{width:76vw;top:22%} }
+@media(max-width:700px){
+  #bird{width:110px;left:15%}
+  #opening{width:80vw;top:20%}
+
+  /* lift the whole walk up the sky — it was sitting on the bottom edge */
+  #legs{top:66%}
+  .prop{padding-bottom:16vh}
+
+  /* Notes used to be 66vw each with one at left:52% and one at right:52%,
+     so neighbouring notes ran straight through each other. Centre them,
+     narrow them, and give them a soft backdrop so they stay readable. */
+  .note{
+    width:74vw;left:50%;right:auto;transform:translateX(-50%);
+    bottom:calc(100% + 10px);font-size:15px;line-height:1.3;text-align:center;
+    background:rgba(255,255,255,.62);border-radius:12px;padding:7px 10px;
+    text-shadow:none;backdrop-filter:blur(2px);
+  }
+  .note.r,.note.l{left:50%;right:auto}
+
+  /* three bubbles at 29vw left no room for their text — go two-up and
+     scale the type to the bubble */
+  .bubrow{flex-wrap:wrap;gap:8px;justify-content:center}
+  .bub{width:min(210px,43vw)}
+  .bub .txt{font-size:11.5px;line-height:1.2;top:11%;height:64%;width:78%;left:11%}
+  .bub.open .txt{font-size:10.5px;line-height:1.18}
+
+  .signItem img{width:44vw}
+  .cttl{font-size:17px}
+}
 </style>
 </head>
 <body>
@@ -486,7 +514,9 @@ function frame(){
   var t0=0.83, tv=Math.max(0,Math.min(1,(prog-t0)/(1-t0)));
   var ease=tv*tv*(3-2*tv);
   finWrap.style.transform="translateY("+(-120+ease*120)+"%)";
-  if(tv>0.5 && !rained){ rained=true; rain(40); setInterval(function(){ rain(5); },1500); }
+  /* chocolates only at the very end, and only once — this used to fire at
+     the halfway point and then keep raining every 1.5s forever */
+  if(tv>0.94 && !rained){ rained=true; rain(34); }
 
   document.getElementById("meterFill").style.width=(prog*100)+"%";
 }
