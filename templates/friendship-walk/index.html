@@ -125,8 +125,10 @@ body{font-family:var(--hf-font),'Gaegu',cursive;color:var(--ink);background:var(
 .bub.open .txt .full{display:block}
 .bub.open{transform:translateY(-9px) scale(1.06);z-index:5}
 
-/* the sign board on the path */
-.signItem img{width:min(300px,26vw);display:block;filter:drop-shadow(0 10px 12px rgba(30,40,30,.32))}
+/* the sign board on the path. add() gives it bottom:8% inline, which puts
+   the post in the dirt band (#dirt is the bottom 8.5vh) — nothing else
+   should lift it off that line. */
+.signStop{bottom:4.5% !important}
 
 /* ⑤ finale */
 #finale{position:absolute;left:0;right:0;top:0;height:100%;z-index:12;pointer-events:none;display:flex;justify-content:center}
@@ -165,9 +167,9 @@ body{font-family:var(--hf-font),'Gaegu',cursive;color:var(--ink);background:var(
   #bird{width:110px;left:15%}
   #opening{width:80vw;top:20%}
 
-  /* lift the whole walk up the sky — it was sitting on the bottom edge */
-  #legs{top:66%}
-  .prop{padding-bottom:16vh}
+  /* Props stay planted on the dirt path — only the notes above them get
+     lifted. (A padding-bottom here floated the sign into the sky.) */
+  #legs{top:70%}
 
   /* Notes used to be 66vw each with one at left:52% and one at right:52%,
      so neighbouring notes ran straight through each other. Centre them,
@@ -187,7 +189,8 @@ body{font-family:var(--hf-font),'Gaegu',cursive;color:var(--ink);background:var(
   .bub .txt{font-size:11.5px;line-height:1.2;top:11%;height:64%;width:78%;left:11%}
   .bub.open .txt{font-size:10.5px;line-height:1.18}
 
-  .signItem img{width:44vw}
+  .signImg{width:46vw}
+  .playBtn{font-size:14px;padding:7px 18px 9px;margin-bottom:12px}
   .cttl{font-size:17px}
 }
 </style>
