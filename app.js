@@ -121,7 +121,24 @@ function inject(tpl, vals, opts = {}){
   const absBase = new URL(tpl.assetsBaseURL || '', location.href).href;
   const field = k => tpl.fields.find(f => f.key === k) || {};
   const dflt  = k => field(k).default || '';
-  let html = tpl.html.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+  const valueFor = key => {
+    let v = vals[key];
+    if (v === undefined || v === null || v === '') v = dflt(key);
+    if (field(key).type === 'font') return fontCSS(v);
+    if (v && /_url$/.test(key) && !/^(https?:|data:|blob:)/.test(v)) v = new URL(v, absBase).href;
+    return v;
+  };
+
+  /* A token written as "{{key}}" sits inside a quoted JS string or an HTML
+     attribute. Substituting raw text there is how a newline or a quote in
+     someone's message could break the template's whole <script> and leave
+     the gift frozen. JSON.stringify supplies the quotes AND the escaping. */
+  let html = tpl.html.replace(/"\{\{(\w+)\}\}"/g, (m, key) => {
+    if (field(key).type === 'font') return m;            // css stack, not a string
+    return JSON.stringify(String(valueFor(key) ?? ''));
+  });
+
+  html = html.replace(/\{\{(\w+)\}\}/g, (_, key) => {
     let v = vals[key];
     if (v === undefined || v === null || v === '') v = dflt(key);
     if (field(key).type === 'font') return fontCSS(v);   // name → real css stack

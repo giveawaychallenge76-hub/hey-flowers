@@ -23,7 +23,7 @@
 -->
 <style>
 :root{ --ink:{{accent}}; --ink2:#2c5680; --sky:#c2d1d4; --yellow:#efe86a;
-       --hf-font:"{{font_family}}"; }
+       --hf-font:{{font_family}}; }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scrollbar-width:none}
 body::-webkit-scrollbar{display:none}
@@ -278,6 +278,13 @@ var CHOCS=["walk-assets/choc-kitkat.png","walk-assets/choc-dairymilk.png","walk-
 
 document.getElementById("hudTtl").textContent="a walk with "+FRIEND+" ♥";
 document.getElementById("banSub").innerHTML=FRIEND+" ♥ — from "+FROM;
+/* pressing Enter in the editor should make a real line break, so a plain
+   newline works just as well as typing <br> by hand */
+function nl2br(s){ return String(s==null?"":s).replace(/\r?\n/g,"<br>"); }
+OPENING = nl2br(OPENING);
+NOTES   = NOTES.map(nl2br);
+BUBBLES = BUBBLES.map(function(b){ return { tag:b.tag, text:nl2br(b.text) }; });
+
 document.getElementById("opening").innerHTML=OPENING;
 
 var world=document.getElementById("world"), bird=document.getElementById("bird"),
