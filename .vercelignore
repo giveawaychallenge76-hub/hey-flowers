@@ -11,6 +11,8 @@
 /stickers-king/
 /anniversay-stickers/
 /birthday-assets/
+# source for friendship-walk; the live copy lives in templates/friendship-walk/
+/friend/
 
 # the standalone HTML these templates were converted FROM
 /anniversary-tin.html

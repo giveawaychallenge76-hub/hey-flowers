@@ -1,0 +1,148 @@
+{
+  "id": "friendship-walk",
+  "name": "A WALK WITH YOU",
+  "tagline": "a little walk for your best friend",
+  "category": "Friendship",
+  "experienceTime": "2 min",
+  "description": "Scroll and a little bird walks you both through a valley — flowers, your playlist, polaroids, chocolates, and the things you never said out loud.",
+  "thumbnail": "thumbnail/friendship-walk.png",
+  "featured": true,
+  "trending": true,
+  "pages": [
+    {
+      "id": "walk",
+      "label": "The walk",
+      "mount": "#hf-stage",
+      "display": "block"
+    }
+  ],
+  "fields": [
+    {
+      "key": "friend",
+      "type": "text",
+      "label": "Their name",
+      "default": "saj",
+      "page": "walk",
+      "required": true
+    },
+    {
+      "key": "from",
+      "type": "text",
+      "label": "From (your name)",
+      "default": "naveen",
+      "page": "walk"
+    },
+    {
+      "key": "opening",
+      "type": "paragraph",
+      "label": "Opening lines",
+      "default": "hi saj, you know what's today?<br>30 july — <b>friendship day</b>.<br>so i built you a little walk. come on.",
+      "page": "walk"
+    },
+    {
+      "key": "photo1",
+      "type": "image",
+      "label": "Polaroid 1",
+      "default": "",
+      "page": "walk"
+    },
+    {
+      "key": "photo2",
+      "type": "image",
+      "label": "Polaroid 2",
+      "default": "",
+      "page": "walk"
+    },
+    {
+      "key": "photo3",
+      "type": "image",
+      "label": "Polaroid 3",
+      "default": "",
+      "page": "walk"
+    },
+    {
+      "key": "note1",
+      "type": "text",
+      "label": "Sign 1 — the flowers",
+      "default": "flowers, because you turn ordinary tuesdays<br>into whole occasions.",
+      "page": "walk"
+    },
+    {
+      "key": "note2",
+      "type": "text",
+      "label": "Sign 2 — the playlist",
+      "default": "our playlist is 90% chaos, 10% crying —<br>hit the sign, you know the one.",
+      "page": "walk"
+    },
+    {
+      "key": "note3",
+      "type": "text",
+      "label": "Sign 3 — the polaroids",
+      "default": "proof we were here, being ridiculous.",
+      "page": "walk"
+    },
+    {
+      "key": "note4",
+      "type": "text",
+      "label": "Sign 4 — the bubbles",
+      "default": "and a few things i never said out loud.<br><b>tap a bubble.</b>",
+      "page": "walk"
+    },
+    {
+      "key": "b1_tag",
+      "type": "text",
+      "label": "Bubble 1 — label",
+      "default": "open me first",
+      "page": "walk"
+    },
+    {
+      "key": "b1_text",
+      "type": "paragraph",
+      "label": "Bubble 1 — message",
+      "default": "you make ordinary days feel like the good part of the movie. thank you for every single one.",
+      "page": "walk"
+    },
+    {
+      "key": "b2_tag",
+      "type": "text",
+      "label": "Bubble 2 — label",
+      "default": "for a bad day",
+      "page": "walk"
+    },
+    {
+      "key": "b2_text",
+      "type": "paragraph",
+      "label": "Bubble 2 — message",
+      "default": "if today is heavy — text me. i'll drop everything, bring snacks, and say nothing till you want me to.",
+      "page": "walk"
+    },
+    {
+      "key": "b3_tag",
+      "type": "text",
+      "label": "Bubble 3 — label",
+      "default": "the true one",
+      "page": "walk"
+    },
+    {
+      "key": "b3_text",
+      "type": "paragraph",
+      "label": "Bubble 3 — message",
+      "default": "i don't say it enough: you are my favourite person. happy friendship day ♥",
+      "page": "walk"
+    },
+    {
+      "key": "accent",
+      "type": "color",
+      "label": "Accent colour",
+      "default": "#1f3d5c",
+      "page": "walk"
+    },
+    {
+      "key": "font_family",
+      "type": "font",
+      "label": "Font",
+      "default": "Gaegu",
+      "page": "walk"
+    }
+  ]
+}

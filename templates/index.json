@@ -1,1 +1,10 @@
-{ "templates": ["birthday-cartoon", "anniversary", "date", "crush", "birthday"] }
+{
+  "templates": [
+    "friendship-walk",
+    "birthday-cartoon",
+    "anniversary",
+    "date",
+    "crush",
+    "birthday"
+  ]
+}

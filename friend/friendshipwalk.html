@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hi saj — happy friendship day ♥</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐦</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<!--
+══════════════════════════════════════════════════════════
+  A WALK WITH YOU · friendship day
+  background = the 3 real photos, tiled forever:
+     sky + mountains  /  forest treeline  /  dirt path
+  stops, in order:
+   ① one big bouquet   ② the playlist cassette
+   ③ the sign on the ground + play button above it
+   ④ our photos        ⑤ speech bubbles to open
+   ⑥ HAPPY FRIENDSHIP DAY + balloons + real chocolates rain
+  ★ CUSTOMISE: the CONFIG block at the top of the script.
+══════════════════════════════════════════════════════════
+-->
+<style>
+:root{ --ink:#1f3d5c; --ink2:#2c5680; --sky:#c2d1d4; --yellow:#efe86a; }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scrollbar-width:none}
+body::-webkit-scrollbar{display:none}
+body{font-family:'Gaegu',cursive;color:var(--ink);background:var(--sky);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+#scrollspace{height:660vh}
+
+/* ───────── background : the three real photos, repeat-x forever ───────── */
+#stage{position:fixed;inset:0;overflow:hidden}
+#sky{position:absolute;inset:0;background:var(--sky)}
+.plane{position:absolute;left:0;right:0;background-repeat:repeat-x;background-position:0 bottom;
+  background-size:auto 100%;pointer-events:none;will-change:background-position}
+#mtnFar{bottom:12%;height:52vh;background-image:url("walk-assets/bg-mtn.png");opacity:.24;filter:blur(1px)}
+#mtn   {bottom:9%; height:74vh;background-image:url("walk-assets/bg-mtn.png");opacity:.92}
+#haze  {position:absolute;left:0;right:0;bottom:20%;height:16%;pointer-events:none;
+  background:linear-gradient(180deg,rgba(206,214,215,0),rgba(208,215,216,.34) 70%,rgba(208,215,216,0))}
+#forest{bottom:6.5%;height:30vh;background-image:url("walk-assets/bg-forest.png")}
+#dirt  {bottom:0;   height:8.5vh;background-image:url("walk-assets/bg-dirt.png");background-size:auto 100%}
+#dirtEdge{position:absolute;left:0;right:0;bottom:8.4vh;height:3px;background:rgba(60,64,50,.35);pointer-events:none}
+
+/* ───────── bird ───────── */
+#bird{position:absolute;z-index:9;left:19%;width:150px;will-change:transform}
+#bird.flip{transform:scaleX(-1)}
+#birdInner{position:relative;width:100%}
+#birdInner.walking{animation:bob var(--step,.5s) ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-5px) rotate(1.6deg)}}
+#birdBody{position:relative;z-index:2;width:100%;display:block;filter:drop-shadow(0 7px 6px rgba(20,25,10,.32))}
+#legs{position:absolute;left:38%;top:78%;width:56%;height:58%;z-index:1;overflow:visible}
+#legs g{transform-origin:50px 4px}
+#legs .lg{animation:step var(--step,.5s) linear infinite;animation-play-state:paused}
+#birdInner.walking #legs .lg{animation-play-state:running}
+#legs .lgB{animation-delay:calc(var(--step,.5s) / -2)}
+@keyframes step{0%{transform:rotate(-19deg) translateY(0)}25%{transform:rotate(-2deg) translateY(-3px)}
+  50%{transform:rotate(19deg) translateY(0)}75%{transform:rotate(2deg) translateY(-3px)}100%{transform:rotate(-19deg) translateY(0)}}
+#shadow{position:absolute;z-index:8;height:14px;border-radius:50%;
+  background:radial-gradient(50% 100% at 50% 50%, rgba(20,25,10,.32), rgba(20,25,10,0) 70%)}
+
+/* ───────── world ───────── */
+#world{position:absolute;left:0;top:0;bottom:0;width:100%;z-index:7;will-change:transform}
+.item{position:absolute;bottom:0;opacity:0;transform:translateY(30px) scale(.94);
+  transition:opacity .65s ease, transform .85s cubic-bezier(.2,1.25,.35,1)}
+.item.on{opacity:1;transform:none}
+.prop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.cttl{font-weight:700;font-size:clamp(20px,2.3vw,29px);line-height:1;color:var(--ink);margin-bottom:6px;
+  text-shadow:0 1px 0 rgba(255,255,255,.7)}
+
+/* floating notes, straight on the sky like the real thing */
+.note{position:absolute;bottom:calc(100% + 14px);width:min(430px,38vw);
+  font-size:clamp(18px,2.1vw,25px);line-height:1.35;color:var(--ink);text-shadow:0 1px 0 rgba(255,255,255,.6)}
+.note.r{left:52%}
+.note.l{right:52%}
+.note b{font-weight:700}
+
+/* ① ONE big bouquet — flowers touching, no gaps */
+.bqrow{position:relative;display:flex;align-items:flex-end;justify-content:center}
+.bqrow img{height:auto;transform-origin:50% 100%;
+  animation:sway var(--sd,5s) ease-in-out infinite alternate;
+  filter:drop-shadow(0 8px 10px rgba(30,40,30,.24))}
+.bqrow img + img{margin-left:var(--ov,-70px)}
+@keyframes sway{from{transform:rotate(var(--r0,-2.5deg))}to{transform:rotate(var(--r1,2.5deg))}}
+
+/* ② cassette + the sign board is the play button */
+.tape{width:min(340px,32vw);display:block;filter:drop-shadow(0 12px 16px rgba(30,40,30,.3));
+  animation:tapeb 4.2s ease-in-out infinite alternate}
+@keyframes tapeb{from{transform:translateY(0) rotate(-1.5deg)}to{transform:translateY(-10px) rotate(1.5deg)}}
+/* the sign stands on the ground, the play button floats above it */
+.signImg{width:min(260px,24vw);display:block;filter:drop-shadow(0 10px 12px rgba(30,40,30,.34))}
+.playBtn{display:flex;align-items:center;gap:11px;cursor:pointer;background:#fff;border:3px solid var(--ink);
+  border-radius:999px;padding:9px 26px 11px;margin-bottom:20px;font-family:'Gaegu',cursive;font-weight:700;
+  font-size:clamp(17px,1.9vw,22px);color:var(--ink);box-shadow:0 6px 0 var(--ink);transition:transform .14s,box-shadow .14s}
+.playBtn:hover{transform:translateY(-3px);box-shadow:0 9px 0 var(--ink)}
+.playBtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+.playBtn .tri{width:0;height:0;border-left:17px solid var(--ink);border-top:11px solid transparent;border-bottom:11px solid transparent}
+.playBtn.playing .tri{border:0;width:15px;height:18px;
+  background:linear-gradient(90deg,var(--ink) 0 6px,transparent 6px 9px,var(--ink) 9px 15px)}
+.eqbar{display:flex;align-items:flex-end;gap:6px;height:34px;opacity:0;transition:opacity .4s;margin-bottom:10px}
+.eqbar.on{opacity:1}
+.eqbar i{width:9px;background:var(--ink);height:100%;transform-origin:bottom;animation:eq .6s ease-in-out infinite alternate}
+.eqbar i:nth-child(2){animation-delay:.1s}.eqbar i:nth-child(3){animation-delay:.2s}
+.eqbar i:nth-child(4){animation-delay:.3s}.eqbar i:nth-child(5){animation-delay:.15s}
+@keyframes eq{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+.mnote{position:fixed;pointer-events:none;font-size:30px;z-index:25}
+
+/* ③ photos in the real polaroid frame */
+.polrow{display:flex;align-items:flex-end;justify-content:center;gap:1.5%}
+.pol{position:relative;width:min(300px,27vw);transform:rotate(var(--pr,-2deg));transition:transform .25s}
+.pol:hover{transform:rotate(0) translateY(-10px) scale(1.06);z-index:3}
+.pol .fr{width:100%;display:block;filter:drop-shadow(0 10px 14px rgba(30,40,30,.3))}
+.pol .ph{position:absolute;left:10.4%;top:11.1%;width:78.9%;height:66.4%;object-fit:cover}
+
+/* ④ speech bubbles instead of letters */
+.bubrow{display:flex;align-items:flex-end;justify-content:center;gap:1%}
+.bub{position:relative;width:min(340px,29vw);cursor:pointer;transition:transform .25s}
+.bub:hover{transform:translateY(-9px) rotate(0) scale(1.03);z-index:4}
+.bub img{width:100%;display:block;filter:drop-shadow(0 9px 12px rgba(30,40,30,.26))}
+.bub .txt{position:absolute;left:12%;top:12%;width:76%;height:60%;display:flex;align-items:center;justify-content:center;
+  text-align:center;font-size:clamp(15px,1.55vw,20px);line-height:1.25;color:var(--ink);padding:2px}
+.bub .txt .full{display:none}
+.bub.open .txt .tag{display:none}
+.bub.open .txt .full{display:block}
+.bub.open{transform:translateY(-9px) scale(1.06);z-index:5}
+
+/* the sign board on the path */
+.signItem img{width:min(300px,26vw);display:block;filter:drop-shadow(0 10px 12px rgba(30,40,30,.32))}
+
+/* ⑤ finale */
+#finale{position:absolute;left:0;right:0;top:0;height:100%;z-index:12;pointer-events:none;display:flex;justify-content:center}
+#finWrap{position:relative;width:min(900px,92vw);transform:translateY(-120%);will-change:transform;
+  display:flex;flex-direction:column;align-items:center}
+#balloons{display:flex;align-items:flex-end;justify-content:center;gap:min(60px,7vw)}
+#balloons img{height:min(300px,34vh);width:auto;transform-origin:50% 100%;animation:bsway 5s ease-in-out infinite alternate;
+  filter:drop-shadow(0 12px 16px rgba(30,40,30,.26))}
+#balloons img:nth-child(2){animation-duration:6.2s;animation-delay:-1.6s}
+@keyframes bsway{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+#banner{position:relative;margin-top:-6px;background:var(--yellow);border:4px solid var(--ink);border-radius:7px;
+  padding:14px 34px 18px;text-align:center;box-shadow:0 12px 24px rgba(30,40,30,.22)}
+#banner .b1{font-weight:700;font-size:clamp(26px,4.4vw,52px);line-height:.95;color:var(--ink)}
+#banner .b2{font-size:clamp(15px,1.8vw,20px);color:var(--ink2);margin-top:2px}
+.fall{position:fixed;z-index:26;pointer-events:none;will-change:transform}
+.fall img{display:block;filter:drop-shadow(0 4px 6px rgba(30,40,30,.28))}
+
+/* ───────── ui ───────── */
+#hud{position:fixed;left:0;right:0;top:0;z-index:30;display:flex;align-items:center;gap:10px;padding:14px 18px;pointer-events:none}
+#hud .ttl{font-weight:700;font-size:clamp(19px,2.6vw,26px);color:var(--ink)}
+#hud .spacer{flex:1}
+.hbtn{pointer-events:auto;font-family:'Gaegu',cursive;font-weight:700;font-size:15px;color:var(--ink);background:#fff;border:2px solid var(--ink);
+  border-radius:999px;padding:4px 14px;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.hbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+#meter{position:fixed;left:0;right:0;bottom:0;z-index:30;height:5px;background:rgba(0,0,0,.08)}
+#meter i{display:block;height:100%;width:0;background:#8aa06a}
+#cue{position:fixed;right:26px;bottom:26px;z-index:31;display:flex;align-items:center;gap:10px;font-weight:700;
+  font-size:clamp(17px,2vw,23px);color:var(--ink);transition:opacity .6s}
+#cue .arrow{font-size:26px;animation:arr 1.6s ease-in-out infinite}
+@keyframes arr{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
+#cue.gone{opacity:0}
+#opening{position:fixed;left:6%;top:26%;z-index:14;width:min(520px,46vw);font-size:clamp(19px,2.3vw,27px);line-height:1.4;color:var(--ink);
+  transition:opacity .6s;text-shadow:0 1px 0 rgba(255,255,255,.6)}
+#opening.gone{opacity:0}
+@media(max-width:700px){ #bird{width:110px;left:15%} .note{width:66vw} #opening{width:76vw;top:22%} }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="sky"></div>
+  <div class="plane" id="mtnFar"></div>
+  <div class="plane" id="mtn"></div>
+  <div id="haze"></div>
+  <div class="plane" id="forest"></div>
+  <div class="plane" id="dirt"></div>
+  <div id="dirtEdge"></div>
+
+  <div id="world"></div>
+
+  <div id="shadow"></div>
+  <div id="bird">
+    <div id="birdInner">
+      <svg id="legs" viewBox="0 0 100 92">
+        <g class="lg lgB" opacity=".75">
+          <path d="M50 2 L46 52 L38 78" fill="none" stroke="#161616" stroke-width="5.5" stroke-linecap="round"/>
+          <path d="M38 78 L28 86 M38 78 L40 90 M38 78 L48 86" fill="none" stroke="#161616" stroke-width="4" stroke-linecap="round"/>
+        </g>
+        <g class="lg lgA">
+          <path d="M50 2 L54 52 L62 78" fill="none" stroke="#161616" stroke-width="6" stroke-linecap="round"/>
+          <path d="M62 78 L52 86 M62 78 L60 90 M62 78 L72 86" fill="none" stroke="#161616" stroke-width="4.2" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <img id="birdBody" src="walk-assets/bird-body.png" alt="">
+    </div>
+  </div>
+
+  <div id="finale"><div id="finWrap">
+    <div id="balloons">
+      <img src="walk-assets/bal-silver.png" alt="">
+      <img src="walk-assets/bal-heart.png" alt="">
+    </div>
+    <div id="banner">
+      <div class="b1">HAPPY FRIENDSHIP DAY</div>
+      <div class="b2" id="banSub">saj ♥ — from naveen</div>
+    </div>
+  </div></div>
+</div>
+
+<div id="opening"></div>
+
+<div id="hud">
+  <span class="ttl" id="hudTtl">a walk with saj ♥</span>
+  <span class="spacer"></span>
+  <button class="hbtn" id="muteBtn">♪ on</button>
+  <button class="hbtn" id="topBtn">↺ start</button>
+</div>
+<div id="meter"><i id="meterFill"></i></div>
+<div id="cue"><span>Scroll down to advance</span><span class="arrow">➜</span></div>
+<div id="scrollspace"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ══════════════════ CONFIG ══════════════════ */
+var FRIEND="saj", FROM="naveen";
+var OPENING="hi saj, you know what's today?<br>30 july — <b>friendship day</b>.<br>so i built you a little walk. come on.";
+var PHOTOS=["walk-assets/prop-fav-person.jpg","walk-assets/prop-friendship-wall.jpg","walk-assets/prop-trio.jpg"];
+var BUBBLES=[
+  { tag:"open me first", text:"you make ordinary days feel like the good part of the movie. thank you for every single one." },
+  { tag:"for a bad day",  text:"if today is heavy — text me. i'll drop everything, bring snacks, and say nothing till you want me to." },
+  { tag:"the true one",   text:"i don't say it enough: you are my favourite person. happy friendship day, saj ♥" }
+];
+var NOTES=[
+  "flowers, because you turn ordinary tuesdays<br>into whole occasions.",
+  "our playlist is 90% chaos, 10% crying —<br>hit the sign, you know the one.",
+  "proof we were here, being ridiculous.",
+  "and a few things i never said out loud.<br><b>tap a bubble.</b>"
+];
+var CHOCS=["walk-assets/choc-kitkat.png","walk-assets/choc-dairymilk.png","walk-assets/choc-feastables.png",
+           "walk-assets/choc-mars.png","walk-assets/choc-bonobon.png","walk-assets/choc-bueno.png",
+           "walk-assets/choc-skittles.png"];
+/* ═════════════════════════════════════════════ */
+
+document.getElementById("hudTtl").textContent="a walk with "+FRIEND+" ♥";
+document.getElementById("banSub").innerHTML=FRIEND+" ♥ — from "+FROM;
+document.getElementById("opening").innerHTML=OPENING;
+
+var world=document.getElementById("world"), bird=document.getElementById("bird"),
+    birdInner=document.getElementById("birdInner"), shadow=document.getElementById("shadow"),
+    finWrap=document.getElementById("finWrap"), cue=document.getElementById("cue");
+
+/* ── audio ── */
+var AC=null,MASTER=null,sound=true;
+function ac(){ if(!AC){ var C=window.AudioContext||window.webkitAudioContext; if(C){ AC=new C();
+  var comp=AC.createDynamicsCompressor(); MASTER=AC.createGain(); MASTER.gain.value=.9; MASTER.connect(comp); comp.connect(AC.destination);} }
+  if(AC&&AC.state==="suspended") AC.resume(); return AC; }
+function tone(f,d,ty,v,w){ var a=ac(); if(!a||!sound) return; var t=a.currentTime+(w||0);
+  var o=a.createOscillator(),g=a.createGain(); o.type=ty||"sine"; o.frequency.value=f;
+  g.gain.setValueAtTime(v||.05,t); g.gain.exponentialRampToValueAtTime(.0004,t+d);
+  o.connect(g); g.connect(MASTER); o.start(t); o.stop(t+d+.02); }
+function stepSfx(){ var a=ac(); if(!a||!sound) return; var t=a.currentTime;
+  var len=Math.floor(a.sampleRate*.04), buf=a.createBuffer(1,len,a.sampleRate), d=buf.getChannelData(0);
+  for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,4);
+  var s=a.createBufferSource(); s.buffer=buf;
+  var bp=a.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=1400;
+  var g=a.createGain(); g.gain.value=.12; s.connect(bp); bp.connect(g); g.connect(MASTER); s.start(t); }
+function chirp(){ tone(1500,.09,"sine",.055); tone(2050,.11,"sine",.04,.08); }
+document.getElementById("muteBtn").addEventListener("click",function(){
+  sound=!sound; this.textContent=sound?"♪ on":"♪ off";
+  if(MASTER&&AC) MASTER.gain.setValueAtTime(sound?.9:0,AC.currentTime); if(sound) chirp(); });
+document.getElementById("topBtn").addEventListener("click",function(){ window.scrollTo({top:0,behavior:"smooth"}); });
+
+/* ── build the walk ── */
+var WORLD, items=[];
+function W(){ return window.innerWidth; }
+
+function add(x,bottomPct,inner,noteIdx,noteSide,cls){
+  var el=document.createElement("div"); el.className="item "+(cls||"");
+  el.style.left=x+"px"; el.style.bottom=bottomPct+"%";
+  var note=(noteIdx!=null)? '<div class="note '+(noteSide==="right"?"r":"l")+'">'+NOTES[noteIdx]+'</div>':'';
+  el.innerHTML='<div class="prop">'+inner+'</div>'+note;
+  world.appendChild(el);
+  items.push({el:el,x:x,shown:false});
+  return el;
+}
+
+function build(){
+  world.innerHTML=""; items=[];
+  var vw=W(); WORLD=vw*6.9;
+
+  /* ① ONE big bouquet — every flower touching */
+  var bh=Math.min(window.innerHeight*0.52,430);
+  var bq='<div class="cttl">flowers, for you</div>'+
+    '<div class="bqrow" style="height:'+bh+'px;--ov:-'+Math.round(bh*0.33)+'px">'+
+    '<img src="walk-assets/bq-3.png" style="height:74%;--r0:-4deg;--r1:2deg;--sd:5.4s">'+
+    '<img src="walk-assets/bq-5.png" style="height:88%;--r0:3deg;--r1:-3deg;--sd:5s">'+
+    '<img src="walk-assets/bq-1.png" style="height:100%;--r0:-2deg;--r1:3deg;--sd:6.2s">'+
+    '<img src="walk-assets/bq-4.png" style="height:86%;--r0:-3deg;--r1:3deg;--sd:5.8s">'+
+    '<img src="walk-assets/bq-2.png" style="height:70%;--r0:2deg;--r1:-3deg;--sd:4.6s">'+
+    '</div>';
+  add(vw*1.15, 9, bq, 0, "right", "");
+
+  /* ② the cassette comes FIRST on the path… */
+  var tape='<div class="cttl">our playlist</div>'+
+    '<div class="eqbar" id="eqbar"><i></i><i></i><i></i><i></i><i></i></div>'+
+    '<img class="tape" src="walk-assets/cassette.png" alt="">';
+  add(vw*2.25, 10, tape, 1, "left", "");
+
+  /* …then the sign, planted on the ground, with the play button above it */
+  var dj='<button class="playBtn" id="playBtn"><span class="tri"></span><span id="playLbl">play our song</span></button>'+
+    '<img class="signImg" src="walk-assets/sign.png" alt="">';
+  add(vw*3.05, 8, dj, null, null, "signStop");
+
+  /* ③ our photos */
+  var ph='<div class="cttl">our photos</div><div class="polrow">';
+  PHOTOS.forEach(function(p,i){
+    ph+='<div class="pol" style="--pr:'+(i%2?2.5:-2.5)+'deg"><img class="fr" src="walk-assets/polaroid-frame.png" alt="">'+
+        '<img class="ph" src="'+p+'" alt=""></div>';
+  });
+  ph+='</div>';
+  add(vw*3.95, 9, ph, 2, "right", "");
+
+  /* ④ speech bubbles instead of letters */
+  var bb='<div class="cttl">things i never said</div><div class="bubrow" id="bubRow">';
+  BUBBLES.forEach(function(L,i){
+    bb+='<div class="bub" data-i="'+i+'"><img src="walk-assets/bubble-box.png" alt="">'+
+        '<div class="txt"><span class="tag">'+L.tag+'</span><span class="full">“'+L.text+'”</span></div></div>';
+  });
+  bb+='</div>';
+  add(vw*5.35, 9, bb, 3, "left", "");
+}
+build();
+
+/* clicks */
+world.addEventListener("click",function(e){
+  var b=e.target.closest(".bub");
+  if(b){ b.classList.toggle("open"); chirp(); return; }
+  var pb=e.target.closest("#playBtn");
+  if(pb){
+    ac(); playing=!playing;
+    pb.classList.toggle("playing",playing);
+    document.getElementById("playLbl").textContent=playing?"playing…":"play our song";
+    document.getElementById("eqbar").classList.toggle("on",playing);
+    if(playing){ bar(); barTimer=setInterval(function(){ bar(); floatNote(); },2040); floatNote(); }
+    else if(barTimer){ clearInterval(barTimer); barTimer=null; }
+  }
+});
+
+/* music */
+var playing=false,barTimer=null,ci=0;
+var CH1=[[261.63,329.63,392.00],[233.08,293.66,349.23],[196.00,246.94,329.63],[220.00,277.18,349.23]];
+function bar(){
+  var a=ac(); if(!a) return; var t=a.currentTime, ch=CH1[ci%CH1.length]; ci++;
+  [0,1,2,1,0,2].forEach(function(pi,k){
+    var f=ch[pi], t0=t+k*0.34;
+    var o=a.createOscillator(),o2=a.createOscillator(),g=a.createGain(),lp=a.createBiquadFilter();
+    o.type="triangle"; o.frequency.value=f; o2.type="sine"; o2.frequency.value=f*2; lp.type="lowpass"; lp.frequency.value=2300;
+    g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(.16,t0+.02); g.gain.exponentialRampToValueAtTime(.0006,t0+.5);
+    o.connect(g);o2.connect(g);g.connect(lp);lp.connect(MASTER); o.start(t0);o.stop(t0+.55);o2.start(t0);o2.stop(t0+.55);
+  });
+}
+function floatNote(){
+  var sg=document.getElementById("playBtn"); if(!sg) return;
+  var r=sg.getBoundingClientRect();
+  var n=document.createElement("span"); n.className="mnote"; n.textContent=Math.random()<.5?"♪":"♫";
+  n.style.left=(r.left+r.width*Math.random())+"px"; n.style.top=(r.top-6)+"px";
+  document.body.appendChild(n);
+  n.animate([{transform:"translate(0,0)",opacity:1},{transform:"translate("+(Math.random()*80-40)+"px,-140px)",opacity:0}],
+    {duration:2100,easing:"ease-out",fill:"forwards"});
+  setTimeout(function(){ n.remove(); },2200);
+}
+
+/* ── scroll → walk ── */
+var target=0,prog=0,last=0,walking=false,idleT=null,stepTimer=null,STEP=500;
+function maxScroll(){ return document.documentElement.scrollHeight-window.innerHeight; }
+window.addEventListener("scroll",function(){
+  target=maxScroll()>0? window.scrollY/maxScroll():0;
+  if(window.scrollY>10){ cue.classList.add("gone"); document.getElementById("opening").classList.add("gone"); }
+  else { cue.classList.remove("gone"); document.getElementById("opening").classList.remove("gone"); }
+  ac();
+},{passive:true});
+function setWalking(on){
+  if(on===walking) return; walking=on;
+  birdInner.classList.toggle("walking",on);
+  if(on){ if(stepTimer) clearInterval(stepTimer); stepTimer=setInterval(stepSfx,STEP/2); stepSfx(); }
+  else if(stepTimer){ clearInterval(stepTimer); stepTimer=null; }
+}
+
+/* falling REAL chocolates at the end */
+var rained=false;
+function rain(n){
+  for(var i=0;i<n;i++){
+    (function(){
+      var s=document.createElement("span"); s.className="fall";
+      var src=CHOCS[Math.floor(Math.random()*CHOCS.length)], sz=70+Math.random()*70;
+      s.innerHTML='<img src="'+src+'" style="width:'+sz.toFixed(0)+'px">';
+      s.style.left=(Math.random()*100)+"vw"; s.style.top="-140px";
+      document.body.appendChild(s);
+      var dx=Math.random()*140-70, dur=3400+Math.random()*2800;
+      s.animate([{transform:"translate(0,0) rotate(0)",opacity:1},
+        {transform:"translate("+dx+"px,"+(window.innerHeight+220)+"px) rotate("+(Math.random()*640-320)+"deg)",opacity:.96}],
+        {duration:dur,easing:"cubic-bezier(.35,.2,.6,1)",fill:"forwards"});
+      setTimeout(function(){ s.remove(); },dur+120);
+    })();
+  }
+}
+
+function frame(){
+  requestAnimationFrame(frame);
+  prog+=(target-prog)*0.09;
+  var d=prog-last;
+  if(Math.abs(d)>0.00016){
+    setWalking(true);
+    bird.classList.toggle("flip", d<0);
+    clearTimeout(idleT); idleT=setTimeout(function(){ setWalking(false); },140);
+    var sp=Math.min(.6,Math.max(.3,.42/(Math.abs(d)*260+0.5)));
+    birdInner.style.setProperty("--step",sp.toFixed(2)+"s"); STEP=sp*1000;
+  }
+  last=prog;
+
+  var shift=prog*(WORLD-W()*0.5);
+  world.style.transform="translate3d("+(-shift)+"px,0,0)";
+  /* the three photo planes scroll at their own speed and repeat forever */
+  document.getElementById("dirt").style.backgroundPositionX   =(-shift*0.90)+"px";
+  document.getElementById("forest").style.backgroundPositionX =(-shift*0.42)+"px";
+  document.getElementById("mtn").style.backgroundPositionX    =(-shift*0.13)+"px";
+  document.getElementById("mtnFar").style.backgroundPositionX =(-shift*0.06)+"px";
+
+  var gY=window.innerHeight*0.085, bw=bird.offsetWidth;
+  bird.style.bottom=(gY*1.0)+"px";
+  shadow.style.width=(bw*0.9)+"px";
+  shadow.style.left=(bird.offsetLeft+bw*0.05)+"px";
+  shadow.style.bottom=(gY*1.0-5)+"px";
+
+  var bx=shift+bird.offsetLeft+bw/2;
+  items.forEach(function(s){
+    if(!s.shown && s.x-bx < W()*0.62){ s.shown=true; s.el.classList.add("on"); chirp(); }
+  });
+
+  var t0=0.83, tv=Math.max(0,Math.min(1,(prog-t0)/(1-t0)));
+  var ease=tv*tv*(3-2*tv);
+  finWrap.style.transform="translateY("+(-120+ease*120)+"%)";
+  if(tv>0.5 && !rained){ rained=true; rain(40); setInterval(function(){ rain(5); },1500); }
+
+  document.getElementById("meterFill").style.width=(prog*100)+"%";
+}
+requestAnimationFrame(frame);
+
+var rz=null;
+window.addEventListener("resize",function(){ clearTimeout(rz); rz=setTimeout(function(){
+  var keep=prog; build(); prog=keep; last=keep;
+  var sh=keep*(WORLD-W()*0.5);
+  items.forEach(function(s){ if(s.x-(sh+bird.offsetLeft) < W()*0.62){ s.shown=true; s.el.classList.add("on"); } });
+},260);});
+})();
+</script>
+</body>
+</html>
