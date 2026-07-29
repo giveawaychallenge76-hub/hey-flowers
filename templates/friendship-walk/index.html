@@ -269,9 +269,51 @@ function stepSfx(){ var a=ac(); if(!a||!sound) return; var t=a.currentTime;
   var bp=a.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=1400;
   var g=a.createGain(); g.gain.value=.12; s.connect(bp); bp.connect(g); g.connect(MASTER); s.start(t); }
 function chirp(){ tone(1500,.09,"sine",.055); tone(2050,.11,"sine",.04,.08); }
+/* ── the sender's own song (upload, or a YouTube link) ──
+   Plays under the walk. Browsers won't start audio until someone
+   interacts, so we arm it on the first tap/scroll. */
+var SONG_FILE="{{song}}", SONG_URL="{{song_url}}";
+var songEl=null, ytFrame=null, songArmed=false;
+function ytId(u){
+  var m=String(u||"").match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:"";
+}
+var HAS_SONG = !!(SONG_FILE || ytId(SONG_URL));
+function songStart(){
+  if(!HAS_SONG || !sound) return;
+  if(SONG_FILE){
+    if(!songEl){ songEl=new Audio(SONG_FILE); songEl.loop=true; songEl.volume=.55; }
+    songEl.play().catch(function(){});
+    return;
+  }
+  var id=ytId(SONG_URL);
+  if(id && !ytFrame){
+    ytFrame=document.createElement("iframe");
+    ytFrame.allow="autoplay";
+    ytFrame.style.cssText="position:fixed;width:1px;height:1px;opacity:.01;pointer-events:none;left:0;bottom:0;border:0";
+    ytFrame.src="https://www.youtube-nocookie.com/embed/"+id+
+      "?autoplay=1&loop=1&playlist="+id+"&controls=0&playsinline=1";
+    document.body.appendChild(ytFrame);
+  }
+}
+function songStop(){
+  if(songEl){ try{ songEl.pause(); }catch(_){} }
+  if(ytFrame){ ytFrame.remove(); ytFrame=null; }
+}
+if(HAS_SONG){
+  ["pointerdown","touchstart","scroll","keydown"].forEach(function(ev){
+    window.addEventListener(ev,function(){
+      if(!songArmed){ songArmed=true; songStart(); }
+    },{once:true,passive:true});
+  });
+}
+
 document.getElementById("muteBtn").addEventListener("click",function(){
   sound=!sound; this.textContent=sound?"♪ on":"♪ off";
-  if(MASTER&&AC) MASTER.gain.setValueAtTime(sound?.9:0,AC.currentTime); if(sound) chirp(); });
+  if(MASTER&&AC) MASTER.gain.setValueAtTime(sound?.9:0,AC.currentTime);
+  // the sender's song follows the same switch
+  if(sound){ songArmed=true; songStart(); chirp(); } else songStop();
+});
 document.getElementById("topBtn").addEventListener("click",function(){ window.scrollTo({top:0,behavior:"smooth"}); });
 
 /* ── build the walk ── */

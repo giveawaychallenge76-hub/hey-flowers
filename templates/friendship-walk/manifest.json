@@ -1,11 +1,11 @@
 {
   "id": "friendship-walk",
-  "name": "A WALK WITH YOU",
+  "name": "FRIENDSHIP DAY",
   "tagline": "a little walk for your best friend",
   "category": "Friendship",
   "experienceTime": "2 min",
   "description": "Scroll and a little bird walks you both through a valley — flowers, your playlist, polaroids, chocolates, and the things you never said out loud.",
-  "thumbnail": "thumbnail/friendship-walk.png",
+  "thumbnail": "thumbnail/dump-instagram-post.png",
   "featured": true,
   "trending": true,
   "pages": [
@@ -37,6 +37,21 @@
       "type": "paragraph",
       "label": "Opening lines",
       "default": "hi saj, you know what's today?<br>30 july — <b>friendship day</b>.<br>so i built you a little walk. come on.",
+      "page": "walk"
+    },
+    {
+      "key": "song",
+      "type": "music",
+      "label": "Your own song (upload an audio file)",
+      "default": "",
+      "page": "walk"
+    },
+    {
+      "key": "song_url",
+      "type": "text",
+      "label": "…or paste a YouTube link",
+      "default": "",
+      "placeholder": "https://youtu.be/…",
       "page": "walk"
     },
     {
