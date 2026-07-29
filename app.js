@@ -1071,18 +1071,68 @@ function decodeGift(str){
   return JSON.parse(decodeURIComponent(escape(atob(b))));
 }
 
-function wrap(){
+/* Everything about a gift normally rides in the URL, which makes links
+   thousands of characters long — unusable on Instagram and far too big for
+   a QR code. When Supabase is reachable we park the payload in a row and
+   put a short slug in the link instead. If that fails for any reason we
+   fall back to the long self-contained link, which always works. */
+/* A QR only holds ~2–3KB, so it can represent a short link but never a
+   full self-contained one. Show it when it will actually scan, hide it
+   otherwise rather than render something broken. */
+function paintQR(url){
+  const wrap = document.getElementById('qrWrap');
+  const cv = document.getElementById('qrCanvas');
+  if (!wrap || !cv) return;
+  if (url.length > 300){ wrap.hidden = true; return; }   // long link → no QR
+  const g = window.QRCode || window.qrcode;
+  if (!g){ wrap.hidden = true; return; }
+  try{
+    const q = g(0, 'M'); q.addData(url); q.make();
+    const n = q.getModuleCount(), size = cv.width, cell = size / (n + 2);
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#10131b';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++)
+      if (q.isDark(r, c)) ctx.fillRect((c+1)*cell, (r+1)*cell, cell+.5, cell+.5);
+    wrap.hidden = false;
+  }catch{ wrap.hidden = true; }
+}
+
+const SLUG_ABC = 'abcdefghijkmnpqrstuvwxyz23456789';
+function makeSlug(n = 7){
+  const a = new Uint8Array(n); crypto.getRandomValues(a);
+  return [...a].map(x => SLUG_ABC[x % SLUG_ABC.length]).join('');
+}
+async function shortenGift(tpl, vals, payload){
+  try{
+    const sb = window.HF_SB, u = window.HFAuth && window.HFAuth.user && window.HFAuth.user();
+    if (!sb || !u) return null;
+    const slug = makeSlug();
+    const { error } = await sb.from('gifts').insert({
+      user_id: u.id, template: tpl.id, title: draftLabel(tpl, vals), slug, payload
+    });
+    if (error) return null;                      // column missing → long link
+    return slug;
+  }catch{ return null; }
+}
+
+async function wrap(){
   const missing = current.fields.filter(f => f.required && !values[f.key]);
   if (missing.length){
     toast(`${missing[0].label} is needed first`);
     return;
   }
   const payload = encodeGift(current.id, values);
-  const url = location.origin + location.pathname + '#g=' + payload;
+  const base = location.origin + location.pathname;
+  let url = base + '#g=' + payload;
+  const slug = await shortenGift(current, values, payload);
+  if (slug) url = base + '#' + slug;
   glink.textContent = url;
   glink.dataset.url = url;
+  paintQR(url);
   sentPoster.innerHTML = posterHTML();
-  remember(current, values, url);
+  // shortenGift already wrote the cloud row; don't write a second one
+  remember(current, values, url, { skipCloud: !!slug });
   dropDraft();
   go('sent');
 }
@@ -1108,13 +1158,28 @@ document.addEventListener('hf:signedin', () => {
 document.addEventListener('hf:signedout', () => paintShelf(TEMPLATES));
 
 /* a gift link opens straight into the gift */
-function routeFromHash(){
-  const m = location.hash.match(/^#g=(.+)$/);
-  if (!m) return;
+function showDecoded(payload){
+  const { t, v } = decodeGift(payload);
+  const tpl = TEMPLATES.find(x => x.id === t);
+  if (tpl) openGift(tpl, v, { recipient: true });     // they were sent this
+}
+async function routeFromHash(){
+  const hash = location.hash;
+  const full = hash.match(/^#g=(.+)$/);
+  if (full){
+    try{ showDecoded(full[1]); }catch{ toast("That link looks broken"); }
+    return;
+  }
+  // a short link: #abc1234 — look the gift up by its slug
+  const short = hash.match(/^#([a-z0-9]{5,16})$/i);
+  if (!short) return;
   try{
-    const { t, v } = decodeGift(m[1]);
-    const tpl = TEMPLATES.find(x => x.id === t);
-    if (tpl) openGift(tpl, v, { recipient: true });   // they were sent this
+    const sb = window.HF_SB;
+    if (!sb) return;
+    const { data, error } = await sb.from('gifts')
+      .select('payload').eq('slug', short[1]).maybeSingle();
+    if (error || !data || !data.payload){ toast("That link looks broken"); return; }
+    showDecoded(data.payload);
   }catch{ toast("That link looks broken"); }
 }
 addEventListener('hashchange', routeFromHash);
@@ -1182,11 +1247,11 @@ function dropDraft(){
   draftKey = null;
 }
 
-function remember(tpl, vals, url){
+function remember(tpl, vals, url, opts = {}){
   const list = store.read();
   list.unshift({ id: tpl.id, to: draftLabel(tpl, vals), at: Date.now(), url, vals });
   store.write(list.slice(0, 60));
-  cloudSaveGift(tpl, vals, url);   // also keep it on the account (if signed in)
+  if (!opts.skipCloud) cloudSaveGift(tpl, vals, url);  // keep it on the account
 }
 function paintMine(){
   const sent = store.read();

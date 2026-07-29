@@ -130,3 +130,27 @@ create policy "media read" on storage.objects
 --
 --  Now open  /admin.html , log in, and you'll see the dashboard.
 -- ═══════════════════════════════════════════════════════════════════════
+
+-- ═══════════════════════════════════════════════════════════════════════
+--  SHORT LINKS  (run this to make gift links short)
+--  Without it the whole gift is crammed into the URL, which makes links
+--  thousands of characters long — too long for Instagram, and far too big
+--  to fit in a QR code.
+-- ═══════════════════════════════════════════════════════════════════════
+
+-- the gift's contents, so the URL only has to carry a short id
+alter table public.gifts add column if not exists payload text;
+alter table public.gifts add column if not exists slug   text;
+create unique index if not exists gifts_slug_idx on public.gifts(slug);
+
+-- anyone holding the link may read that one gift (that's the point of a
+-- share link); listing them all still requires being the owner or admin
+drop policy if exists "gifts read"        on public.gifts;
+drop policy if exists "gifts read by slug" on public.gifts;
+create policy "gifts read by slug" on public.gifts
+  for select using (true);
+
+-- signed-in people can save their own; keep insert owner-checked
+drop policy if exists "gifts insert" on public.gifts;
+create policy "gifts insert" on public.gifts
+  for insert with check (auth.uid() = user_id);

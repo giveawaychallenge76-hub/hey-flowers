@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@700;800;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=23">
+<link rel="stylesheet" href="styles.css?v=24">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
@@ -210,6 +210,10 @@
       <h1>It's wrapped.</h1>
       <p>Send them this link. Everything they'll see is inside it — no account, nothing to install.</p>
       <div class="link"><code id="glink"></code><button id="copyBtn">Copy link</button></div>
+      <div class="qr-wrap" id="qrWrap" hidden>
+        <canvas id="qrCanvas" width="180" height="180" aria-label="QR code for this gift"></canvas>
+        <span class="qr-cap">or let them scan it</span>
+      </div>
       <div class="row">
         <button class="send ghost" id="openSentBtn">▷ Open the gift</button>
         <button class="send" data-go="gallery">Back to templates</button>
@@ -247,6 +251,7 @@
 </div>
 
 <script src="auth.js?v=4"></script>
-<script src="app.js?v=17"></script>
+<script src="qrcode.min.js"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>

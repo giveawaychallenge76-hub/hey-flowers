@@ -651,3 +651,10 @@ body.auth-open #auth{display:flex}
 .auth-switch{color:var(--soft);font-size:13.5px;margin-top:10px}
 .auth-switch button{color:var(--yellow);font-weight:600;text-decoration:underline}
 .auth-note{color:var(--soft);font-size:12px;margin-top:14px;opacity:.8}
+
+/* ── QR beside the share link (only shown when the link is short enough) ── */
+.qr-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin:18px 0 4px}
+.qr-wrap[hidden]{display:none}
+#qrCanvas{background:#fff;border-radius:14px;padding:10px;width:180px;height:180px;
+  box-shadow:0 10px 26px -12px rgba(0,0,0,.6)}
+.qr-cap{font-size:12.5px;color:var(--soft)}
