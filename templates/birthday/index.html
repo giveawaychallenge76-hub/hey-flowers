@@ -141,6 +141,36 @@ border-radius:50% 50% 0 0;
   flex-direction: column;
   align-items: center;
   z-index: 10;
+  position: relative;      /* so the next-wish button can sit over the envelope */
+}
+
+/* appears once the candle is out — makes it obvious there's more than one
+   wish, instead of relying on people guessing they can tap the note */
+#next-wish {
+  position: absolute;
+  left: 50%;
+  bottom: -16px;
+  transform: translateX(-50%) translateY(10px);
+  z-index: 40;
+  opacity: 0;
+  transition: opacity .45s ease, transform .45s cubic-bezier(.2,1.3,.4,1);
+  font-family: "Comic Sans MS", "Chalkboard SE", "Comic Neue", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(180deg, #ff6f91, #e63b66);
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 26px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #b32349, 0 10px 22px -8px rgba(180,20,60,.55);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+#next-wish.in { opacity: 1; transform: translateX(-50%) translateY(0); }
+#next-wish:active { transform: translateX(-50%) translateY(3px); box-shadow: 0 2px 0 #b32349; }
+@media (max-width: 640px) {
+  #next-wish { font-size: 17px; padding: 15px 30px; bottom: -12px; }
 }
 
 .hint{
@@ -640,29 +670,46 @@ function runMemoryNoteCarousel() {
     const txtEl = document.getElementById("display-text");
     const scrollerBox = document.getElementById("note-scroller");
 
-    // Makes layout feel interactive & clickable like a button link
     scrollerBox.style.cursor = "pointer";
     titleEl.innerHTML = memories[0].title;
     txtEl.innerHTML = memories[0].txt;
 
-    scrollerBox.addEventListener("click", (e) => {
-        e.stopPropagation(); // Avoids closing the letter fold state layout
-        
+    function showNext(e) {
+        /* The envelope opens/closes on BOTH click and touchstart, so a tap in
+           here has to stop both — stopping only click is why the letter folded
+           itself away on phones while working fine on desktop. */
+        if (e) { e.stopPropagation(); e.preventDefault(); }
+
         txtEl.style.opacity = "0";
         titleEl.style.opacity = "0";
         txtEl.style.transform = "scale(0.9)";
-        
+
         setTimeout(() => {
             currentIndex = (currentIndex + 1) % memories.length;
             titleEl.innerHTML = memories[currentIndex].title;
             txtEl.innerHTML = memories[currentIndex].txt;
-            
+            nextBtn.innerHTML = (currentIndex === memories.length - 1)
+                ? "read them again ↻" : "next wish →";
+
             txtEl.style.opacity = "1";
             titleEl.style.opacity = "1";
             txtEl.style.transform = "scale(1)";
             triggerConfettiExplosion();
         }, 300);
-    });
+    }
+
+    ["click", "touchstart"].forEach(ev =>
+        scrollerBox.addEventListener(ev, showNext, { passive: false }));
+
+    /* a real button, so it's obvious there's more than one wish */
+    const nextBtn = document.createElement("button");
+    nextBtn.id = "next-wish";
+    nextBtn.type = "button";
+    nextBtn.innerHTML = "next wish →";
+    ["click", "touchstart"].forEach(ev =>
+        nextBtn.addEventListener(ev, showNext, { passive: false }));
+    document.getElementById("surprise-content").appendChild(nextBtn);
+    requestAnimationFrame(() => nextBtn.classList.add("in"));
 }
 
 let candleOut = false;

@@ -100,14 +100,14 @@
       "type": "image",
       "label": "Background photo",
       "default": "1000076281.jpg",
-      "page": "style"
+      "page": "front"
     },
     {
       "key": "music_url",
       "type": "music",
       "label": "Their song (upload your own audio)",
       "default": "YTDown.com_Shorts_Ariana-Grande-Hate-That-I-Made-You-Love-_Media_5b-pz-Fm_XI_008_128k.mp3",
-      "page": "style"
+      "page": "front"
     },
     {
       "key": "music_yt",
@@ -115,35 +115,35 @@
       "label": "…or paste a YouTube link",
       "default": "",
       "placeholder": "https://youtu.be/…",
-      "page": "style"
+      "page": "front"
     },
     {
       "key": "bg_tint",
       "type": "color",
       "label": "Background tint",
       "default": "#f4a5b5",
-      "page": "style"
+      "page": "front"
     },
     {
       "key": "envelope_color",
       "type": "color",
       "label": "Envelope colour",
       "default": "#eed070",
-      "page": "style"
+      "page": "front"
     },
     {
       "key": "accent_color",
       "type": "color",
       "label": "Text & accent colour",
       "default": "#c0435a",
-      "page": "style"
+      "page": "front"
     },
     {
       "key": "font_family",
       "type": "font",
       "label": "Font",
       "default": "Georgia",
-      "page": "style"
+      "page": "front"
     }
   ]
 }
