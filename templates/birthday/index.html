@@ -464,8 +464,28 @@ for(let i = 0; i < 80; i++){
 const romanticMusic = document.getElementById("romantic-music");
 const birthdayMusic = document.getElementById("birthday-music");
 
+/* the sender can supply a YouTube link instead of an audio file */
+const MUSIC_YT = "{{music_yt}}";
+function ytId(u){
+    const m = String(u||"").match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : "";
+}
+let ytFrame = null;
+function startYouTube(){
+    const id = ytId(MUSIC_YT);
+    if (!id || ytFrame) return false;
+    ytFrame = document.createElement("iframe");
+    ytFrame.allow = "autoplay";
+    ytFrame.style.cssText = "position:fixed;width:1px;height:1px;opacity:.01;pointer-events:none;left:0;bottom:0;border:0";
+    ytFrame.src = "https://www.youtube-nocookie.com/embed/" + id +
+        "?autoplay=1&loop=1&playlist=" + id + "&controls=0&playsinline=1";
+    document.body.appendChild(ytFrame);
+    return true;
+}
+
 function startRomanticTrack() {
-    romanticMusic.play().catch(e => console.log("Audio initializing..."));
+    // a YouTube link wins; otherwise fall back to the uploaded/default file
+    if (!startYouTube()) romanticMusic.play().catch(e => console.log("Audio initializing..."));
     window.removeEventListener("click", startRomanticTrack);
     window.removeEventListener("touchstart", startRomanticTrack);
 }
@@ -526,7 +546,23 @@ function toggle(){
 envelope.addEventListener("click", toggle);  
 envelope.addEventListener("touchstart", e => { e.preventDefault(); toggle(); }, {passive:false});  
 
+/* Most people never got the candle out: the mic needs permission AND a hard
+   enough puff, and the tap fallback only appeared if permission was denied.
+   Now it always blows itself out 3s after "close your eyes" — the mic and a
+   tap still work, they just get there sooner. */
+let wishTimer = null;
+function startWishCountdown() {
+    const micTag = document.getElementById("mic-tag");
+    if (micTag) micTag.innerHTML = "close your eyes and make a wish…";
+    // a tap anywhere on the cake blows it out immediately
+    const cake = document.getElementById("cake-container");
+    if (cake) cake.addEventListener("click", e => { e.stopPropagation(); extinguishCandle(); });
+    if (wishTimer) clearTimeout(wishTimer);
+    wishTimer = setTimeout(() => extinguishCandle(), 3000);
+}
+
 function initBlowDetection() {
+    startWishCountdown();          // the candle goes out on its own regardless
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .then((stream) => {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -540,7 +576,7 @@ function initBlowDetection() {
         microphone.connect(analyser);
 
         function checkBlow() {
-            if (!letterOpened) return; 
+            if (!letterOpened || candleOut) return;   // stop polling once it's out
             analyser.getByteFrequencyData(dataArray);
             
             let highFrequencySum = 0;
@@ -557,12 +593,9 @@ function initBlowDetection() {
         }
         checkBlow();
     })
-    .catch((err) => {
-        document.getElementById("mic-tag").innerHTML = "(tap the cake to blow the candle)";
-        document.getElementById("cake-container").addEventListener("click", (e) => {
-            e.stopPropagation();
-            extinguishCandle();
-        });
+    .catch(() => {
+        /* no mic permission — nothing to do, the countdown and the tap
+           handler from startWishCountdown() already cover it */
     });
 }
 
@@ -632,10 +665,15 @@ function runMemoryNoteCarousel() {
     });
 }
 
+let candleOut = false;
 function extinguishCandle(stream = null, audioContext = null) {
+    if (candleOut) return;          // mic, tap and the timer all race — first one wins
+    candleOut = true;
+    if (wishTimer) { clearTimeout(wishTimer); wishTimer = null; }
+
     const cake = document.getElementById("cake-container");
     const micTag = document.getElementById("mic-tag");
-    
+
     cake.classList.add("blown-out");
     micTag.innerHTML = "✨ Click below to read your wishes! ✨";
     

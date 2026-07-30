@@ -105,8 +105,16 @@
     {
       "key": "music_url",
       "type": "music",
-      "label": "Their song",
+      "label": "Their song (upload your own audio)",
       "default": "YTDown.com_Shorts_Ariana-Grande-Hate-That-I-Made-You-Love-_Media_5b-pz-Fm_XI_008_128k.mp3",
+      "page": "style"
+    },
+    {
+      "key": "music_yt",
+      "type": "text",
+      "label": "…or paste a YouTube link",
+      "default": "",
+      "placeholder": "https://youtu.be/…",
       "page": "style"
     },
     {
