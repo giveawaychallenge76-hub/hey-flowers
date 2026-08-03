@@ -77,7 +77,7 @@ const SHAPES = ['rect','circle','star','heart','tri'];
 /* ───────────────────────── 1. load the folders ───────────────────── */
 /* Bump on every release, and keep build.json in step. Printed on load so
    "is this the new code or a cached copy?" is answerable at a glance. */
-const HF_BUILD = 24;
+const HF_BUILD = 25;
 console.log('%c heyflowers build ' + HF_BUILD + ' ', 'background:#ffd935;color:#4a3305;font-weight:700;border-radius:4px');
 window.HF_BUILD = HF_BUILD;
 
@@ -177,7 +177,27 @@ function inject(tpl, vals, opts = {}){
     : html.replace(/<html([^>]*)>/i, `<html$1><head>${baseTag}</head>`);
   if (tpl.fields.some(f => f.type === 'font'))
     html = html.replace('</head>', FONT_LINK + '\n</head>');
-  html = html.replace('</body>', giftRuntime(tpl, vals, opts) + '\n</body>');
+  /* The <base> tag above makes the template's images resolve, but it also
+     makes same-page anchors resolve against the TEMPLATE FILE. A template
+     that navigates with <a href="#/letter"> would therefore leave this
+     rendered document and load the raw file off the server — tokens and
+     all. Keep those clicks in the document. */
+  const anchorGuard = `<script>
+(function(){
+  document.addEventListener('click', function(e){
+    var a = e.target && e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a) return;
+    var h = a.getAttribute('href') || '#';
+    e.preventDefault();
+    if (location.hash === h || (h === '#' && !location.hash)) {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } else {
+      location.hash = h;                 // fragment only — never leaves the page
+    }
+  }, true);
+})();
+<\/script>`;
+  html = html.replace('</body>', anchorGuard + giftRuntime(tpl, vals, opts) + '\n</body>');
 
   /* Safety net. Every token should be resolved by now, but if a template
      ever references a field the manifest doesn't declare, the recipient
