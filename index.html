@@ -253,6 +253,27 @@
 
 <script src="auth.js?v=4"></script>
 <script src="qrcode.min.js"></script>
+<!-- The build check inside app.js can't save a browser that cached THIS
+     file, because a stale index.html keeps requesting a stale app.js.
+     So the check also runs here, before app.js loads: ask the server for
+     the current build and, if this document is behind, reload past the
+     cache. Guarded so it can never loop. -->
+<script>
+(function(){
+  var EXPECT = 24;                       // keep in step with build.json
+  try{
+    fetch('build.json?t=' + Date.now(), { cache:'no-store' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        if (!j || !j.build || j.build <= EXPECT) return;
+        if (sessionStorage.getItem('hf.doc') === String(j.build)) return;
+        sessionStorage.setItem('hf.doc', String(j.build));
+        location.replace(location.pathname + '?b=' + j.build + location.hash);
+      })
+      .catch(function(){});
+  }catch(e){}
+})();
+</script>
 <script src="app.js?v=24"></script>
 </body>
 </html>
