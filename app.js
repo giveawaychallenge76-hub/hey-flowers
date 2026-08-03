@@ -154,6 +154,16 @@ function inject(tpl, vals, opts = {}){
   if (tpl.fields.some(f => f.type === 'font'))
     html = html.replace('</head>', FONT_LINK + '\n</head>');
   html = html.replace('</body>', giftRuntime(tpl, vals, opts) + '\n</body>');
+
+  /* Safety net. Every token should be resolved by now, but if a template
+     ever references a field the manifest doesn't declare, the recipient
+     would see a literal "{{letter_to}}" in their gift. Blank is bad;
+     showing our plumbing is worse. Warn so it's findable, then strip. */
+  const stray = [...new Set(html.match(/\{\{\w+\}\}/g) || [])];
+  if (stray.length){
+    console.warn('[heyflowers] unresolved tokens in', tpl.id, stray);
+    html = html.replace(/\{\{\w+\}\}/g, '');
+  }
   return html;
 }
 
