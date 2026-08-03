@@ -16,9 +16,15 @@
       ]
     },
     {
+      "source": "/(index.html|admin.html|privacy.html|app.js|auth.js|styles.css)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate, max-age=0" }
+      ]
+    },
+    {
       "source": "/templates/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=300, must-revalidate" }
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate, max-age=0" }
       ]
     },
     {
