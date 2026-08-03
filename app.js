@@ -75,6 +75,12 @@ const BLANK = {
 const SHAPES = ['rect','circle','star','heart','tri'];
 
 /* ───────────────────────── 1. load the folders ───────────────────── */
+/* Bump on every release. Printed on load so "is this the new code or a
+   cached copy?" is answerable in one glance instead of by guesswork. */
+const HF_BUILD = 23;
+console.log('%c heyflowers build ' + HF_BUILD + ' ', 'background:#ffd935;color:#4a3305;font-weight:700;border-radius:4px');
+window.HF_BUILD = HF_BUILD;
+
 async function boot(){
   try{
     const reg = await fetch('templates/index.json', { cache: 'no-cache' }).then(r => r.json());
