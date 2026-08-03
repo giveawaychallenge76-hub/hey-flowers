@@ -784,19 +784,24 @@ function handleImagePlace(file){
 pvRefresh.onclick = refreshPreview;
 pvFull.onclick    = () => openGift(current, values);
 
+/* An edit is in `values` but the preview still shows the old render.
+   The hint text alone was easy to miss, so show a real button too. */
 function markStale(){
   stale = true;
-  pvHint.textContent = 'tap ↻ to update';
+  pvHint.textContent = 'edited';
   pvHint.classList.add('stale');
+  if (pvUpdate) pvUpdate.hidden = false;
 }
 function refreshPreview(){
   if (!current) return;
   stale = false;
   pvHint.textContent = 'live preview';
   pvHint.classList.remove('stale');
+  if (pvUpdate) pvUpdate.hidden = true;      // edits are now on screen
   pv.srcdoc = inject(current, values, { editor: true });
   scalePreview();
 }
+if (typeof pvUpdate !== 'undefined' && pvUpdate) pvUpdate.onclick = refreshPreview;
 
 /* jump the running preview to the page being edited — and, if the page
    declares a `route`, tell the template to navigate there (its own sections) */

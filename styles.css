@@ -376,11 +376,25 @@ textarea{resize:vertical;min-height:76px}
 
 /* ── the phone preview ── */
 .device{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:100%}
+/* The preview mirrors the device the RECIPIENT will most likely be on:
+   a 16:9 window on a laptop, a 9:16 phone screen on mobile. scalePreview()
+   covers whichever shape this ends up, and the sticker overlay copies the
+   same transform, so both stay aligned. */
 .screen-frame{
-  position:relative;height:min(calc(100vh - 170px),740px);
-  width:calc(min(calc(100vh - 170px),740px)*.5625);max-width:100%;
-  border-radius:26px;overflow:hidden;background:#000;
+  position:relative;
+  width:min(calc(100vw - 420px), 900px);
+  height:calc(min(calc(100vw - 420px), 900px) * .5625);   /* 16:9 */
+  max-height:calc(100vh - 170px);max-width:100%;
+  border-radius:20px;overflow:hidden;background:#000;
   box-shadow:0 40px 90px -35px rgba(0,0,0,.85),0 0 0 1px var(--edge);
+}
+/* tablets and phones: back to a portrait phone */
+@media (max-width:960px){
+  .screen-frame{
+    height:min(calc(100vh - 170px),740px);
+    width:calc(min(calc(100vh - 170px),740px)*.5625);
+    border-radius:26px;
+  }
 }
 .screen-frame iframe{width:375px;height:667px;border:0;display:block;background:#fff;
   transform-origin:top left}
@@ -658,3 +672,17 @@ body.auth-open #auth{display:flex}
 #qrCanvas{background:#fff;border-radius:14px;padding:10px;width:180px;height:180px;
   box-shadow:0 10px 26px -12px rgba(0,0,0,.6)}
 .qr-cap{font-size:12.5px;color:var(--soft)}
+
+/* ── "tap to update" — appears when an edit hasn't reached the preview ── */
+.update-pill{
+  background:var(--yellow);color:#4a3305;font-weight:700;font-size:13px;
+  border-radius:999px;padding:8px 16px;white-space:nowrap;
+  box-shadow:0 4px 14px -4px rgba(255,217,53,.7);
+  animation:updatepop .28s cubic-bezier(.2,1.4,.4,1);
+}
+.update-pill[hidden]{display:none}
+.update-pill:active{transform:translateY(1px)}
+@keyframes updatepop{0%{transform:scale(.86);opacity:0}100%{transform:none;opacity:1}}
+@media (max-width:620px){
+  .update-pill{font-size:13.5px;padding:10px 18px}
+}

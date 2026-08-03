@@ -338,13 +338,8 @@ function songStop(){
   if(songEl){ try{ songEl.pause(); }catch(_){} }
   if(ytFrame){ ytFrame.remove(); ytFrame=null; }
 }
-if(HAS_SONG){
-  ["pointerdown","touchstart","scroll","keydown"].forEach(function(ev){
-    window.addEventListener(ev,function(){
-      if(!songArmed){ songArmed=true; songStart(); }
-    },{once:true,passive:true});
-  });
-}
+/* Their song waits for the "play our song" button — starting it on the
+   first stray tap meant the button did nothing you could hear. */
 
 document.getElementById("muteBtn").addEventListener("click",function(){
   sound=!sound; this.textContent=sound?"♪ on":"♪ off";
@@ -425,8 +420,16 @@ world.addEventListener("click",function(e){
     pb.classList.toggle("playing",playing);
     document.getElementById("playLbl").textContent=playing?"playing…":"play our song";
     document.getElementById("eqbar").classList.toggle("on",playing);
-    if(playing){ bar(); barTimer=setInterval(function(){ bar(); floatNote(); },2040); floatNote(); }
-    else if(barTimer){ clearInterval(barTimer); barTimer=null; }
+    if(playing){
+      /* if they supplied a song, THIS is what plays it — the built-in
+         chord loop is only for when no song was given */
+      if(HAS_SONG){ songArmed=true; songStart(); }
+      else { bar(); barTimer=setInterval(function(){ bar(); floatNote(); },2040); }
+      floatNote();
+    } else {
+      if(HAS_SONG) songStop();
+      if(barTimer){ clearInterval(barTimer); barTimer=null; }
+    }
   }
 });
 
