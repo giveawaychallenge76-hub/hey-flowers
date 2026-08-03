@@ -77,7 +77,7 @@ const SHAPES = ['rect','circle','star','heart','tri'];
 /* ───────────────────────── 1. load the folders ───────────────────── */
 /* Bump on every release, and keep build.json in step. Printed on load so
    "is this the new code or a cached copy?" is answerable at a glance. */
-const HF_BUILD = 25;
+const HF_BUILD = 26;
 console.log('%c heyflowers build ' + HF_BUILD + ' ', 'background:#ffd935;color:#4a3305;font-weight:700;border-radius:4px');
 window.HF_BUILD = HF_BUILD;
 
@@ -1235,10 +1235,12 @@ async function routeFromHash(){
   try{
     const sb = window.HF_SB;
     if (!sb) return;
-    const { data, error } = await sb.from('gifts')
-      .select('payload').eq('slug', short[1]).maybeSingle();
-    if (error || !data || !data.payload){ toast("That link looks broken"); return; }
-    showDecoded(data.payload);
+    /* open_gift() returns just this one row. Reading the table directly
+       would mean letting strangers list every gift — payloads and all. */
+    const { data, error } = await sb.rpc('open_gift', { p_slug: short[1] });
+    const row = Array.isArray(data) ? data[0] : data;
+    if (error || !row || !row.payload){ toast("That link looks broken"); return; }
+    showDecoded(row.payload);
   }catch{ toast("That link looks broken"); }
 }
 addEventListener('hashchange', routeFromHash);
