@@ -544,6 +544,21 @@ noBtn.addEventListener("mouseover", escapeNoButton);
 noBtn.addEventListener("touchstart", (e) => { e.preventDefault(); escapeNoButton(); });
 noBtn.addEventListener("click", (e) => { e.preventDefault(); escapeNoButton(); });
 
+/* The editor's Front page / The letter tabs post here. Without this the
+   sidebar switched sections while the preview stayed put, so letter edits
+   looked like they had done nothing. */
+function showSection(which){
+    const toLetter = which === 'letter';
+    frontPage.style.display      = toLetter ? 'none' : 'flex';
+    frontPage.style.opacity      = toLetter ? '0' : '1';
+    surpriseContent.style.display = toLetter ? 'flex' : 'none';
+    surpriseContent.style.opacity = toLetter ? '1' : '0';
+}
+window.addEventListener('message', e => {
+    const d = e.data || {};
+    if (d.__gotoPage) showSection(d.__gotoPage);
+});
+
 yesBtn.addEventListener("click", () => {
     yesBtn.innerHTML = "Yay! 🥰";
     romanticMusic.pause();

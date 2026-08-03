@@ -620,6 +620,23 @@ var letterLines = [
   window.addEventListener('hashchange', render);
   render();
 
+  /* The editor's section tabs post here. Without this the sidebar switched
+     to Photos while the preview sat on whichever section it happened to be
+     showing — so edits looked like they'd done nothing. */
+  window.addEventListener('message', function(e){
+    var d = e.data || {};
+    if (!d.__gotoPage && !d.route) return;
+    var want = String(d.route || '').replace('#/','').replace('#','');
+    if (!want && d.__gotoPage) {
+      want = d.__gotoPage === 'photos' ? 'photo'
+           : d.__gotoPage === 'cover'  ? ''
+           : d.__gotoPage;
+    }
+    var target = '#/' + want;
+    if (location.hash === target) render();      // same section → just redraw
+    else location.hash = target;
+  });
+
   /* ── our film: if a video was uploaded, load it into the TV ── */
   (function(){
     var sc = document.querySelector('.tv .screen');
