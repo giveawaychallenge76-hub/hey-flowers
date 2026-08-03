@@ -35,7 +35,7 @@
       "key": "name",
       "type": "text",
       "label": "Their name",
-      "placeholder": "ashika",
+      "placeholder": "saj",
       "required": true,
       "page": "letter"
     },

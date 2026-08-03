@@ -63,6 +63,30 @@
   .empty{color:var(--soft);font-size:14px;padding:14px 4px}
   .hidden{display:none}
   .foot{max-width:1000px;margin:16px auto 0;color:var(--soft);font-size:12px;text-align:center}
+
+  /* ── gifts people have made ── */
+  .hint-line{color:var(--soft);font-size:13px;margin:-6px 0 14px}
+  .gift-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .gift-card2{background:#0e1220;border:1px solid var(--edge);border-radius:14px;padding:14px;
+    display:flex;flex-direction:column;gap:6px;text-align:left}
+  .gift-card2 .t{font-weight:600;font-size:14.5px;line-height:1.3;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gift-card2 .who{font-size:12.5px;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gift-card2 .meta{font-size:11.5px;color:var(--soft);display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .gift-card2 .tmpl{background:rgba(61,139,255,.16);color:#8ab6ff;border-radius:999px;padding:2px 9px}
+  .gift-card2 .acts{display:flex;gap:8px;margin-top:8px}
+  .gift-card2 button{flex:1;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;
+    border:0;border-radius:9px;padding:8px;background:var(--yellow);color:#3a2a00}
+  .gift-card2 button.ghost{background:rgba(255,255,255,.07);color:var(--ink)}
+
+  /* in-place preview */
+  .peek{position:fixed;inset:0;z-index:200;background:#05070c;display:flex;flex-direction:column}
+  .peek[hidden]{display:none}
+  .peek-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);
+    border-bottom:1px solid var(--edge)}
+  .peek-bar span{flex:1;font-size:13.5px;color:var(--soft);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #peekFrame{flex:1;width:100%;border:0;background:#fff}
 </style>
 </head>
 <body>
@@ -105,6 +129,26 @@
       <tbody id="rows"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody>
     </table>
   </div>
+
+  <div class="panel">
+    <h2>🎁 Gifts people have made
+      <span class="sp"></span>
+      <button class="btn ghost" id="reloadGifts" style="font-size:12.5px;padding:6px 14px">↻ Refresh</button>
+    </h2>
+    <p class="hint-line">Open any gift to see exactly what the recipient sees.</p>
+    <div class="gift-grid" id="giftGrid"><div class="empty">Loading…</div></div>
+  </div>
+</div>
+
+<!-- opened gift, previewed in place -->
+<div class="peek" id="peek" hidden>
+  <div class="peek-bar">
+    <span id="peekTitle"></span>
+    <a class="btn ghost" id="peekOpen" target="_blank" rel="noopener noreferrer"
+       style="font-size:13px;padding:7px 14px">Open in a tab ↗</a>
+    <button class="btn" id="peekClose" style="font-size:13px;padding:7px 14px">✕ Close</button>
+  </div>
+  <iframe id="peekFrame" title="Gift preview"></iframe>
 </div>
 
 <div class="foot" id="setupNote"></div>
@@ -157,7 +201,8 @@ async function gateOrDash(user){
 
 async function load(){
   // members
-  const { data: profiles } = await sb.from('profiles').select('email,plan,created_at').order('created_at', { ascending:false });
+  // id is needed to match gifts back to whoever made them
+  const { data: profiles } = await sb.from('profiles').select('id,email,plan,created_at').order('created_at', { ascending:false });
   const list = profiles || [];
   $('cMembers').textContent = fmt(list.length);
 
@@ -188,8 +233,88 @@ async function load(){
   const { count: gifts } = await sb.from('gifts').select('*', { count:'exact', head:true });
   $('cGifts').textContent = fmt(gifts);
 
+  await loadGifts(list);
+
   note('Live from Supabase · RLS-protected · <a href="index.html">← back to site</a>');
 }
+
+/* ── gifts people have made ───────────────────────────────────────────
+   Gifts carry no email of their own, so match user_id against the
+   profiles we already loaded rather than asking the database twice. */
+const esc = s => String(s ?? '').replace(/[<>&"]/g, c =>
+  ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+let GIFTS = [];
+async function loadGifts(profiles = []) {
+  const grid = $('giftGrid');
+  const byId = Object.fromEntries((profiles || []).map(p => [p.id, p.email]));
+
+  const { data, error } = await sb.from('gifts')
+    .select('id,user_id,template,title,url,slug,created_at')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
+  if (error) {
+    grid.innerHTML = `<div class="empty">Couldn't load gifts — ${esc(error.message)}</div>`;
+    return;
+  }
+  GIFTS = data || [];
+  if (!GIFTS.length) {
+    grid.innerHTML = '<div class="empty">Nobody has made a gift yet.</div>';
+    return;
+  }
+
+  grid.innerHTML = GIFTS.map((g, i) => {
+    const who  = byId[g.user_id] || 'unknown account';
+    const when = g.created_at ? new Date(g.created_at).toLocaleDateString() : '';
+    // a slug link is short; older gifts stored the whole long URL
+    const link = g.slug ? `index.html#${g.slug}` : (g.url || '');
+    return `<div class="gift-card2">
+      <div class="t">${esc(g.title || 'untitled')}</div>
+      <div class="who">${esc(who)}</div>
+      <div class="meta"><span class="tmpl">${esc(g.template || '—')}</span><span>${esc(when)}</span></div>
+      <div class="acts">
+        <button data-peek="${i}">View</button>
+        <button class="ghost" data-copy="${i}" ${link ? '' : 'disabled'}>Copy link</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function giftLink(g) {
+  return g.slug ? new URL('index.html#' + g.slug, location.href).href : (g.url || '');
+}
+
+$('giftGrid').addEventListener('click', async e => {
+  const peek = e.target.closest('[data-peek]');
+  const copy = e.target.closest('[data-copy]');
+  if (peek) {
+    const g = GIFTS[peek.dataset.peek];
+    const link = giftLink(g);
+    $('peekTitle').textContent = `${g.title || 'untitled'} · ${g.template || ''}`;
+    $('peekOpen').href = link;
+    $('peekFrame').src = link;
+    $('peek').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  if (copy) {
+    const link = giftLink(GIFTS[copy.dataset.copy]);
+    try { await navigator.clipboard.writeText(link); copy.textContent = 'Copied ✓'; }
+    catch { copy.textContent = 'Copy failed'; }
+    setTimeout(() => { copy.textContent = 'Copy link'; }, 1600);
+  }
+});
+function closePeek(){
+  $('peek').hidden = true;
+  $('peekFrame').src = 'about:blank';       // stop any music the gift was playing
+  document.body.style.overflow = '';
+}
+$('peekClose').onclick = closePeek;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('peek').hidden) closePeek(); });
+$('reloadGifts').onclick = async () => {
+  const { data } = await sb.from('profiles').select('id,email');
+  await loadGifts(data || []);
+};
 
 $('login').onclick = login;
 $('pass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
