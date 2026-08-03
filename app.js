@@ -1268,6 +1268,42 @@ function remember(tpl, vals, url, opts = {}){
   store.write(list.slice(0, 60));
   if (!opts.skipCloud) cloudSaveGift(tpl, vals, url);  // keep it on the account
 }
+/* Sent gifts live in TWO places: this browser's localStorage, and the
+   account in Supabase. Reading only local meant a gift made on a laptop
+   was invisible on the phone — and anything made before the per-account
+   storage keys landed looked lost too. Pull the account's gifts down and
+   merge them in, newest first, de-duped on the share URL. */
+async function syncSentFromCloud(){
+  try{
+    const sb = window.HF_SB, u = window.HFAuth && window.HFAuth.user && window.HFAuth.user();
+    if (!sb || !u) return false;
+    const { data, error } = await sb.from('gifts')
+      .select('template,title,url,slug,payload,created_at')
+      .eq('user_id', u.id).order('created_at', { ascending:false }).limit(60);
+    if (error || !data) return false;
+
+    const local = store.read();
+    const seen  = new Set(local.map(g => g.url));
+    const base  = location.origin + location.pathname;
+    let added = 0;
+
+    for (const row of data){
+      const url = row.slug ? base + '#' + row.slug : (row.url || '');
+      if (!url || seen.has(url)) continue;
+      let vals = {};
+      try { if (row.payload) vals = decodeGift(row.payload).v || {}; } catch {}
+      local.push({ id: row.template, to: row.title || 'someone',
+                   at: row.created_at ? Date.parse(row.created_at) : Date.now(),
+                   url, vals });
+      seen.add(url); added++;
+    }
+    if (!added) return false;
+    local.sort((a,b) => (b.at||0) - (a.at||0));
+    store.write(local.slice(0, 60));
+    return true;
+  }catch{ return false; }
+}
+
 function paintMine(){
   const sent = store.read();
   const dr   = drafts.read();
@@ -1375,7 +1411,10 @@ function go(id){
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
   setNav(id === 'mine' ? 'tab-mine' : 'tab-gallery');
   document.body.classList.toggle('editing', id === 'compose');  // hides the site nav
-  if (id === 'mine') paintMine();
+  if (id === 'mine'){
+    paintMine();                                   // local first, instantly
+    syncSentFromCloud().then(changed => { if (changed) paintMine(); });
+  }
   if (id === 'compose') scalePreview();
   scrollTo(0, 0);
 }
