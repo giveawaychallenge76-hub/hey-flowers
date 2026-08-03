@@ -75,11 +75,29 @@ const BLANK = {
 const SHAPES = ['rect','circle','star','heart','tri'];
 
 /* ───────────────────────── 1. load the folders ───────────────────── */
-/* Bump on every release. Printed on load so "is this the new code or a
-   cached copy?" is answerable in one glance instead of by guesswork. */
-const HF_BUILD = 23;
+/* Bump on every release, and keep build.json in step. Printed on load so
+   "is this the new code or a cached copy?" is answerable at a glance. */
+const HF_BUILD = 24;
 console.log('%c heyflowers build ' + HF_BUILD + ' ', 'background:#ffd935;color:#4a3305;font-weight:700;border-radius:4px');
 window.HF_BUILD = HF_BUILD;
+
+/* Some embedded webviews (the in-app browsers in Claude, Instagram, etc.)
+   keep their own cache that a normal refresh never clears, so people can
+   sit on an old build for days and hit bugs that were fixed long ago.
+   Ask the server what the current build is; if we're behind, reload once
+   past the cache. sessionStorage guards against a reload loop. */
+(async function checkBuild(){
+  try{
+    const r = await fetch('build.json?t=' + Date.now(), { cache:'no-store' });
+    if (!r.ok) return;
+    const { build } = await r.json();
+    if (!build || build <= HF_BUILD) return;
+    if (sessionStorage.getItem('hf.reloaded') === String(build)) return;  // already tried
+    sessionStorage.setItem('hf.reloaded', String(build));
+    console.warn('[heyflowers] running build ' + HF_BUILD + ', server has ' + build + ' — reloading');
+    location.replace(location.pathname + '?b=' + build + location.hash);
+  }catch{}
+})();
 
 async function boot(){
   try{

@@ -16,7 +16,7 @@
       ]
     },
     {
-      "source": "/(index.html|admin.html|privacy.html|app.js|auth.js|styles.css)",
+      "source": "/(index.html|admin.html|privacy.html|app.js|auth.js|styles.css|build.json)",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache, must-revalidate, max-age=0" }
       ]
