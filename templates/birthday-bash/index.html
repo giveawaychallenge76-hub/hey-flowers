@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday {{name}}! 🎂</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<!--
+════════════════════════════════════════════════
+  one birthday, four rooms:
+   1. is it your birthday?  (the ask)
+   2. the friends wall      (tap anyone → everyone dances)
+   3. the letter            (envelope → candle → their wishes)
+   4. the cake scroll       (in its own frame — see cake.html)
+════════════════════════════════════════════════
+-->
+<style>
+:root{
+  --navy:   {{accent_color}};
+  --hf-font:{{font_family}};
+  --tint:   {{bg_tint}};
+  --env:    {{envelope_color}};
+  --accent: {{accent_color}};
+  --font:   {{font_family}};
+  --accent-bright: color-mix(in srgb, var(--accent) 72%, white);
+  --env-dark: color-mix(in srgb, var(--env) 82%, #5c4a12);
+  --env-mid:  color-mix(in srgb, var(--env) 91%, #5c4a12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--hf-font),'Baloo 2',cursive;background:#fff;overflow:hidden;
+  color:var(--navy);-webkit-tap-highlight-color:transparent}
+
+/* ── the four rooms ── */
+.stage{display:none}
+#st-wall.on{display:block}
+#st-ask.on,#st-letter.on{display:flex;justify-content:center;align-items:center}
+#st-letter{flex-direction:column}
+/* the letter used to be shown by hand by the old two-page router, so it
+   still carries display:none/opacity:0 — the stage owns that now */
+#st-letter #surprise-content{display:flex;opacity:1}
+
+/* On to the cake — but only once the candle is out, so nobody skips the
+   wishes. The letter needs the full height, which is why the wall's nav
+   doesn't follow it here. */
+#toCake{position:fixed;right:16px;bottom:16px;z-index:70;font-family:Arial,Helvetica,sans-serif;
+  font-weight:700;font-size:15px;color:#1a1a1a;background:#f5c518;border:0;border-radius:999px;
+  padding:11px 22px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.22);
+  opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .5s,transform .5s}
+#toCake.in{opacity:1;pointer-events:auto;transform:translateY(0)}
+
+/* ══ from the party wall ══════════════════════════════════ */
+#wall{position:fixed;inset:0;overflow:hidden}
+
+/* ── top nav bar (Wiki-Spy style) ── */
+#nav{position:fixed;left:0;right:0;top:0;height:52px;z-index:40;display:flex;align-items:center;
+  padding:0 20px;background:#fff;border-top:3px solid #2b2b2b;border-bottom:1px solid #e3e3e3;
+  box-shadow:0 2px 6px rgba(0,0,0,.05)}
+#nav .brand{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:26px;color:#b22222;
+  letter-spacing:.01em;line-height:1;white-space:nowrap}
+#nav .friends-line{margin-left:22px;flex:0 1 auto;font-family:Georgia,'Times New Roman',serif;font-weight:700;
+  font-size:clamp(18px,3vw,30px);color:#16307a;background:#b3d7ff;padding:2px 12px 4px;border-radius:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em}
+#nav .spacer{flex:1}
+#nav .nextbtn{margin-left:14px;flex:0 0 auto;font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:15px;color:#1a1a1a;
+  background:#f5c518;border:0;border-radius:5px;padding:9px 22px;cursor:pointer;text-decoration:none;
+  box-shadow:0 1px 2px rgba(0,0,0,.15);transition:filter .15s, transform .15s}
+#nav .nextbtn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+@media(max-width:900px){ #nav .friends-line{font-size:15px;margin-left:10px;max-width:54vw} }
+@media(max-width:640px){ #nav{height:46px;padding:0 12px} #nav .brand{font-size:20px} #nav .fakesearch{display:none} #nav .nextbtn{padding:7px 16px;font-size:14px} }
+
+/* stickers */
+.st{position:absolute;will-change:transform,opacity;opacity:0;cursor:pointer;
+  transition:opacity .5s ease, transform .9s cubic-bezier(.2,1.1,.35,1);
+  transform:translate(var(--fx),var(--fy)) rotate(var(--fr)) scale(.4);
+  filter:drop-shadow(0 6px 9px rgba(20,30,60,.18))}
+.st img{width:100%;height:auto;display:block;pointer-events:none}
+.st.in{opacity:1;transform:translate(0,0) rotate(var(--r)) scale(1)}
+/* everyone dances once the party is live */
+#st-wall.live .st{animation:party var(--dd) ease-in-out infinite;animation-delay:var(--da)}
+@keyframes party{
+  0%,100%{transform:translateY(0) rotate(var(--r)) scale(1)}
+  25%{transform:translateY(-13px) rotate(calc(var(--r) - 6deg)) scale(1.05)}
+  50%{transform:translateY(0) rotate(var(--r)) scale(1)}
+  75%{transform:translateY(-8px) rotate(calc(var(--r) + 6deg)) scale(1.04)}
+}
+.st.tap{animation:tapPop .4s ease}
+@keyframes tapPop{0%{transform:rotate(var(--r)) scale(1)}45%{transform:rotate(var(--r)) scale(1.22)}100%{transform:rotate(var(--r)) scale(1)}}
+
+/* name labels — separate layer so they stay upright & don't move with the dance */
+.lbl{position:absolute;z-index:15;transform:translateX(-50%);pointer-events:none;white-space:nowrap;
+  font-family:var(--hf-font),'Baloo 2',cursive;font-weight:700;font-size:12px;letter-spacing:.02em;color:var(--navy);
+  background:rgba(255,255,255,.82);border-radius:999px;padding:1px 9px 2px;
+  box-shadow:0 2px 6px rgba(20,40,90,.14);opacity:0;transition:opacity .5s ease;}
+.lbl.show{opacity:1}
+
+/* intro line */
+#hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;text-align:center;
+  font-family:'Caveat',cursive;font-weight:700;color:#9fb0d8;font-size:30px;transition:opacity .6s}
+#hint.gone{opacity:0}
+
+/* subtle start cue (not a button) */
+#cue{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:18;pointer-events:none;
+  font-family:var(--hf-font),'Baloo 2',cursive;font-weight:700;font-size:16px;letter-spacing:.06em;color:var(--navy);
+  background:rgba(255,255,255,.7);border-radius:999px;padding:6px 18px 7px;
+  box-shadow:0 4px 14px rgba(20,40,90,.16);opacity:0;transition:opacity .6s;animation:cueBob 1.7s ease-in-out infinite}
+#cue.on{opacity:1}
+#cue.gone{opacity:0}
+@keyframes cueBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-6px)}}
+
+.mnote{position:fixed;z-index:23;pointer-events:none;font-size:26px;will-change:transform,opacity}
+.conf{position:fixed;z-index:22;pointer-events:none;will-change:transform}
+
+#credit{position:fixed;right:16px;bottom:12px;z-index:20;font-weight:600;font-size:13px;color:#8fa0c8;
+  letter-spacing:.06em;opacity:0;transition:opacity .8s}
+#st-wall.live #credit{opacity:.9}
+#replay{position:fixed;left:16px;bottom:12px;z-index:20;font-weight:700;font-size:12px;letter-spacing:.1em;
+  color:#fff;background:rgba(22,48,122,.85);border:0;border-radius:999px;padding:6px 14px;cursor:pointer;
+  opacity:0;transition:opacity .8s}
+#st-wall.live #replay{opacity:.85}
+#replay:hover{opacity:1}
+
+/* ══ from the letter ══════════════════════════════════════ */
+.bshell{
+position:fixed; inset:0;
+
+
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+background: linear-gradient(color-mix(in srgb, var(--tint) 35%, transparent),
+            color-mix(in srgb, var(--tint) 50%, transparent)),
+            var(--photo) no-repeat center center;
+background-size: cover;
+font-family:var(--font), Georgia, serif;
+}
+
+/* HEARTS BACKGROUND */
+#hearts{ position:fixed; inset:0; pointer-events:none; z-index: 1; }
+.heart{
+position:absolute; bottom:-100px; opacity:0;
+animation:floatUp linear infinite;
+}
+.heart::before,.heart::after{
+content:''; position:absolute;
+width:50%; height:80%; background:currentColor;
+border-radius:50% 50% 0 0;
+}
+.heart::before{ left:50%; transform-origin:left bottom; transform:rotate(-45deg); }
+.heart::after{  left:0;   transform-origin:right bottom; transform:rotate(45deg); }
+@keyframes floatUp{
+0%  { transform:translateY(0); opacity:0; }
+10% { opacity:.8; }
+100%{ transform:translateY(-120vh) translateX(40px) rotate(20deg); opacity:0; }
+}
+
+/* ── CELEBRATION CONFETTI ENGINE ── */
+.confetti-particle {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 99;
+  animation: explodeDrop 3s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+@keyframes explodeDrop {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  30% { opacity: 1; }
+  100% { transform: translate(var(--x-move), var(--y-move)) rotate(var(--rot)) scale(0.3); opacity: 0; }
+}
+
+/* ── FRONT PAGE ── */
+#front-page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  background: linear-gradient(color-mix(in srgb, var(--tint) 40%, transparent),
+              color-mix(in srgb, var(--tint) 55%, transparent)),
+              var(--photo) no-repeat center center;
+  background-size: cover;
+  transition: opacity 0.6s ease;
+}
+
+.proposal-box {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(192, 67, 90, 0.3);
+  max-width: 90%;
+  width: 360px;
+  backdrop-filter: blur(4px);
+}
+
+.proposal-box h1 {
+  color: var(--accent);
+  font-size: 1.6rem;
+  margin-bottom: 30px;
+}
+
+.btn-container {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  position: relative;
+  height: 50px;
+}
+
+.btn {
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#yes-btn {
+  background-color: var(--accent-bright);
+  color: white;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+#yes-btn:hover {
+  background-color: color-mix(in srgb, var(--accent-bright) 80%, white);
+}
+
+#no-btn {
+  background-color: #f0f0f0;
+  color: #555;
+  position: absolute;
+  left: 190px; 
+  transition: all 0.2s ease;
+}
+
+/* ── SURPRISE CONTAINER ── */
+#surprise-content {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  position: relative;      /* so the next-wish button can sit over the envelope */
+}
+
+/* appears once the candle is out — makes it obvious there's more than one
+   wish, instead of relying on people guessing they can tap the note */
+#next-wish {
+  position: absolute;
+  left: 50%;
+  bottom: -16px;
+  transform: translateX(-50%) translateY(10px);
+  z-index: 40;
+  opacity: 0;
+  transition: opacity .45s ease, transform .45s cubic-bezier(.2,1.3,.4,1);
+  font-family: "Comic Sans MS", "Chalkboard SE", "Comic Neue", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(180deg, #ff6f91, #e63b66);
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 26px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #b32349, 0 10px 22px -8px rgba(180,20,60,.55);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+#next-wish.in { opacity: 1; transform: translateX(-50%) translateY(0); }
+#next-wish:active { transform: translateX(-50%) translateY(3px); box-shadow: 0 2px 0 #b32349; }
+@media (max-width: 640px) {
+  #next-wish { font-size: 17px; padding: 15px 30px; bottom: -12px; }
+}
+
+.l-hint{
+text-align:center;
+color:var(--accent);
+font-size:16px;
+margin-bottom:20px;
+transition:opacity .4s;
+font-weight: bold;
+text-shadow: 0 1px 4px rgba(255,255,255,0.8);
+background: rgba(255, 255, 255, 0.7);
+padding: 5px 15px;
+border-radius: 20px;
+}
+.l-hint.hidden{ opacity:0; }
+
+/* Envelope Setup */
+.envelope{
+position:relative;
+width:320px;
+height:380px; 
+cursor:pointer;
+animation:bob 3s ease-in-out infinite;
+}
+.envelope.pulled{ animation:none; }
+
+@keyframes bob{
+0%,100%{ transform:translateY(0); }
+50%    { transform:translateY(-10px); }
+}
+
+.back-flap{
+position:absolute;
+top:0; left:0;
+width:0; height:0;
+border-left:  160px solid transparent;
+border-right: 160px solid transparent;
+border-bottom:130px solid var(--env-dark);
+z-index:1;
+}
+
+.body-bg{
+position:absolute;
+left:0; right:0;
+top:130px;
+height:250px;
+background:var(--env-mid);
+z-index:1;
+border-radius:0 0 4px 4px;
+box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+
+/* ── LETTER CARD ENGINE ── */
+.letter{
+position:absolute;
+left:20px;
+right:20px;
+height:245px; 
+background:#fff;
+border-radius:4px;
+top:132px; 
+z-index:2;
+box-shadow:0 4px 15px rgba(0,0,0,.15);
+transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), height 1s cubic-bezier(0.25, 1, 0.5, 1);
+overflow:hidden;
+transform: translateY(0);
+}
+
+.envelope.pulled .letter{
+transform:translateY(-215px);
+height: 325px; 
+}
+
+.content{
+height:100%;
+display:flex; flex-direction:column;
+justify-content:flex-start; align-items:center;
+text-align:center; padding:12px;
+opacity:0;
+transition:opacity 0.6s ease 0.4s;
+}
+.envelope.pulled .content{ opacity:1; }
+
+.content h2{
+  color:var(--accent);
+  margin-top: 5px;
+  margin-bottom:5px;
+  font-size: 1.5rem;
+  font-weight: normal;
+  font-family: var(--font), 'Dancing Script', 'Brush Script MT', 'Georgia', cursive, serif;
+}
+
+.highlight-name {
+  background: transparent; 
+  padding: 0 4px;
+  border: none; 
+  font-weight: bold;
+  color: var(--accent-bright);
+  font-size: 1.8rem;
+  display: inline-block;
+}
+
+.mic-instruction {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+/* CAKE */
+.cake-design {
+  position: relative;
+  width: 90px;
+  height: 45px;
+  background: #f48fb1; 
+  border-radius: 6px 6px 0 0;
+  margin-top: 22px;
+  margin-bottom: 12px;
+  box-shadow: inset 0 -8px 0 #f06292;
+  flex-shrink: 0;
+}
+.cake-design::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 8px;
+  background: #fff8e1; 
+  top: 18px; left: 0;
+}
+.cake-design::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 6px;
+  background: #e1bee7; 
+  border-radius: 6px 6px 0 0;
+  top: 0; left: 0;
+}
+.candle-wick {
+  position: absolute;
+  width: 6px;
+  height: 18px;
+  background: linear-gradient(#b2ebf2, #00bcd4);
+  top: -18px;
+  left: 42px;
+  border-radius: 1px;
+}
+.candle-wick::before {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 4px;
+  background: #333;
+  top: -4px; left: 2px;
+}
+.glowing-flame {
+  position: absolute;
+  width: 10px;
+  height: 14px;
+  background: #ffb74d;
+  border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+  top: -32px;
+  left: 40px;
+  box-shadow: 0 0 10px #ffb74d, 0 0 20px #ff9800;
+  animation: flameMove 0.6s ease-in-out infinite alternate;
+  transition: opacity 0.3s ease;
+}
+@keyframes flameMove {
+  0% { transform: scale(1) rotate(-3deg); opacity: 0.9; }
+  100% { transform: scale(1.15) rotate(4deg); opacity: 1; box-shadow: 0 0 12px #ffb74d, 0 0 22px #ff5722; }
+}
+
+.smoke {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: rgba(220, 220, 220, 0.8);
+  border-radius: 50%;
+  top: -36px;
+  left: 39px;
+  opacity: 0;
+  pointer-events: none;
+}
+.blown-out .glowing-flame {
+  opacity: 0 !important;
+  animation: none !important;
+}
+.blown-out .smoke {
+  animation: smokeRise 1.5s ease-out forwards;
+}
+@keyframes smokeRise {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; filter: blur(0px); }
+  50% { opacity: 0.4; }
+  100% { transform: translateY(-30px) scale(2.5); opacity: 0; filter: blur(4px); }
+}
+
+/* MEMORY SLIDER DISPLAY SCROLL */
+.cute-note-scroll {
+  width: 100%;
+  background: #fff9f9;
+  border: none; 
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 4px;
+  font-family: "Comic Sans MS", "Chalkboard SE", "Comic Neue", sans-serif;
+  position: relative;
+}
+.cute-note-scroll h4 {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 5px;
+  font-weight: normal;
+}
+.important-list {
+  color: var(--accent-bright);
+  font-weight: bold;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  letter-spacing: 1px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.front-pocket{
+position:absolute;
+left:0; right:0;
+top:130px;
+bottom:0;
+background:var(--env);
+z-index:4;
+border-radius:0 0 4px 4px;
+clip-path: polygon(0 0, 50% 55px, 100% 0, 100% 100%, 0 100%);
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.front-label{
+font-size:18px;
+font-weight:bold;
+color:color-mix(in srgb, var(--env) 18%, black);
+opacity:0.85;
+transition:opacity .3s;
+text-align:center;
+margin-top:45px; 
+}
+.envelope.pulled .front-label{ opacity:0; }
+</style>
+</head>
+<body>
+
+<!-- the hearts drift behind the ask and the letter -->
+<div id="hearts"></div>
+
+<div id="nav" style="display:none">
+  <span class="brand">{{brand}}</span>
+  <span class="friends-line">{{message}}</span>
+  <span class="spacer"></span>
+  <button class="nextbtn" id="navNext" type="button">the letter →</button>
+</div>
+
+<!-- ═ 1 ─ the ask ═ -->
+<div class="stage bshell" id="st-ask">
+<div id="front-page">
+    <div class="proposal-box">
+        <h1>{{question}}</h1>
+        <div class="btn-container">
+            <button class="btn" id="yes-btn">Yes</button>
+            <button class="btn" id="no-btn">No</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ═ 2 ─ the friends wall ═ -->
+<div class="stage" id="st-wall">
+  <div id="wall"></div>
+  <div id="hint">gathering your friends…</div>
+  <div id="cue">tap anyone to start the music ♫</div>
+  <div id="credit"></div>
+  <button id="replay">↺ again</button>
+</div>
+
+<!-- ═ 3 ─ the letter ═ -->
+<div class="stage bshell" id="st-letter">
+<div id="surprise-content" class="wrap">  
+    <div class="l-hint" id="l-hint">Tap to pull out the letter 💖</div>  
+    
+    <div class="envelope" id="envelope">  
+        <div class="back-flap"></div>  
+        <div class="body-bg"></div>  
+
+        <div class="letter">  
+            <div class="content">  
+                <h2>Happy Birthday <span class="highlight-name">{{name}}</span> 🥳</h2>  
+                <div class="mic-instruction" id="mic-tag">(use the mic to blow the candle)</div>
+                
+                <div class="cake-design" id="cake-container">
+                    <div class="glowing-flame"></div>
+                    <div class="candle-wick"></div>
+                    <div class="smoke"></div>
+                </div>
+
+                <div class="cute-note-scroll" id="note-scroller">
+                    <h4 id="note-title">A list of my most important things...</h4>
+                    <div class="important-list" id="display-text">
+                        {{note4_text}}
+                    </div>
+                </div>
+            </div>  
+        </div>  
+
+        <div class="front-pocket">
+            <div class="front-label">Place your hand here</div>  
+        </div>
+    </div>
+</div>
+  <button id="toCake" type="button">the cake →</button>
+</div>
+
+<!-- ═ 4 ─ the cake scroll, in its own frame so scripts never clash ═ -->
+<iframe id="cake-frame" src="cake.html" title="the cake"
+  style="position:fixed;inset:0;width:100%;height:100%;border:0;z-index:120;background:#fff;display:none"></iframe>
+
+<div id="hf-stage" style="position:fixed;inset:0;pointer-events:none;z-index:60"></div>
+
+<script>
+/* ── four stages, one at a time ──────────────────────────────────────
+   ask → the friends wall → the letter → the cake scroll.
+   The cake keeps living in its own frame: it has its own music and its
+   own scroll, and letting its script share this document is exactly the
+   clash the iframe was introduced to avoid. */
+(function(){
+"use strict";
+var frame  = document.getElementById('cake-frame');
+var hearts = document.getElementById('hearts');
+var nav    = document.getElementById('nav');
+var navBtn = document.getElementById('navNext');
+var ORDER  = ['ask','wall','letter','cake'];
+
+var HF = {
+  msg:"{{message}}", frm:"{{from}}", age:"{{age}}", who:"{{name}}",
+  photos:[{src:"{{cphoto1}}",cap:"{{ccap1}}"},{src:"{{cphoto2}}",cap:"{{ccap2}}"},{src:"{{cphoto3}}",cap:"{{ccap3}}"},{src:"{{cphoto4}}",cap:"{{ccap4}}"},{src:"{{cphoto5}}",cap:"{{ccap5}}"},{src:"{{cphoto6}}",cap:"{{ccap6}}"},{src:"{{cphoto7}}",cap:"{{ccap7}}"},{src:"{{cphoto8}}",cap:"{{ccap8}}"},{src:"{{cphoto9}}",cap:"{{ccap9}}"},{src:"{{cphoto10}}",cap:"{{ccap10}}"}],
+  letters:[{msg:"{{cl1m}}",frm:"{{cl1f}}"},{msg:"{{cl2m}}",frm:"{{cl2f}}"},{msg:"{{cl3m}}",frm:"{{cl3f}}"},{msg:"{{cl4m}}",frm:"{{cl4f}}"},{msg:"{{cl5m}}",frm:"{{cl5f}}"},{msg:"{{cl6m}}",frm:"{{cl6f}}"},{msg:"{{cl7m}}",frm:"{{cl7f}}"},{msg:"{{cl8m}}",frm:"{{cl8f}}"},{msg:"{{cl9m}}",frm:"{{cl9f}}"},{msg:"{{cl10m}}",frm:"{{cl10f}}"},{msg:"{{cl11m}}",frm:"{{cl11f}}"},{msg:"{{cl12m}}",frm:"{{cl12f}}"}]
+};
+/* optional background photo — none is a valid background-image layer,
+   an empty url() is not (it re-requests this very page) */
+var PHOTO = "{{photo_url}}";
+document.documentElement.style.setProperty('--photo',
+  PHOTO ? 'url("' + PHOTO.replace(/"/g,'%22') + '")' : 'none');
+
+function tell(m){ try{ frame.contentWindow.postMessage(m,"*"); }catch(_){} }
+function sendVals(){ tell({__hfvals:1, msg:HF.msg, frm:HF.frm, age:HF.age, who:HF.who,
+                           photos:HF.photos, letters:HF.letters}); }
+
+var stage = 'ask';
+function go(which){
+  if(ORDER.indexOf(which) < 0) return;
+  stage = which;
+  ['ask','wall','letter'].forEach(function(s){
+    var n = document.getElementById('st-'+s);
+    if(n) n.classList.toggle('on', s === which);
+  });
+  /* The hearts belong to the two pages that came from the letter template.
+     They have to live INSIDE the active stage, not beside it: the letter is
+     a flex item, so its z-index only ranks it against its siblings, and a
+     body-level hearts layer would paint straight over the envelope. */
+  var host = document.getElementById('st-' + which);
+  if(hearts){
+    var wanted = (which === 'ask' || which === 'letter');
+    hearts.style.display = wanted ? 'block' : 'none';
+    if(wanted && host && hearts.parentElement !== host) host.insertBefore(hearts, host.firstChild);
+  }
+
+  var onCake = (which === 'cake');
+  frame.style.display = onCake ? 'block' : 'none';
+  // the letter needs its full height, so the nav belongs to the wall alone
+  if(nav) nav.style.display = (which === 'wall') ? 'flex' : 'none';
+
+  /* only the page you're looking at is allowed to make noise */
+  if(onCake){ sendVals(); tell({__audio:'on'}); if(window.__partyAudio) window.__partyAudio(false); }
+  else { tell({__audio:'off'}); if(window.__partyAudio) window.__partyAudio(true); }
+}
+window.__bashGo = go;
+
+if(navBtn) navBtn.addEventListener('click', function(){ go('letter'); });
+
+/* the cake opens once the candle is out — watch for the class the blow-out
+   adds, rather than reaching into the letter's own script */
+var cakeBtn = document.getElementById('toCake');
+if(cakeBtn) cakeBtn.addEventListener('click', function(){ go('cake'); });
+var candle = document.getElementById('cake-container');
+if(candle && cakeBtn && window.MutationObserver){
+  var mo = new MutationObserver(function(){
+    if(candle.classList.contains('blown-out')){ cakeBtn.classList.add('in'); mo.disconnect(); }
+  });
+  mo.observe(candle, { attributes:true, attributeFilter:['class'] });
+}
+
+/* the ask: Yes opens the party */
+var yesBtn = document.getElementById('yes-btn');
+if(yesBtn) yesBtn.addEventListener('click', function(){
+  yesBtn.innerHTML = "Yay! 🥰";
+  setTimeout(function(){ go('wall'); }, 550);
+});
+
+/* Their song starts on the first touch anywhere, so it's already playing
+   by the time the wall gathers. With no song uploaded this does nothing
+   and the wall's own tune takes over when the party goes live. */
+function firstTouch(){
+  if(window.__bashSong) window.__bashSong();
+  window.removeEventListener('click', firstTouch);
+  window.removeEventListener('touchstart', firstTouch);
+}
+window.addEventListener('click', firstTouch);
+window.addEventListener('touchstart', firstTouch);
+
+window.addEventListener('message', function(e){
+  var d = e.data || {};
+  if(d.__cakeReady) sendVals();          // cake loaded → hand it the names
+  if(d.__cakeBack)  go('letter');
+  if(d.__gotoPage){                      // the editor's page tabs
+    go(d.__gotoPage === 'surprise' ? 'cake'
+     : d.__gotoPage === 'friends'  ? 'wall'
+     : d.__gotoPage);
+  }
+});
+
+go('ask');
+})();
+</script>
+
+<script>
+/* ── the envelope, the candle and their wishes ── */
+const hearts = document.getElementById("hearts");
+const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ff4d6d";
+const colors = [55, 65, 75, 88, 100].map(p => `color-mix(in srgb, ${accent} ${p}%, white)`);
+for(let i = 0; i < 80; i++){  
+    const h = document.createElement("span");  
+    h.className = "heart";  
+    const size = 10 + Math.random()*50;  
+    h.style.width  = size+"px";  
+    h.style.height = size+"px";  
+    h.style.left   = Math.random()*100+"vw";  
+    h.style.color  = colors[Math.floor(Math.random()*colors.length)];  
+    h.style.animationDuration = 6+Math.random()*10+"s";  
+    h.style.animationDelay   = -Math.random()*12+"s";  
+    hearts.appendChild(h);  
+}  
+
+const noBtn = document.getElementById("no-btn");
+const yesBtn = document.getElementById("yes-btn");
+const frontPage = document.getElementById("front-page");
+const surpriseContent = document.getElementById("surprise-content");
+
+function escapeNoButton() {
+    const padding = 25; 
+    const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+    const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+    
+    const randomX = Math.max(padding, Math.min(maxX, Math.floor(Math.random() * maxX)));
+    const randomY = Math.max(padding, Math.min(maxY, Math.floor(Math.random() * maxY)));
+    
+    noBtn.style.position = "fixed";
+    noBtn.style.left = randomX + "px";
+    noBtn.style.top = randomY + "px";
+}
+
+noBtn.addEventListener("mouseover", escapeNoButton);
+noBtn.addEventListener("touchstart", (e) => { e.preventDefault(); escapeNoButton(); });
+noBtn.addEventListener("click", (e) => { e.preventDefault(); escapeNoButton(); });
+
+const envelope = document.getElementById("envelope");  
+const hint     = document.getElementById("l-hint");  
+let letterOpened = false;
+  
+function toggle(){  
+    envelope.classList.toggle("pulled");  
+    const isPulled = envelope.classList.contains("pulled");
+    hint.classList.toggle("hidden", isPulled);  
+    
+    if(isPulled && !letterOpened) {
+        letterOpened = true;
+        setTimeout(initBlowDetection, 1000); 
+    }
+}  
+envelope.addEventListener("click", toggle);  
+envelope.addEventListener("touchstart", e => { e.preventDefault(); toggle(); }, {passive:false});  
+
+/* Most people never got the candle out: the mic needs permission AND a hard
+   enough puff, and the tap fallback only appeared if permission was denied.
+   Now it always blows itself out 3s after "close your eyes" — the mic and a
+   tap still work, they just get there sooner. */
+let wishTimer = null;
+function startWishCountdown() {
+    const micTag = document.getElementById("mic-tag");
+    if (micTag) micTag.innerHTML = "close your eyes and make a wish…";
+    // a tap anywhere on the cake blows it out immediately
+    const cake = document.getElementById("cake-container");
+    if (cake) cake.addEventListener("click", e => { e.stopPropagation(); extinguishCandle(); });
+    if (wishTimer) clearTimeout(wishTimer);
+    wishTimer = setTimeout(() => extinguishCandle(), 3000);
+}
+
+function initBlowDetection() {
+    startWishCountdown();          // the candle goes out on its own regardless
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then((stream) => {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const microphone = audioContext.createMediaStreamSource(stream);
+        
+        analyser.fftSize = 512;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        microphone.connect(analyser);
+
+        function checkBlow() {
+            if (!letterOpened || candleOut) return;   // stop polling once it's out
+            analyser.getByteFrequencyData(dataArray);
+            
+            let highFrequencySum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                if (i >= bufferLength / 4) highFrequencySum += dataArray[i];
+            }
+            const highFreqAverage = highFrequencySum / (bufferLength * 0.75);
+            
+            if (highFreqAverage > 45) { 
+                extinguishCandle(stream, audioContext);
+                return;
+            }
+            requestAnimationFrame(checkBlow);
+        }
+        checkBlow();
+    })
+    .catch(() => {
+        /* no mic permission — nothing to do, the countdown and the tap
+           handler from startWishCountdown() already cover it */
+    });
+}
+
+// ── NEW ADVANCED ENGAGEMENT FEATURES ──
+function triggerConfettiExplosion() {
+    const confettiColors = ["#ff4d6d", "#ff758f", "#ffbe0b", "#ff006e", "#8338ec", "#3a86ff", "#00f5d4"];
+    
+    for (let i = 0; i < 65; i++) {
+        const p = document.createElement("div");
+        p.className = "confetti-particle";
+        p.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+        
+        // Emits directly outwards center-screen from behind the envelope position
+        p.style.left = "50vw";
+        p.style.top = "45vh";
+        
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 80 + Math.random() * 160;
+        
+        p.style.setProperty('--x-move', Math.cos(angle) * velocity + 'vw');
+        p.style.setProperty('--y-move', (Math.sin(angle) * velocity + 150) + 'vh');
+        p.style.setProperty('--rot', Math.floor(Math.random() * 720 - 360) + 'deg');
+        
+        p.style.animationDelay = (Math.random() * 0.2) + 's';
+        p.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+        
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 3500);
+    }
+}
+
+function runMemoryNoteCarousel() {
+    const memories = [
+        { title: "{{note1_title}}", txt: "{{note1_text}}" },
+        { title: "{{note2_title}}", txt: "{{note2_text}}" },
+        { title: "{{note3_title}}", txt: "{{note3_text}}" },
+        { title: "{{note4_title}}", txt: "{{note4_text}}" }
+    ];
+    
+    let currentIndex = 0;
+    const titleEl = document.getElementById("note-title");
+    const txtEl = document.getElementById("display-text");
+    const scrollerBox = document.getElementById("note-scroller");
+
+    scrollerBox.style.cursor = "pointer";
+    titleEl.innerHTML = memories[0].title;
+    txtEl.innerHTML = memories[0].txt;
+
+    function showNext(e) {
+        /* The envelope opens/closes on BOTH click and touchstart, so a tap in
+           here has to stop both — stopping only click is why the letter folded
+           itself away on phones while working fine on desktop. */
+        if (e) { e.stopPropagation(); e.preventDefault(); }
+
+        txtEl.style.opacity = "0";
+        titleEl.style.opacity = "0";
+        txtEl.style.transform = "scale(0.9)";
+
+        setTimeout(() => {
+            currentIndex = (currentIndex + 1) % memories.length;
+            titleEl.innerHTML = memories[currentIndex].title;
+            txtEl.innerHTML = memories[currentIndex].txt;
+            nextBtn.innerHTML = (currentIndex === memories.length - 1)
+                ? "read them again ↻" : "next wish →";
+
+            txtEl.style.opacity = "1";
+            titleEl.style.opacity = "1";
+            txtEl.style.transform = "scale(1)";
+            triggerConfettiExplosion();
+        }, 300);
+    }
+
+    ["click", "touchstart"].forEach(ev =>
+        scrollerBox.addEventListener(ev, showNext, { passive: false }));
+
+    /* a real button, so it's obvious there's more than one wish */
+    const nextBtn = document.createElement("button");
+    nextBtn.id = "next-wish";
+    nextBtn.type = "button";
+    nextBtn.innerHTML = "next wish →";
+    ["click", "touchstart"].forEach(ev =>
+        nextBtn.addEventListener(ev, showNext, { passive: false }));
+    document.getElementById("surprise-content").appendChild(nextBtn);
+    requestAnimationFrame(() => nextBtn.classList.add("in"));
+}
+
+let candleOut = false;
+function extinguishCandle(stream = null, audioContext = null) {
+    if (candleOut) return;          // mic, tap and the timer all race — first one wins
+    candleOut = true;
+    if (wishTimer) { clearTimeout(wishTimer); wishTimer = null; }
+
+    const cake = document.getElementById("cake-container");
+    const micTag = document.getElementById("mic-tag");
+
+    cake.classList.add("blown-out");
+    micTag.innerHTML = "✨ Click below to read your wishes! ✨";
+    
+    triggerConfettiExplosion();
+    runMemoryNoteCarousel();
+    
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    if (audioContext) audioContext.close();
+}
+</script>
+
+<script>
+/* ── the friends wall ── */
+(function(){
+"use strict";
+
+/* ══════════ CONFIG ══════════ */
+var FROM = "{{from}}";
+
+/* every character: n=file, anim=frozen-until-tap, w=width, lbl=small name shown above it */
+var CAST = [
+  { n:"piano-beethoven", anim:true,  w:170, lbl:"beethoven" },
+  { n:"dance-baby",      anim:true,  w:120, lbl:"baby" },
+  { n:"dance-lisa",      anim:true,  w:110, lbl:"lisa" },
+  { n:"heart-golfer",    anim:true,  w:130, lbl:"mr. heart" },
+  { n:"disco-star-man",  anim:true,  w:110, lbl:"disco star" },
+  { n:"dance-tina",      anim:true,  w:105, lbl:"tina" },
+  { n:"trombone-girl",   anim:true,  w:100, lbl:"trombone" },
+  { n:"tux-guy",         anim:true,  w:110, lbl:"the tux" },
+  { n:"dance-suit",      anim:true,  w:95,  lbl:"smooth" },
+  { n:"banjo-cowboy",    anim:true,  w:120, lbl:"banjo" },
+  { n:"guitar-boy",      anim:true,  w:110, lbl:"strummer" },
+  { n:"dance-cartoon",   anim:true,  w:115, lbl:"hey!" },
+  { n:"dj-snoopy",       anim:false, w:150, lbl:"dj snoopy" },
+  { n:"sax-snoopy",      anim:false, w:100, lbl:"sax snoopy" },
+  { n:"piano-snoopy",    anim:false, w:150, lbl:"maestro" },
+  { n:"sing-snoopy",     anim:false, w:130, lbl:"singer" },
+  { n:"rock-snoopy",     anim:false, w:120, lbl:"rockstar" },
+  { n:"drummer",         anim:false, w:130, lbl:"drummer" },
+  { n:"violin-garfield", anim:false, w:120, lbl:"garfield" },
+  { n:"guitar-pepe",     anim:false, w:100, lbl:"pepe" },
+  { n:"guitar-frog",     anim:false, w:135, lbl:"froggy" },
+  { n:"boombox-pirate",  anim:false, w:115, lbl:"boombox" },
+  { n:"disco-ball",      anim:false, w:120, lbl:"disco" },
+  { n:"dance-dobby",     anim:false, w:100, lbl:"dobby" },
+  { n:"dance-naruto",    anim:false, w:95,  lbl:"naruto" },
+  { n:"guitar-mickey",   anim:false, w:140, lbl:"mickey" },
+  { n:"dj-kid",          anim:false, w:120, lbl:"the dj" }
+];
+/* ════════════════════════════ */
+
+var wall = document.getElementById("wall");
+var hint = document.getElementById("hint");
+var cue = document.getElementById("cue");
+var els = [], labels = [];
+
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=(Math.random()*(i+1))|0; var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+function build(){
+  var vw=window.innerWidth, vh=window.innerHeight, mobile=vw<720;
+  var BAR=mobile?46:52;
+  var list=shuffle(CAST.slice());
+  var cols=mobile?4:6, rows=Math.ceil(list.length/cols);
+  var cw=vw/cols, ch=(vh-BAR-10)/rows;
+  list.forEach(function(s,i){
+    var c=i%cols, r=(i/cols)|0;
+    var w=Math.min(s.w, cw*1.0)*(mobile?.78:.9);
+    var jx=(Math.random()-.5)*cw*0.42, jy=(Math.random()-.5)*ch*0.42;
+    var cx=c*cw+cw/2+jx, cy=BAR+22 + r*ch+ch/2+jy;
+    cy=Math.max(cy, BAR+22+ch*0.5);   /* leave headroom for label + navbar */
+
+    var el=document.createElement("div");
+    el.className="st";
+    el.style.setProperty("--r",(Math.random()*16-8)+"deg");
+    el.style.setProperty("--dd",(1.5+Math.random()*1.2).toFixed(2)+"s");
+    el.style.setProperty("--da",(Math.random()*1).toFixed(2)+"s");
+    var side=i%4;
+    el.style.setProperty("--fx", side===0?"-70vw":side===1?"70vw":(Math.random()*40-20)+"vw");
+    el.style.setProperty("--fy", side===2?"-70vh":side===3?"70vh":(Math.random()*40-20)+"vh");
+    el.style.setProperty("--fr",(Math.random()*120-60)+"deg");
+    el.style.width=w+"px";
+    el.style.left=(cx-w/2)+"px";
+    el.style.top=(cy-w/2)+"px";
+    el.style.zIndex=2+(i%6);
+    var src = s.anim ? "birthday-assets/frozen/"+s.n+".png" : "birthday-assets/"+s.n+".png";
+    el.innerHTML='<img src="'+src+'" alt="" '+(s.anim?'data-anim="birthday-assets/anim/'+s.n+'.webp"':'')+'>';
+    el.addEventListener("click", function(){ tap(el); });
+    wall.appendChild(el);
+    els.push(el);
+  });
+}
+build();
+
+/* after 2s: friends fly in one by one, then the cue */
+setTimeout(function(){
+  hint.classList.add("gone");
+  els.forEach(function(el,i){ setTimeout(function(){ el.classList.add("in"); pop(); }, i*90); });
+  var doneAt = els.length*90 + 500;
+  setTimeout(function(){ cue.classList.add("on"); }, doneAt + 300);
+}, 2000);
+
+/* tiny land blips */
+var AC=null;
+function ac(){ if(!AC){ var C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C(); } if(AC&&AC.state==="suspended") AC.resume(); return AC; }
+function pop(){ var a=ac(); if(!a) return; var t=a.currentTime; var o=a.createOscillator(),g=a.createGain();
+  o.type="sine"; o.frequency.setValueAtTime(320+Math.random()*460,t);
+  g.gain.setValueAtTime(.022,t); g.gain.exponentialRampToValueAtTime(.0005,t+.1);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+.12); }
+
+/* ══════════ MUSIC ══════════
+   The sender can supply their own song — an uploaded file, or a YouTube
+   link. If neither is given we fall back to the built-in chiptune. */
+var SONG_FILE = "{{song}}";       // data: or https: audio
+var SONG_URL  = "{{song_url}}";   // a YouTube link
+var customEl=null, ytFrame=null;
+
+function ytId(u){
+  var m=String(u||"").match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:"";
+}
+function customStart(){
+  if (SONG_FILE){
+    if(!customEl){
+      customEl=new Audio(SONG_FILE); customEl.loop=true; customEl.volume=.85;
+    }
+    customEl.play().catch(function(){});
+    return true;
+  }
+  var id=ytId(SONG_URL);
+  if (id){
+    if(!ytFrame && window.__hfPlayYT) ytFrame = window.__hfPlayYT(id);
+    return true;
+  }
+  return false;
+}
+function customStop(){
+  if(customEl){ try{ customEl.pause(); }catch(_){} }
+  if(ytFrame){ if(window.__hfStopYT) window.__hfStopYT(); ytFrame=null; }
+}
+var hasCustom = !!(SONG_FILE || ytId(SONG_URL));
+
+var MASTER=null, playing=false, muted=false;
+function master(){ var a=ac(); if(!a) return null;
+  if(!MASTER){ var comp=a.createDynamicsCompressor(); MASTER=a.createGain(); MASTER.gain.value=.9; MASTER.connect(comp); comp.connect(a.destination); }
+  return MASTER; }
+var G=392,A=440,B=493.88,C=523.25,D=587.33,E=659.25,F=698.46,G5=783.99;
+var TUNE=[[G,.75],[G,.25],[A,1],[G,1],[C,1],[B,2],
+  [G,.75],[G,.25],[A,1],[G,1],[D,1],[C,2],
+  [G,.75],[G,.25],[G5,1],[E,1],[C,1],[B,1],[A,2],
+  [F,.75],[F,.25],[E,1],[C,1],[D,1],[C,2.5]];
+var BEAT=0.44;
+function tone(f,t0,dur){ if(muted) return; var a=ac(),out=master(); if(!a||!out) return;
+  var o=a.createOscillator(),o2=a.createOscillator(),g=a.createGain(),lp=a.createBiquadFilter();
+  o.type="triangle"; o.frequency.value=f; o2.type="sine"; o2.frequency.value=f*2; o2.detune.value=4;
+  lp.type="lowpass"; lp.frequency.value=2600;
+  g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(.3,t0+.02);
+  g.gain.exponentialRampToValueAtTime(.0006,t0+dur*0.95);
+  o.connect(g);o2.connect(g);g.connect(lp);lp.connect(out); o.start(t0);o.stop(t0+dur);o2.start(t0);o2.stop(t0+dur); }
+function playTune(){ var a=ac(); if(!a) return 8000; var t=a.currentTime+.06;
+  TUNE.forEach(function(n){ var dur=n[1]*BEAT; if(n[0]>0) tone(n[0],t,dur*0.92); t+=dur; });
+  return (t-a.currentTime)*1000; }
+
+/* ══════════ click any sticker → everyone dances ══════════ */
+function tap(el){
+  el.classList.remove("tap"); void el.offsetWidth; el.classList.add("tap");
+  if(!playing) goLive();
+}
+var tuneTimer=null;
+var WALL=document.getElementById("st-wall");
+function goLive(){
+  if(playing) return;
+  playing=true;
+  cue.classList.add("gone");
+  WALL.classList.add("live");
+  document.querySelectorAll('img[data-anim]').forEach(function(img){ img.src = img.getAttribute("data-anim"); });
+  // their song wins; the built-in tune is only the fallback
+  if(!customStart()){
+    ac(); master();
+    var loop=playTune();
+    tuneTimer=setInterval(playTune, loop+500);
+  }
+  setInterval(sprinkle, BEAT*1000*2);
+  burst(70); setInterval(function(){ burst(10); }, 1500);
+  document.getElementById("credit").textContent = "— with love, " + FROM + " ♥";
+}
+
+/* Page 1 and the cake each have their own audio. Whichever page you're
+   NOT looking at must go quiet, or they play over each other.
+   `muted` is the source of truth and is also checked in tone(), so this
+   works even if it's called before the AudioContext exists. */
+window.__bashSong = function(){ return customStart(); };
+window.__partyAudio = function(on){
+  muted = !on;
+  if (hasCustom){
+    if(on){ if(playing) customStart(); } else customStop();
+    return;
+  }
+  try{
+    var a=ac();
+    if(MASTER && a) MASTER.gain.setValueAtTime(on ? .9 : 0, a.currentTime);
+  }catch(_){}
+  if(!on){                                  // stop scheduling new notes too
+    if(tuneTimer){ clearInterval(tuneTimer); tuneTimer=null; }
+  } else if(playing && !tuneTimer){
+    var loop=playTune();
+    tuneTimer=setInterval(playTune, loop+500);
+  }
+};
+
+var CC=["#ff5c8a","#ffcf3f","#5ad1ff","#7ee88a","#c78bff","#ff8a3a"];
+function burst(n){
+  for(var i=0;i<n;i++){
+    var c=document.createElement("span"); c.className="conf";
+    var sz=6+Math.random()*9; c.style.width=sz+"px"; c.style.height=(sz*.6)+"px";
+    c.style.background=CC[(Math.random()*CC.length)|0];
+    c.style.left=Math.random()*100+"vw"; c.style.top="-18px";
+    c.style.borderRadius=Math.random()<.5?"50%":"2px";
+    document.body.appendChild(c);
+    var dx=Math.random()*160-80, dur=2600+Math.random()*2400;
+    c.animate([{transform:"translate(0,0) rotate(0)",opacity:1},
+      {transform:"translate("+dx+"px,"+(window.innerHeight+40)+"px) rotate("+(Math.random()*720-360)+"deg)",opacity:.9}],
+      {duration:dur,easing:"cubic-bezier(.3,.4,.6,1)",fill:"forwards"});
+    setTimeout(function(el){ el.remove(); }.bind(null,c),dur+100);
+  }
+}
+function sprinkle(){
+  for(var i=0;i<2;i++){
+    var n=document.createElement("span"); n.className="mnote";
+    n.textContent=Math.random()<.5?"♪":"♫"; n.style.color=CC[(Math.random()*CC.length)|0];
+    n.style.left=Math.random()*100+"vw"; n.style.top=(45+Math.random()*45)+"vh";
+    document.body.appendChild(n);
+    n.animate([{transform:"translateY(0)",opacity:1},{transform:"translateY(-120px) rotate("+(Math.random()*60-30)+"deg)",opacity:0}],
+      {duration:2200,easing:"ease-out",fill:"forwards"});
+    setTimeout(function(el){ el.remove(); }.bind(null,n),2300);
+  }
+}
+
+document.getElementById("replay").addEventListener("click", function(){ location.reload(); });
+})();
+</script>
+</body>
+</html>

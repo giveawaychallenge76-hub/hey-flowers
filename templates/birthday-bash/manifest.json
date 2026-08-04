@@ -1,0 +1,500 @@
+{
+  "id": "birthday-bash",
+  "name": "BIRTHDAY BASH",
+  "tagline": "the ask, the party, the letter, the cake",
+  "category": "Birthday",
+  "experienceTime": "3 min",
+  "description": "Four rooms in one gift. It opens by asking if it's their birthday, then a wall of little characters gathers and starts dancing, then an envelope pulls out a letter with a candle to blow out and your wishes inside, and it ends on a scroll of cakes — one for every year — with photos, chocolates and letters from everyone.",
+  "thumbnail": "thumbnail/birthdaymemory.png",
+  "featured": true,
+  "trending": true,
+  "assetsBaseURL": "templates/birthday-bash/",
+  "pages": [
+    {
+      "id": "ask",
+      "label": "The ask",
+      "mount": "#hf-stage",
+      "display": "block"
+    },
+    {
+      "id": "wall",
+      "label": "Friends",
+      "mount": "#hf-stage",
+      "display": "block"
+    },
+    {
+      "id": "letter",
+      "label": "The letter",
+      "mount": "#hf-stage",
+      "display": "block"
+    },
+    {
+      "id": "surprise",
+      "label": "The cake",
+      "mount": "#hf-stage",
+      "display": "block"
+    }
+  ],
+  "fields": [
+    {
+      "key": "question",
+      "type": "text",
+      "label": "Opening question",
+      "default": "Is it your birthday?? 🎂",
+      "page": "ask"
+    },
+    {
+      "key": "photo_url",
+      "type": "image",
+      "label": "Background photo (optional)",
+      "default": "",
+      "page": "ask"
+    },
+    {
+      "key": "bg_tint",
+      "type": "color",
+      "label": "Background tint",
+      "default": "#f4a5b5",
+      "page": "ask"
+    },
+    {
+      "key": "message",
+      "type": "text",
+      "label": "Birthday line (top bar)",
+      "default": "happy birthday saj",
+      "placeholder": "happy birthday saj",
+      "required": true,
+      "page": "wall"
+    },
+    {
+      "key": "brand",
+      "type": "text",
+      "label": "Corner brand",
+      "default": "wiki day.",
+      "page": "wall"
+    },
+    {
+      "key": "from",
+      "type": "text",
+      "label": "From (your name)",
+      "default": "naveen",
+      "page": "wall"
+    },
+    {
+      "key": "song",
+      "type": "music",
+      "label": "Their song — upload an audio file",
+      "default": "",
+      "page": "wall"
+    },
+    {
+      "key": "song_url",
+      "type": "text",
+      "label": "…or paste a YouTube link",
+      "default": "",
+      "placeholder": "https://youtu.be/…",
+      "page": "wall"
+    },
+    {
+      "key": "name",
+      "type": "text",
+      "label": "Their name",
+      "placeholder": "saj",
+      "required": true,
+      "page": "letter"
+    },
+    {
+      "key": "note1_title",
+      "type": "text",
+      "label": "Note 1 — title",
+      "default": "she is so cute....",
+      "page": "letter"
+    },
+    {
+      "key": "note1_text",
+      "type": "paragraph",
+      "label": "Note 1 — text",
+      "default": "the one reading this note right now. 🥰",
+      "page": "letter"
+    },
+    {
+      "key": "note2_title",
+      "type": "text",
+      "label": "Note 2 — title",
+      "default": "No matter how much time passes...",
+      "page": "letter"
+    },
+    {
+      "key": "note2_text",
+      "type": "paragraph",
+      "label": "Note 2 — text",
+      "default": "You will always have such a beautiful heart! ❤️",
+      "page": "letter"
+    },
+    {
+      "key": "note3_title",
+      "type": "text",
+      "label": "Note 3 — title",
+      "default": "Your beautiful smile...",
+      "page": "letter"
+    },
+    {
+      "key": "note3_text",
+      "type": "paragraph",
+      "label": "Note 3 — text",
+      "default": "Makes every single day feel worth celebrating. ✨",
+      "page": "letter"
+    },
+    {
+      "key": "note4_title",
+      "type": "text",
+      "label": "Final note — title",
+      "default": "Happy Birthday",
+      "page": "letter"
+    },
+    {
+      "key": "note4_text",
+      "type": "paragraph",
+      "label": "Final note — text",
+      "default": "YOU<br>YOU<br>YOU❤️",
+      "page": "letter"
+    },
+    {
+      "key": "envelope_color",
+      "type": "color",
+      "label": "Envelope colour",
+      "default": "#eed070",
+      "page": "letter"
+    },
+    {
+      "key": "age",
+      "type": "text",
+      "label": "How old are they turning?",
+      "default": "24",
+      "placeholder": "24",
+      "page": "surprise"
+    },
+    {
+      "key": "cphoto1",
+      "type": "image",
+      "label": "Photo 1",
+      "default": "",
+      "page": "surprise"
+    },
+    {
+      "key": "ccap1",
+      "type": "text",
+      "label": "Photo 1 — name",
+      "default": "you ♥",
+      "page": "surprise"
+    },
+    {
+      "key": "cphoto2",
+      "type": "image",
+      "label": "Photo 2",
+      "default": "",
+      "page": "surprise"
+    },
+    {
+      "key": "ccap2",
+      "type": "text",
+      "label": "Photo 2 — name",
+      "default": "that day",
+      "page": "surprise"
+    },
+    {
+      "key": "cphoto3",
+      "type": "image",
+      "label": "Photo 3",
+      "default": "",
+      "page": "surprise"
+    },
+    {
+      "key": "ccap3",
+      "type": "text",
+      "label": "Photo 3 — name",
+      "default": "us",
+      "page": "surprise"
+    },
+    {
+      "key": "cphoto4",
+      "type": "image",
+      "label": "Photo 4",
+      "default": "",
+      "page": "surprise"
+    },
+    {
+      "key": "ccap4",
+      "type": "text",
+      "label": "Photo 4 — name",
+      "default": "my favorite",
+      "page": "surprise"
+    },
+    {
+      "key": "cphoto5",
+      "type": "image",
+      "label": "Photo 5",
+      "default": "",
+      "page": "surprise"
+    },
+    {
+      "key": "ccap5",
+      "type": "text",
+      "label": "Photo 5 — name",
+      "default": "always",
+      "page": "surprise"
+    },
+    {
+      "key": "cphoto6",
+      "type": "image",
+      "label": "Photo 6",
+      "default": "",
+      "page": "surprise"
+    },
+    {
+      "key": "ccap6",
+      "type": "text",
+      "label": "Photo 6 — name",
+      "default": "cutie",
+      "page": "surprise"
+    },
+    {
+      "key": "cphoto7",
+      "type": "image",
+      "label": "Photo 7",
+      "default": "",
+      "page": "surprise"
+    },
+    {
+      "key": "ccap7",
+      "type": "text",
+      "label": "Photo 7 — name",
+      "default": "the smile",
+      "page": "surprise"
+    },
+    {
+      "key": "cphoto8",
+      "type": "image",
+      "label": "Photo 8",
+      "default": "",
+      "page": "surprise"
+    },
+    {
+      "key": "ccap8",
+      "type": "text",
+      "label": "Photo 8 — name",
+      "default": "sunshine",
+      "page": "surprise"
+    },
+    {
+      "key": "cphoto9",
+      "type": "image",
+      "label": "Photo 9",
+      "default": "",
+      "page": "surprise"
+    },
+    {
+      "key": "ccap9",
+      "type": "text",
+      "label": "Photo 9 — name",
+      "default": "forever",
+      "page": "surprise"
+    },
+    {
+      "key": "cphoto10",
+      "type": "image",
+      "label": "Photo 10",
+      "default": "",
+      "page": "surprise"
+    },
+    {
+      "key": "ccap10",
+      "type": "text",
+      "label": "Photo 10 — name",
+      "default": "♥ ♥ ♥",
+      "page": "surprise"
+    },
+    {
+      "key": "cl1m",
+      "type": "text",
+      "label": "Letter 1 — message",
+      "default": "happy birthday saj",
+      "page": "surprise"
+    },
+    {
+      "key": "cl1f",
+      "type": "text",
+      "label": "Letter 1 — from",
+      "default": "~ from kunl",
+      "page": "surprise"
+    },
+    {
+      "key": "cl2m",
+      "type": "text",
+      "label": "Letter 2 — message",
+      "default": "happy birthday saj",
+      "page": "surprise"
+    },
+    {
+      "key": "cl2f",
+      "type": "text",
+      "label": "Letter 2 — from",
+      "default": "~ from naveen",
+      "page": "surprise"
+    },
+    {
+      "key": "cl3m",
+      "type": "text",
+      "label": "Letter 3 — message",
+      "default": "i really miss u saj",
+      "page": "surprise"
+    },
+    {
+      "key": "cl3f",
+      "type": "text",
+      "label": "Letter 3 — from",
+      "default": "~ from aditya",
+      "page": "surprise"
+    },
+    {
+      "key": "cl4m",
+      "type": "text",
+      "label": "Letter 4 — message",
+      "default": "another year of you ♥",
+      "page": "surprise"
+    },
+    {
+      "key": "cl4f",
+      "type": "text",
+      "label": "Letter 4 — from",
+      "default": "~ from riya",
+      "page": "surprise"
+    },
+    {
+      "key": "cl5m",
+      "type": "text",
+      "label": "Letter 5 — message",
+      "default": "so lucky to know you",
+      "page": "surprise"
+    },
+    {
+      "key": "cl5f",
+      "type": "text",
+      "label": "Letter 5 — from",
+      "default": "~ from sara",
+      "page": "surprise"
+    },
+    {
+      "key": "cl6m",
+      "type": "text",
+      "label": "Letter 6 — message",
+      "default": "shine on, saj",
+      "page": "surprise"
+    },
+    {
+      "key": "cl6f",
+      "type": "text",
+      "label": "Letter 6 — from",
+      "default": "~ from arjun",
+      "page": "surprise"
+    },
+    {
+      "key": "cl7m",
+      "type": "text",
+      "label": "Letter 7 — message",
+      "default": "you deserve the world",
+      "page": "surprise"
+    },
+    {
+      "key": "cl7f",
+      "type": "text",
+      "label": "Letter 7 — from",
+      "default": "~ from meera",
+      "page": "surprise"
+    },
+    {
+      "key": "cl8m",
+      "type": "text",
+      "label": "Letter 8 — message",
+      "default": "happiest birthday ever",
+      "page": "surprise"
+    },
+    {
+      "key": "cl8f",
+      "type": "text",
+      "label": "Letter 8 — from",
+      "default": "~ from dev",
+      "page": "surprise"
+    },
+    {
+      "key": "cl9m",
+      "type": "text",
+      "label": "Letter 9 — message",
+      "default": "stay exactly you",
+      "page": "surprise"
+    },
+    {
+      "key": "cl9f",
+      "type": "text",
+      "label": "Letter 9 — from",
+      "default": "~ from ananya",
+      "page": "surprise"
+    },
+    {
+      "key": "cl10m",
+      "type": "text",
+      "label": "Letter 10 — message",
+      "default": "cheers to 24, saj",
+      "page": "surprise"
+    },
+    {
+      "key": "cl10f",
+      "type": "text",
+      "label": "Letter 10 — from",
+      "default": "~ from rohan",
+      "page": "surprise"
+    },
+    {
+      "key": "cl11m",
+      "type": "text",
+      "label": "Letter 11 — message",
+      "default": "missing you today",
+      "page": "surprise"
+    },
+    {
+      "key": "cl11f",
+      "type": "text",
+      "label": "Letter 11 — from",
+      "default": "~ from ishaan",
+      "page": "surprise"
+    },
+    {
+      "key": "cl12m",
+      "type": "text",
+      "label": "Letter 12 — message",
+      "default": "the best human i know",
+      "page": "surprise"
+    },
+    {
+      "key": "cl12f",
+      "type": "text",
+      "label": "Letter 12 — from",
+      "default": "~ from priya",
+      "page": "surprise"
+    },
+    {
+      "key": "accent_color",
+      "type": "color",
+      "label": "Text & accent colour",
+      "default": "#c0435a",
+      "page": "ask"
+    },
+    {
+      "key": "font_family",
+      "type": "font",
+      "label": "Font",
+      "default": "Georgia",
+      "page": "ask"
+    }
+  ]
+}
