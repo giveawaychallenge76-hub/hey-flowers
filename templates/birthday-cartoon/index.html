@@ -264,21 +264,14 @@ function customStart(){
   }
   var id=ytId(SONG_URL);
   if (id){
-    if(!ytFrame){
-      ytFrame=document.createElement("iframe");
-      ytFrame.allow="autoplay";
-      ytFrame.style.cssText="position:fixed;width:1px;height:1px;opacity:.01;pointer-events:none;bottom:0;left:0;border:0";
-      ytFrame.src="https://www.youtube-nocookie.com/embed/"+id+
-        "?autoplay=1&loop=1&playlist="+id+"&controls=0&playsinline=1";
-      document.body.appendChild(ytFrame);
-    }
+    if(!ytFrame && window.__hfPlayYT) ytFrame = window.__hfPlayYT(id);
     return true;
   }
   return false;
 }
 function customStop(){
   if(customEl){ try{ customEl.pause(); }catch(_){} }
-  if(ytFrame){ ytFrame.remove(); ytFrame=null; }
+  if(ytFrame){ if(window.__hfStopYT) window.__hfStopYT(); ytFrame=null; }
 }
 var hasCustom = !!(SONG_FILE || ytId(SONG_URL));
 

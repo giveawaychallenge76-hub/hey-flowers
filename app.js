@@ -77,7 +77,7 @@ const SHAPES = ['rect','circle','star','heart','tri'];
 /* ───────────────────────── 1. load the folders ───────────────────── */
 /* Bump on every release, and keep build.json in step. Printed on load so
    "is this the new code or a cached copy?" is answerable at a glance. */
-const HF_BUILD = 26;
+const HF_BUILD = 27;
 console.log('%c heyflowers build ' + HF_BUILD + ' ', 'background:#ffd935;color:#4a3305;font-weight:700;border-radius:4px');
 window.HF_BUILD = HF_BUILD;
 
@@ -197,7 +197,36 @@ function inject(tpl, vals, opts = {}){
   }, true);
 })();
 <\/script>`;
-  html = html.replace('</body>', anchorGuard + giftRuntime(tpl, vals, opts) + '\n</body>');
+  /* Gifts render sandboxed (no allow-same-origin) so a malicious one can't
+     reach the recipient's session. YouTube's player refuses to run in an
+     opaque origin, though, which would silently kill the "paste a YouTube
+     link" song option. So the frame doesn't embed the player — it asks the
+     parent to, and the only thing that crosses the boundary is an 11-char
+     video id the parent re-validates. Opened standalone (no parent), it
+     falls back to embedding directly. */
+  const ytBridge = `<script>
+(function(){
+  window.__hfPlayYT = function(id){
+    id = String(id || '').match(/^[A-Za-z0-9_-]{11}$/) ? id : '';
+    if (!id) return false;
+    if (window.parent && window.parent !== window){
+      window.parent.postMessage({ __hfYT: id }, '*');
+      return true;
+    }
+    var f = document.createElement('iframe');
+    f.allow = 'autoplay';
+    f.style.cssText = 'position:fixed;width:1px;height:1px;opacity:.01;pointer-events:none;left:0;bottom:0;border:0';
+    f.src = 'https://www.youtube-nocookie.com/embed/' + id +
+            '?autoplay=1&loop=1&playlist=' + id + '&controls=0&playsinline=1';
+    document.body.appendChild(f);
+    return true;
+  };
+  window.__hfStopYT = function(){
+    if (window.parent && window.parent !== window) window.parent.postMessage({ __hfYT: '' }, '*');
+  };
+})();
+<\/script>`;
+  html = html.replace('</body>', anchorGuard + ytBridge + giftRuntime(tpl, vals, opts) + '\n</body>');
 
   /* Safety net. Every token should be resolved by now, but if a template
      ever references a field the manifest doesn't declare, the recipient
@@ -852,6 +881,7 @@ function refreshPreview(){
   pvHint.textContent = 'live preview';
   pvHint.classList.remove('stale');
   if (pvUpdate) pvUpdate.hidden = true;      // edits are now on screen
+  stopYT();                                  // the old preview's song, if any
   pv.srcdoc = inject(current, values, { editor: true });
   scalePreview();
 }
@@ -1107,13 +1137,39 @@ function openGift(tpl, vals, opts = {}){
 function closeGift(){
   viewer.hidden = true;
   viewFrame.srcdoc = '';
+  stopYT();                            // otherwise the song outlives the gift
   document.body.style.overflow = '';
   if (location.hash.startsWith('#g=')) history.replaceState(null, '', location.pathname);
 }
 replayBtn.onclick = () => {
   const v = window._viewing;
+  stopYT();
   if (v) viewFrame.srcdoc = inject(v.tpl, v.vals);
 };
+
+/* The song a sender picked by pasting a YouTube link. It plays from here,
+   in the page, because the gift frame is sandboxed into an opaque origin
+   and YouTube's player won't run in one. See the bridge in inject(). */
+var ytHost = null;   // var, not let: stopYT() is called from code defined above this
+function stopYT(){ if (ytHost){ ytHost.remove(); ytHost = null; } }
+function playYT(id){
+  stopYT();
+  ytHost = document.createElement('iframe');
+  ytHost.allow = 'autoplay';
+  ytHost.setAttribute('aria-hidden', 'true');
+  ytHost.style.cssText = 'position:fixed;width:1px;height:1px;opacity:.01;pointer-events:none;left:0;bottom:0;border:0';
+  ytHost.src = 'https://www.youtube-nocookie.com/embed/' + id +
+               '?autoplay=1&loop=1&playlist=' + id + '&controls=0&playsinline=1';
+  document.body.appendChild(ytHost);
+}
+addEventListener('message', e => {
+  // only our own gift frames, and only ever a bare video id
+  if (e.source !== pv.contentWindow && e.source !== viewFrame.contentWindow) return;
+  if (!e.data || typeof e.data.__hfYT !== 'string') return;
+  const id = e.data.__hfYT;
+  if (!id) return stopYT();
+  if (/^[A-Za-z0-9_-]{11}$/.test(id)) playYT(id);
+});
 closeBtn.onclick  = closeGift;
 addEventListener('keydown', e => { if (e.key === 'Escape' && !viewer.hidden) closeGift(); });
 
@@ -1462,6 +1518,7 @@ function go(id){
     syncSentFromCloud().then(changed => { if (changed) paintMine(); });
   }
   if (id === 'compose') scalePreview();
+  else stopYT();          // leaving the editor shouldn't keep the preview's song going
   scrollTo(0, 0);
 }
 

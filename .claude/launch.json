@@ -12,6 +12,18 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "4175"],
       "port": 4175
+    },
+    {
+      "name": "sunflower-csp",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [".claude/csp-server.py", "4176"],
+      "port": 4176
+    },
+    {
+      "name": "sunflower-csp2",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [".claude/csp-server.py", "4177"],
+      "port": 4177
     }
   ]
 }

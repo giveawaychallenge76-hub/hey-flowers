@@ -504,12 +504,8 @@ let ytFrame = null;
 function startYouTube(){
     const id = ytId(MUSIC_YT);
     if (!id || ytFrame) return false;
-    ytFrame = document.createElement("iframe");
-    ytFrame.allow = "autoplay";
-    ytFrame.style.cssText = "position:fixed;width:1px;height:1px;opacity:.01;pointer-events:none;left:0;bottom:0;border:0";
-    ytFrame.src = "https://www.youtube-nocookie.com/embed/" + id +
-        "?autoplay=1&loop=1&playlist=" + id + "&controls=0&playsinline=1";
-    document.body.appendChild(ytFrame);
+    // the parent page owns the player — see the bridge injected by inject()
+    ytFrame = !!window.__hfPlayYT && window.__hfPlayYT(id);
     return true;
 }
 

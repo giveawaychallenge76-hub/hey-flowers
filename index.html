@@ -188,7 +188,11 @@
       <section class="ed-stage">
         <div class="device">
           <div class="screen-frame">
-            <iframe id="pv" title="Preview" allow="microphone; autoplay"></iframe>
+            <!-- sandbox WITHOUT allow-same-origin: gift content is written by
+                 whoever made the link, so it must never reach this page's
+                 origin, session or storage. Communication is postMessage only. -->
+            <iframe id="pv" title="Preview" allow="microphone; autoplay"
+                    sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-presentation"></iframe>
             <div id="svo" aria-hidden="true"></div>
           </div>
           <div class="device-bar">
@@ -247,7 +251,10 @@
     <button class="vbtn" id="closeBtn">✕ Close</button>
   </div>
   <div class="viewer-stage">
-    <iframe id="viewFrame" title="Your gift" allow="microphone; autoplay"></iframe>
+    <!-- same reasoning as the editor preview, and this one matters more:
+         it renders a gift a stranger sent to the person viewing it -->
+    <iframe id="viewFrame" title="Your gift" allow="microphone; autoplay"
+            sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-presentation"></iframe>
   </div>
 </div>
 
@@ -260,7 +267,7 @@
      cache. Guarded so it can never loop. -->
 <script>
 (function(){
-  var EXPECT = 26;                       // keep in step with build.json
+  var EXPECT = 27;                       // keep in step with build.json
   try{
     fetch('build.json?t=' + Date.now(), { cache:'no-store' })
       .then(function(r){ return r.ok ? r.json() : null; })
@@ -274,6 +281,6 @@
   }catch(e){}
 })();
 </script>
-<script src="app.js?v=26"></script>
+<script src="app.js?v=27"></script>
 </body>
 </html>
