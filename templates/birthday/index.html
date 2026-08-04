@@ -422,12 +422,11 @@ margin-top:45px;
 </head>  
 <body>  
 
-<audio id="romantic-music" loop>
-  <source src="{{music_url}}" type="audio/mpeg">
-</audio>
-<audio id="birthday-music" loop>
-  <source src="{{music_url}}">
-</audio>
+<!-- no <source> here on purpose: the sender supplies the song, so the src is
+     set from JS only once we know there is one. An empty src resolves to the
+     page itself and fails to decode. -->
+<audio id="romantic-music" loop></audio>
+<audio id="birthday-music" loop></audio>
 
 <div id="hearts"></div>  
 
@@ -494,7 +493,14 @@ for(let i = 0; i < 80; i++){
 const romanticMusic = document.getElementById("romantic-music");
 const birthdayMusic = document.getElementById("birthday-music");
 
-/* the sender can supply a YouTube link instead of an audio file */
+/* The song is whatever the sender chose — an uploaded audio file, or a
+   YouTube link. There is no built-in track: if they picked neither, the
+   gift simply plays no music rather than falling back to someone else's. */
+const MUSIC_FILE = "{{music_url}}";
+if (MUSIC_FILE){
+    romanticMusic.src = MUSIC_FILE;
+    birthdayMusic.src = MUSIC_FILE;
+}
 const MUSIC_YT = "{{music_yt}}";
 function ytId(u){
     const m = String(u||"").match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
@@ -510,8 +516,9 @@ function startYouTube(){
 }
 
 function startRomanticTrack() {
-    // a YouTube link wins; otherwise fall back to the uploaded/default file
-    if (!startYouTube()) romanticMusic.play().catch(e => console.log("Audio initializing..."));
+    // a YouTube link wins; otherwise the uploaded file, if there is one
+    if (!startYouTube() && MUSIC_FILE)
+        romanticMusic.play().catch(e => console.log("Audio initializing..."));
     window.removeEventListener("click", startRomanticTrack);
     window.removeEventListener("touchstart", startRomanticTrack);
 }
@@ -557,8 +564,12 @@ window.addEventListener('message', e => {
 
 yesBtn.addEventListener("click", () => {
     yesBtn.innerHTML = "Yay! 🥰";
-    romanticMusic.pause();
-    birthdayMusic.play().catch(e => console.log("Music handover."));
+    // a YouTube song is already playing from the page and carries across;
+    // an uploaded file hands over here so page one stops before page two starts
+    if (MUSIC_FILE){
+        romanticMusic.pause();
+        birthdayMusic.play().catch(e => console.log("Music handover."));
+    }
 
     setTimeout(() => {
         frontPage.style.opacity = "0";

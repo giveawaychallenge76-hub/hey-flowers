@@ -267,7 +267,7 @@
      cache. Guarded so it can never loop. -->
 <script>
 (function(){
-  var EXPECT = 27;                       // keep in step with build.json
+  var EXPECT = 28;                       // keep in step with build.json
   try{
     fetch('build.json?t=' + Date.now(), { cache:'no-store' })
       .then(function(r){ return r.ok ? r.json() : null; })
@@ -281,6 +281,6 @@
   }catch(e){}
 })();
 </script>
-<script src="app.js?v=27"></script>
+<script src="app.js?v=28"></script>
 </body>
 </html>
