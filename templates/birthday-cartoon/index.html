@@ -111,11 +111,11 @@ body.live #replay{opacity:.85}
   style="position:fixed;inset:0;width:100%;height:100%;border:0;z-index:120;background:#fff;display:none"></iframe>
 <script>
 (function(){
-  var HF={ msg:"{{message}}", frm:"{{from}}",
+  var HF={ msg:"{{message}}", frm:"{{from}}", age:"{{age}}", who:"{{to_name}}",
     photos:[{src:"{{cphoto1}}",cap:"{{ccap1}}"},{src:"{{cphoto2}}",cap:"{{ccap2}}"},{src:"{{cphoto3}}",cap:"{{ccap3}}"},{src:"{{cphoto4}}",cap:"{{ccap4}}"},{src:"{{cphoto5}}",cap:"{{ccap5}}"},{src:"{{cphoto6}}",cap:"{{ccap6}}"},{src:"{{cphoto7}}",cap:"{{ccap7}}"},{src:"{{cphoto8}}",cap:"{{ccap8}}"},{src:"{{cphoto9}}",cap:"{{ccap9}}"},{src:"{{cphoto10}}",cap:"{{ccap10}}"}],
     letters:[{msg:"{{cl1m}}",frm:"{{cl1f}}"},{msg:"{{cl2m}}",frm:"{{cl2f}}"},{msg:"{{cl3m}}",frm:"{{cl3f}}"},{msg:"{{cl4m}}",frm:"{{cl4f}}"},{msg:"{{cl5m}}",frm:"{{cl5f}}"},{msg:"{{cl6m}}",frm:"{{cl6f}}"},{msg:"{{cl7m}}",frm:"{{cl7f}}"},{msg:"{{cl8m}}",frm:"{{cl8f}}"},{msg:"{{cl9m}}",frm:"{{cl9f}}"},{msg:"{{cl10m}}",frm:"{{cl10f}}"},{msg:"{{cl11m}}",frm:"{{cl11f}}"},{msg:"{{cl12m}}",frm:"{{cl12f}}"}] };
   var frame=document.getElementById('cake-frame'), btn=document.getElementById('toCake');
-  function send(){ try{ frame.contentWindow.postMessage({__hfvals:1,msg:HF.msg,frm:HF.frm,photos:HF.photos,letters:HF.letters},"*"); }catch(_){}}
+  function send(){ try{ frame.contentWindow.postMessage({__hfvals:1,msg:HF.msg,frm:HF.frm,age:HF.age,who:HF.who,photos:HF.photos,letters:HF.letters},"*"); }catch(_){}}
   function tell(m){ try{ frame.contentWindow.postMessage(m,"*"); }catch(_){} }
   /* only the page you're looking at is allowed to make noise */
   function showCake(){

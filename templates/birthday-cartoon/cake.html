@@ -147,6 +147,13 @@ var LETTERS=[
   {msg:"the best human i know", frm:"~ from priya"}
 ];
 
+/* How old they're turning. Drives the number of cakes, the hero line and
+   the closing line, so "12 cakes" never sits under "happy 24th". Clamped
+   because this comes from a free-text box — 500 cakes would never end. */
+var AGE=24, WHO="saj";
+function clampAge(v){ v=parseInt(v,10); return (isFinite(v)&&v>0) ? Math.min(v,100) : 24; }
+function ord(n){ var v=n%100, s=["th","st","nd","rd"]; return n+(s[(v-20)%10]||s[v]||s[0]); }
+
 var ROWS=[
   { t:"here are 24 cakes",    d:"(one for every year — watch them grow)", kind:"cake",   dir:"right", h:150, sp:40 },
   { t:"chocolates",           d:"(because you love them)",  kind:"choc",   count:20, dir:"left",  h:120, sp:30 },
@@ -165,9 +172,10 @@ function friendCol(i,h){ var f=FRIENDS[i%FRIENDS.length]; var src=f.anim?"birthd
 function buildSeq(R){
   var seq=document.createElement("div"); seq.className="seq";
   if(R.kind==="cake"){
-    var N=24;
+    var N=AGE;
     for(var i=0;i<N;i++){
-      var hh=Math.round(52 + (i/(N-1))*(158-52));
+      // they grow across the row; a single cake would divide by zero
+      var hh=Math.round(52 + (N>1 ? i/(N-1) : 1)*(158-52));
       var w=document.createElement("div"); w.className="cakewrap";
       w.innerHTML='<img src="birthday-assets/cake.png" alt="" style="--h:'+hh+'px"><span class="yr">'+(i+1)+'</span>';
       seq.appendChild(w);
@@ -198,7 +206,17 @@ function buildSeq(R){
   return seq;
 }
 
+/* the age appears in three places besides the cakes themselves */
+function paintAge(){
+  var big=document.querySelector("#hero .big");
+  if(big) big.innerHTML='happy '+ord(AGE)+', '+WHO+' ♥';
+  var cl=document.querySelector("#closing .l");
+  if(cl) cl.textContent=AGE+(AGE===1?' year':' years')+' of you making the world softer.';
+  ROWS[0].t=(AGE===1?'here is 1 cake':'here are '+AGE+' cakes');
+}
+
 function buildRows(){
+  paintAge();
   rowsBox.innerHTML='';
   ROWS.forEach(function(R){
     var row=document.createElement("div"); row.className="row";
@@ -257,6 +275,8 @@ window.addEventListener("message",function(e){ var d=e.data||{}; if(!d.__hfvals)
   var fl=document.querySelector(".friends-line"); if(fl&&d.msg) fl.textContent=d.msg;
   var cs=document.querySelector("#closing .s"); if(cs&&d.frm) cs.textContent="\u2014 with all my love, "+d.frm;
   var changed=false;
+  if(d.age!=null && d.age!==''){ var a=clampAge(d.age); if(a!==AGE){ AGE=a; changed=true; } }
+  if(d.who!=null && d.who!==''){ if(d.who!==WHO){ WHO=d.who; changed=true; } }
   if(d.photos && d.photos.length){
     d.photos.forEach(function(p,i){ if(p && PHOTOS[i]){
       if(p.src) PHOTOS[i].src=p.src; if(p.cap!=null&&p.cap!=='') PHOTOS[i].cap=p.cap; } });
