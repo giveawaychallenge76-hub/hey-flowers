@@ -46,6 +46,15 @@ bd_css = (bd_css[:m.start()] +
 # #hint / .hint is the ONE id collision between the two documents
 bd_css = bd_css.replace('#hint', '#l-hint').replace('.hint', '.l-hint')
 
+# The hint fades out via `transition:opacity`, and in this document that
+# transition gets created but never advances (playState running, currentTime
+# stuck at 0), so it pins opacity at the start value and "tap to pull out the
+# letter" stays on screen over the opened letter. visibility isn't in the
+# transition list, so it applies immediately and the hint goes regardless.
+assert '.l-hint.hidden{ opacity:0; }' in bd_css
+bd_css = bd_css.replace('.l-hint.hidden{ opacity:0; }',
+                        '.l-hint.hidden{ opacity:0; visibility:hidden; }')
+
 # The background photo is optional here — this template ships no default, so
 # url('') would resolve to the page itself and fire a pointless request. The
 # glue sets --photo to a real url() or to none.
