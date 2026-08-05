@@ -106,8 +106,13 @@ body.live #replay{opacity:.85}
 <div id="wall"></div>
 <div id="hf-stage" style="position:fixed;inset:0;pointer-events:none;z-index:60"></div>
 
-<!-- page 2 — the birthday cake scroll, in its own frame so scripts never clash -->
-<iframe id="cake-frame" src="cake.html" title="the cake"
+<!-- page 2 — the birthday cake scroll, in its own frame so scripts never clash.
+     ?v=2 is a cache key, not a version: cake.html used to carry
+     X-Frame-Options, which stops it rendering inside the sandboxed gift frame
+     (an opaque origin is same-origin with nothing). Removing the header
+     server-side isn't enough — a 304 revalidation can't REMOVE a stored
+     header, so a browser that saw the old response keeps refusing it. -->
+<iframe id="cake-frame" src="cake.html?v=2" title="the cake"
   style="position:fixed;inset:0;width:100%;height:100%;border:0;z-index:120;background:#fff;display:none"></iframe>
 <script>
 (function(){

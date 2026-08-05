@@ -599,8 +599,14 @@ margin-top:45px;
   <button id="toCake" type="button">the cake →</button>
 </div>
 
-<!-- ═ 4 ─ the cake scroll, in its own frame so scripts never clash ═ -->
-<iframe id="cake-frame" src="cake.html" title="the cake"
+<!-- ═ 4 ─ the cake scroll, in its own frame so scripts never clash ═
+     ?v=2 is a cache key, not a version: cake.html used to be served with
+     X-Frame-Options, which stops it rendering inside the sandboxed gift
+     frame (an opaque origin is same-origin with nothing). Dropping the
+     header server-side isn't enough — a 304 revalidation can't REMOVE a
+     stored header, so browsers that saw the old response keep refusing it
+     forever. A different URL is a different cache entry. -->
+<iframe id="cake-frame" src="cake.html?v=2" title="the cake"
   style="position:fixed;inset:0;width:100%;height:100%;border:0;z-index:120;background:#fff;display:none"></iframe>
 
 <div id="hf-stage" style="position:fixed;inset:0;pointer-events:none;z-index:60"></div>
