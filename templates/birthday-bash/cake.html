@@ -34,20 +34,20 @@ html{scroll-behavior:smooth}
 body{font-family:'EB Garamond',Georgia,serif;background:var(--room);color:var(--ink);overflow-x:hidden}
 
 #nav{position:fixed;left:0;right:0;top:0;height:52px;z-index:60;display:flex;align-items:center;
-  padding:0 20px;background:#fff;border-top:3px solid #2b2b2b;border-bottom:1px solid #e3e3e3;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+  padding:0 20px;background:none;border:0;box-shadow:none;pointer-events:none}
 #nav .brand{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:26px;color:#b22222;line-height:1;white-space:nowrap}
 #nav .friends-line{margin-left:22px;flex:0 1 auto;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:clamp(16px,2.4vw,24px);color:#16307a;background:#b3d7ff;padding:2px 10px 4px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #nav .spacer{flex:1}
-#nav .backbtn{margin-left:14px;font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:15px;color:#1a1a1a;background:#f5c518;border:0;border-radius:5px;padding:9px 22px;cursor:pointer;text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:filter .15s, transform .15s}
+#nav .backbtn{pointer-events:auto;margin-left:14px;font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:15px;color:#1a1a1a;background:#f5c518;border:0;border-radius:5px;padding:9px 22px;cursor:pointer;text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:filter .15s, transform .15s}
 #nav .backbtn:hover{filter:brightness(1.05);transform:translateY(-1px)}
-@media(max-width:640px){ #nav{height:46px;padding:0 12px} #nav .brand{font-size:20px} #nav .friends-line{font-size:16px} #nav .backbtn{padding:7px 16px;font-size:14px} }
+@media(max-width:640px){ #nav{height:46px;padding:0 12px} #nav .brand{font-size:20px} #nav .friends-line{font-size:16px} #nav .backbtn{pointer-events:auto;padding:7px 16px;font-size:14px} }
 
 #page{padding-top:78px;padding-bottom:70px}
 #hero{text-align:center;margin:6px auto 30px;padding:0 16px}
 #hero .big{font-weight:600;font-size:clamp(30px,5.2vw,54px);color:var(--navy);line-height:1.05}
 #hero .sub{font-style:italic;font-size:clamp(16px,2.4vw,22px);color:#6a6a6a;margin-top:6px}
 
-.row{margin:44px 0 60px}
+.row{margin:44px 0 60px;content-visibility:auto;contain-intrinsic-size:auto 320px}
 .row .cap{text-align:center;margin-bottom:14px;padding:0 14px}
 .row .cap .t{font-weight:600;font-size:clamp(24px,3.6vw,40px);color:var(--ink)}
 .row .cap .d{font-size:clamp(15px,2vw,22px);color:#6f6f6f;margin-left:6px}
@@ -75,8 +75,8 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--room);color:var(--
 
 .letter{position:relative;flex:0 0 auto;margin:0 16px;height:var(--h)}
 .letter > img.env{height:100%;width:auto;display:block;filter:drop-shadow(0 8px 12px rgba(120,10,20,.28))}
-.letter .note{position:absolute;left:50%;top:31%;transform:translate(-50%,-50%) rotate(var(--lr));width:56%;text-align:center;background:transparent}
-.letter .note .msg{font-family:'Dancing Script',cursive;font-weight:700;font-size:19px;line-height:1.1;color:var(--navy)}
+.letter .note{position:absolute;left:50%;top:31%;transform:translate(-50%,-50%) rotate(var(--lr));width:68%;text-align:center;overflow-wrap:anywhere;background:transparent}
+.letter .note .msg{font-family:'Dancing Script',cursive;font-weight:700;font-size:clamp(13px,1.6vw,18px);line-height:1.16;color:var(--navy)}
 .letter .note .frm{font-family:'Dancing Script',cursive;font-weight:600;font-size:15px;color:#b0231b;margin-top:3px}
 
 #closing{text-align:center;margin:46px auto 10px;padding:0 18px}
@@ -118,8 +118,8 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--room);color:var(--
 var CHOCS=["choc-bueno","choc-snickers","choc-feastables","choc-dairymilk","choc-kitkat","choc-skittles"];
 var FLOWERS=["flower-1","flower-2","flower-3","flower-4","flower-5","flower-6"];
 var FRIENDS=[
-  {n:"dj-snoopy",anim:false,lbl:"dj snoopy"},{n:"piano-beethoven",anim:true,lbl:"beethoven"},{n:"guitar-boy",anim:true,lbl:"strummer"},
-  {n:"sax-snoopy",anim:false,lbl:"sax snoopy"},{n:"dance-tina",anim:true,lbl:"tina"},{n:"drummer",anim:false,lbl:"drummer"},
+  {n:"piano-beethoven",anim:true,lbl:"beethoven"},{n:"guitar-boy",anim:true,lbl:"strummer"},
+  {n:"sax-snoopy",anim:false,lbl:"sax snoopy"},{n:"dance-tina",anim:true,lbl:"tina"},
   {n:"guitar-mickey",anim:false,lbl:"mickey"},{n:"dance-lisa",anim:true,lbl:"lisa"},{n:"violin-garfield",anim:false,lbl:"garfield"},
   {n:"trombone-girl",anim:true,lbl:"trombone"},{n:"rock-snoopy",anim:false,lbl:"rockstar"},{n:"dance-baby",anim:true,lbl:"baby"},
   {n:"guitar-frog",anim:false,lbl:"froggy"},{n:"guitar-pepe",anim:false,lbl:"pepe"},{n:"boombox-pirate",anim:false,lbl:"boombox"},
@@ -177,7 +177,7 @@ var ROWS=[
 var rowsBox=document.getElementById("rows");
 
 function friendCol(i,h){ var f=FRIENDS[i%FRIENDS.length]; var src=f.anim?"birthday-assets/frozen/"+f.n+".png":"birthday-assets/"+f.n+".png"; var an=f.anim?"birthday-assets/anim/"+f.n+".webp":"";
-  return '<img src="'+src+'" alt="" style="--h:'+h+'px" '+(an?'data-anim="'+an+'"':'')+'><div class="frname">'+f.lbl+'</div>'; }
+  return '<img loading="lazy" decoding="async" src="'+src+'" alt="" style="--h:'+h+'px" '+(an?'data-anim="'+an+'"':'')+'><div class="frname">'+f.lbl+'</div>'; }
 
 function buildSeq(R){
   var seq=document.createElement("div"); seq.className="seq";
@@ -187,28 +187,28 @@ function buildSeq(R){
       // they grow across the row; a single cake would divide by zero
       var hh=Math.round(52 + (N>1 ? i/(N-1) : 1)*(158-52));
       var w=document.createElement("div"); w.className="cakewrap";
-      w.innerHTML='<img src="birthday-assets/cake.png" alt="" style="--h:'+hh+'px"><span class="yr">'+(i+1)+'</span>';
+      w.innerHTML='<img loading="lazy" decoding="async" src="birthday-assets/cake.png" alt="" style="--h:'+hh+'px"><span class="yr">'+(i+1)+'</span>';
       seq.appendChild(w);
     }
   } else if(R.kind==="photo"){
     PHOTOS.forEach(function(p){
       var el=document.createElement("div"); el.className="polaroid";
       el.style.setProperty("--pr",(Math.random()*6-3).toFixed(1)+"deg");
-      el.innerHTML='<img src="'+p.src+'" alt="" style="--h:'+R.h+'px"><div class="pc">'+p.cap+'</div>';
+      el.innerHTML='<img loading="lazy" decoding="async" src="'+p.src+'" alt="" style="--h:'+R.h+'px"><div class="pc">'+p.cap+'</div>';
       seq.appendChild(el);
     });
   } else if(R.kind==="letter"){
     LETTERS.forEach(function(L){
       var el=document.createElement("div"); el.className="letter"; el.style.setProperty("--h",R.h+"px");
       el.style.setProperty("--lr",(Math.random()*4-2).toFixed(1)+"deg");
-      el.innerHTML='<img class="env" src="birthday-assets/envelope-red.png" alt=""><div class="note"><div class="msg">'+L.msg+'</div><div class="frm">'+L.frm+'</div></div>';
+      el.innerHTML='<img loading="lazy" decoding="async" class="env" src="birthday-assets/envelope-red.png" alt=""><div class="note"><div class="msg">'+L.msg+'</div><div class="frm">'+L.frm+'</div></div>';
       seq.appendChild(el);
     });
   } else {
     for(var j=0;j<R.count;j++){
       var it=document.createElement("div"); it.className="item"; it.style.setProperty("--h",R.h+"px");
-      if(R.kind==="choc") it.innerHTML='<img src="birthday-assets/'+CHOCS[j%CHOCS.length]+'.png" alt="">';
-      else if(R.kind==="flower") it.innerHTML='<img src="birthday-assets/'+FLOWERS[j%FLOWERS.length]+'.png" alt="">';
+      if(R.kind==="choc") it.innerHTML='<img loading="lazy" decoding="async" src="birthday-assets/'+CHOCS[j%CHOCS.length]+'.png" alt="">';
+      else if(R.kind==="flower") it.innerHTML='<img loading="lazy" decoding="async" src="birthday-assets/'+FLOWERS[j%FLOWERS.length]+'.png" alt="">';
       else if(R.kind==="friend"){ it.classList.add("friendcol"); it.innerHTML=friendCol(j,R.h); }
       seq.appendChild(it);
     }
@@ -242,7 +242,20 @@ function buildRows(){
     row.appendChild(strip);
     rowsBox.appendChild(row);
   });
-  document.querySelectorAll('img[data-anim]').forEach(function(img){ img.src=img.getAttribute("data-anim"); });
+  (function(){
+    var pending=document.querySelectorAll('img[data-anim]');
+    if(!window.IntersectionObserver){                       // old browser: just swap
+      [].forEach.call(pending,function(i){ i.src=i.getAttribute("data-anim"); }); return;
+    }
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(!en.isIntersecting) return;
+        var i=en.target; io.unobserve(i);
+        var a=i.getAttribute("data-anim"); if(a) i.src=a;   // start dancing on arrival
+      });
+    },{rootMargin:"300px"});
+    [].forEach.call(pending,function(i){ io.observe(i); });
+  })();
 }
 buildRows();
 

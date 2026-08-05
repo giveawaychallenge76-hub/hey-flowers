@@ -400,6 +400,54 @@ cake = cake.replace(':root{ --navy:#16307a; --ink:#2a2a2a; }',
   '#page,#nav{position:relative;z-index:1}')
 cake = cake.replace('<div id="page">', '<div id="hearts"></div>\n<div id="page">')
 
+# the top bar was a white strip with a hard border across the tinted page
+assert 'background:#fff;border-top:3px solid #2b2b2b;border-bottom:1px solid #e3e3e3' in cake
+cake = cake.replace('background:#fff;border-top:3px solid #2b2b2b;border-bottom:1px solid #e3e3e3;'
+                    'box-shadow:0 2px 6px rgba(0,0,0,.05)',
+                    'background:none;border:0;box-shadow:none;pointer-events:none')
+cake = cake.replace('#nav .backbtn{', '#nav .backbtn{pointer-events:auto;')
+
+# two characters the sender asked to drop, in the scroll and on the wall
+for gone in ('{n:"dj-snoopy",anim:false,lbl:"dj snoopy"},', '{n:"drummer",anim:false,lbl:"drummer"},'):
+    assert gone in cake, gone
+    cake = cake.replace(gone, '')
+
+# The note sat in 56% of the envelope at a fixed 19px, so anything past
+# about three words spilled over the artwork. Wider, smaller, and it wraps.
+assert 'width:56%;text-align:center' in cake
+cake = cake.replace('width:56%;text-align:center', 'width:68%;text-align:center;overflow-wrap:anywhere')
+cake = cake.replace(".note .msg{font-family:'Dancing Script',cursive;font-weight:700;font-size:19px;line-height:1.1;",
+                    ".note .msg{font-family:'Dancing Script',cursive;font-weight:700;font-size:clamp(13px,1.6vw,18px);line-height:1.16;")
+
+# ── make the scroll cheap to open ────────────────────────────────────
+# Every image was eager, and buildRows() swapped ~20 friends to animated
+# webp (1.9MB) the moment it ran — all of it decoded before the page was
+# usable, for rows that start off screen.
+assert "document.querySelectorAll('img[data-anim]').forEach(function(img){ img.src=img.getAttribute(\"data-anim\"); });" in cake
+cake = cake.replace(
+  "document.querySelectorAll('img[data-anim]').forEach(function(img){ img.src=img.getAttribute(\"data-anim\"); });",
+  """(function(){
+    var pending=document.querySelectorAll('img[data-anim]');
+    if(!window.IntersectionObserver){                       // old browser: just swap
+      [].forEach.call(pending,function(i){ i.src=i.getAttribute("data-anim"); }); return;
+    }
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(!en.isIntersecting) return;
+        var i=en.target; io.unobserve(i);
+        var a=i.getAttribute("data-anim"); if(a) i.src=a;   // start dancing on arrival
+      });
+    },{rootMargin:"300px"});
+    [].forEach.call(pending,function(i){ io.observe(i); });
+  })();""")
+# every image in the scroll is off screen to begin with
+cake = cake.replace('<img src="', '<img loading="lazy" decoding="async" src="')
+cake = cake.replace("'<img src=\"'", "'<img loading=\"lazy\" decoding=\"async\" src=\"'")
+cake = cake.replace("'<img class=\"env\" src=\"", "'<img loading=\"lazy\" decoding=\"async\" class=\"env\" src=\"")
+# and let the browser skip laying out rows nobody has scrolled to yet
+cake = cake.replace('.row{margin:44px 0 60px}',
+                    '.row{margin:44px 0 60px;content-visibility:auto;contain-intrinsic-size:auto 320px}')
+
 # build the hearts, and take the sender's tint when the values arrive
 assert 'var cb=document.getElementById("cakeBack");' in cake
 cake = cake.replace('var cb=document.getElementById("cakeBack");', '''

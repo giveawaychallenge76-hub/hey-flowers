@@ -77,7 +77,7 @@ const SHAPES = ['rect','circle','star','heart','tri'];
 /* ───────────────────────── 1. load the folders ───────────────────── */
 /* Bump on every release, and keep build.json in step. Printed on load so
    "is this the new code or a cached copy?" is answerable at a glance. */
-const HF_BUILD = 34;
+const HF_BUILD = 35;
 console.log('%c heyflowers build ' + HF_BUILD + ' ', 'background:#ffd935;color:#4a3305;font-weight:700;border-radius:4px');
 window.HF_BUILD = HF_BUILD;
 
@@ -361,9 +361,15 @@ function fallback(name){
 
 /* ───────────────────────── 4. the editor, built from the manifest ── */
 /* One control per field TYPE. No per-template logic anywhere. */
+/* Some slots are physically small — a name on an envelope in the cake
+   scroll, a caption under a polaroid. A manifest field can declare `max`
+   (characters) and the box stops there instead of letting the text spill
+   out of the artwork in the finished gift. */
+const capAttr = f => f.max ? ` maxlength="${f.max}"` : '';
+
 const CONTROL = {
-  text:      f => `<input type="text" data-k="${f.key}" value="${esc(f.value)}" placeholder="${esc(f.placeholder||'')}">`,
-  paragraph: f => `<textarea data-k="${f.key}" placeholder="${esc(f.placeholder||'')}">${esc(f.value)}</textarea>`,
+  text:      f => `<input type="text" data-k="${f.key}" value="${esc(f.value)}" placeholder="${esc(f.placeholder||'')}"${capAttr(f)}>`,
+  paragraph: f => `<textarea data-k="${f.key}" placeholder="${esc(f.placeholder||'')}"${capAttr(f)}>${esc(f.value)}</textarea>`,
   image:     f => uploadControl(f, 'image'),
   music:     f => uploadControl(f, 'audio'),
   video:     f => uploadControl(f, 'video'),
@@ -470,6 +476,7 @@ function fieldHTML(f){
     <div class="lab">${esc(f.label)}${f.required ? '<span class="req">*</span>' : ''}</div>
     ${f.placeholder ? `<div class="help">e.g. ${esc(f.placeholder)}</div>` : ''}
     ${build({ ...f, value: values[f.key] })}
+    ${f.max ? `<div class="cap" data-cap="${f.key}">${(values[f.key]||'').length}/${f.max}</div>` : ''}
   </div>`;
 }
 
@@ -744,7 +751,17 @@ let stale = false, idle;
 fields.addEventListener('input', e => {
   const k = e.target.dataset.k;
   if (!k) return;
+  /* maxlength only stops typing — a paste, an autofill or a draft saved
+     before the cap existed can still be longer, and that's exactly the
+     text that overflows the artwork. Clamp what we store. */
+  const max = (current && current.fields.find(f => f.key === k) || {}).max;
+  if (max && e.target.value.length > max) e.target.value = e.target.value.slice(0, max);
   values[k] = e.target.value;
+  const cap = fields.querySelector(`[data-cap="${k}"]`);
+  if (cap && max){                             // so a capped box says why it stopped
+    cap.textContent = `${e.target.value.length}/${max}`;
+    cap.classList.toggle('full', e.target.value.length >= max);
+  }
   markStale();
   clearTimeout(idle);
   idle = setTimeout(saveDraft, 400);          // draft saves quietly, preview does not

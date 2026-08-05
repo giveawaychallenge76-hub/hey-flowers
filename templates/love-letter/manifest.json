@@ -24,7 +24,8 @@
       "default": "hey saj — i really miss you so much. every ordinary day feels better knowing you're somewhere in it. thank you for being exactly, stubbornly, wonderfully you.",
       "placeholder": "hey saj — i really miss you so much…",
       "required": true,
-      "page": "letter"
+      "page": "letter",
+      "max": 200
     },
     {
       "key": "sign_off",
@@ -32,7 +33,8 @@
       "label": "Sign off",
       "default": "— always, naveen",
       "placeholder": "— always, naveen",
-      "page": "letter"
+      "page": "letter",
+      "max": 28
     },
     {
       "key": "photo_url",
