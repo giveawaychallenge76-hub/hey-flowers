@@ -35,12 +35,19 @@ bd_css = re.sub(r'\*\{[^}]*\}\s*', '', bd_css, count=1)    # host owns the reset
 bd_css = re.sub(r':root\{[^}]*\}\s*', '', bd_css, count=1) # vars merged below
 
 # body{} centred the envelope and painted the photo — both stages from this
-# template still need that, so it becomes a class they share.
+# template still need the painting, so it becomes a class they share.
+# The LAYOUT properties must not come along: `.stage{display:none}` and
+# `.bshell{display:flex}` have equal specificity, and .bshell lands later in
+# the sheet, so it would win and pin the ask and the letter permanently open
+# — every room stacked on every other. The `.on` rules own display.
 m = re.search(r'\nbody\{(.*?)\n\}\n', bd_css, re.S)
 assert m, 'birthday body{} block not found'
+body_rules = m.group(1)
+for layout in ('height:100vh;', 'display:flex;', 'justify-content:center;', 'align-items:center;'):
+    assert layout in body_rules, 'expected %r in birthday body{}' % layout
+    body_rules = body_rules.replace(layout, '')
 bd_css = (bd_css[:m.start()] +
-          '\n.bshell{\nposition:fixed; inset:0;\n' +
-          m.group(1).replace('height:100vh;', '') + '\n}\n' +
+          '\n.bshell{\nposition:fixed; inset:0;\n' + body_rules + '\n}\n' +
           bd_css[m.end():])
 
 # #hint / .hint is the ONE id collision between the two documents
