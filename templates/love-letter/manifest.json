@@ -1,0 +1,73 @@
+{
+  "id": "love-letter",
+  "name": "LOVE LETTER",
+  "tagline": "one envelope, one letter",
+  "category": "Love",
+  "experienceTime": "30 sec",
+  "description": "An envelope waiting on screen. They tap it, the letter slides out, and there's the thing you wanted to say — in your words, nothing else in the way.",
+  "thumbnail": "thumbnail/dump-instagram-portrait-11.png",
+  "featured": true,
+  "trending": true,
+  "pages": [
+    {
+      "id": "letter",
+      "label": "The letter",
+      "mount": "#hf-stage",
+      "display": "block"
+    }
+  ],
+  "fields": [
+    {
+      "key": "letter_text",
+      "type": "paragraph",
+      "label": "Your letter (about 25 words reads best)",
+      "default": "hey saj — i really miss you so much. every ordinary day feels better knowing you're somewhere in it. thank you for being exactly, stubbornly, wonderfully you.",
+      "placeholder": "hey saj — i really miss you so much…",
+      "required": true,
+      "page": "letter"
+    },
+    {
+      "key": "sign_off",
+      "type": "text",
+      "label": "Sign off",
+      "default": "— always, naveen",
+      "placeholder": "— always, naveen",
+      "page": "letter"
+    },
+    {
+      "key": "photo_url",
+      "type": "image",
+      "label": "Background photo (optional)",
+      "default": "",
+      "page": "letter"
+    },
+    {
+      "key": "bg_tint",
+      "type": "color",
+      "label": "Background tint",
+      "default": "#e8c9a8",
+      "page": "letter"
+    },
+    {
+      "key": "envelope_color",
+      "type": "color",
+      "label": "Envelope colour",
+      "default": "#c9a37b",
+      "page": "letter"
+    },
+    {
+      "key": "accent_color",
+      "type": "color",
+      "label": "Text & accent colour",
+      "default": "#7a4a34",
+      "page": "letter"
+    },
+    {
+      "key": "font_family",
+      "type": "font",
+      "label": "Font",
+      "default": "Playfair Display",
+      "page": "letter"
+    }
+  ]
+}

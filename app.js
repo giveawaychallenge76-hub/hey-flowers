@@ -77,7 +77,7 @@ const SHAPES = ['rect','circle','star','heart','tri'];
 /* ───────────────────────── 1. load the folders ───────────────────── */
 /* Bump on every release, and keep build.json in step. Printed on load so
    "is this the new code or a cached copy?" is answerable at a glance. */
-const HF_BUILD = 33;
+const HF_BUILD = 34;
 console.log('%c heyflowers build ' + HF_BUILD + ' ', 'background:#ffd935;color:#4a3305;font-weight:700;border-radius:4px');
 window.HF_BUILD = HF_BUILD;
 
@@ -326,7 +326,10 @@ ${giftRuntime(tpl, vals, opts)}
    Signed in  → a calm static grid: you're here to pick one and build,
    so every template sits still and fully visible.                     */
 function paintShelf(all){
-  const list = all.filter(t => !t.openEditor);   // the blank canvas isn't a card
+  /* `retired` templates stay registered so gifts already sent with them
+     still open — they just can't be picked for a new one. Deleting the
+     entry outright would break every link ever made from it. */
+  const list = all.filter(t => !t.openEditor && !t.retired);
   if (!list.length){ shelf.innerHTML = '<div class="loading">Nothing matches that.</div>'; return; }
   // just the thumbnail — no caption; the image speaks for itself
   const card = t => `

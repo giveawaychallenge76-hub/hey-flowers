@@ -36,12 +36,22 @@ body{font-family:var(--hf-font),'Baloo 2',cursive;background:#fff;overflow:hidde
 
 /* ── the four rooms ── */
 .stage{display:none}
+/* the wall used to be a white page between two pink ones, which read as a
+   different site mid-gift. Same wash as the ask and the letter now. */
+#st-wall{position:fixed; inset:0; overflow:hidden;
+  background: linear-gradient(color-mix(in srgb, var(--tint) 35%, transparent),
+              color-mix(in srgb, var(--tint) 50%, transparent)),
+              var(--photo) no-repeat center center;
+  background-size: cover}
 #st-wall.on{display:block}
 #st-ask.on,#st-letter.on{display:flex;justify-content:center;align-items:center}
 #st-letter{flex-direction:column}
 /* the letter used to be shown by hand by the old two-page router, so it
    still carries display:none/opacity:0 — the stage owns that now */
 #st-letter #surprise-content{display:flex;opacity:1}
+
+/* the wall's own hearts sit behind its characters */
+#st-wall #hearts{z-index:0}
 
 /* On to the cake — but only once the candle is out, so nobody skips the
    wishes. The letter needs the full height, which is why the wall's nav
@@ -526,6 +536,18 @@ text-align:center;
 margin-top:45px; 
 }
 .envelope.pulled .front-label{ opacity:0; }
+
+/* ══ overrides ════════════════════════════════════════════
+   These have to sit AFTER both imported sheets. Equal specificity is
+   decided by order, so anything competing with a rule that came in from
+   a source template belongs here, not up top. */
+
+/* With the brand and the birthday line gone, a full-width white bar with a
+   border read as a site header sitting on someone's gift. The button floats
+   on its own instead. */
+#nav{background:none;border:0;box-shadow:none;height:auto;padding:14px 16px 0;
+  justify-content:flex-end;pointer-events:none}
+#nav .nextbtn{pointer-events:auto}
 </style>
 </head>
 <body>
@@ -533,9 +555,9 @@ margin-top:45px;
 <!-- the hearts drift behind the ask and the letter -->
 <div id="hearts"></div>
 
+<!-- just the way onward: no brand, no birthday line. This is the sender's
+     gift, not a masthead. -->
 <div id="nav" style="display:none">
-  <span class="brand">{{brand}}</span>
-  <span class="friends-line">{{message}}</span>
   <span class="spacer"></span>
   <button class="nextbtn" id="navNext" type="button">the letter →</button>
 </div>
@@ -626,7 +648,7 @@ var navBtn = document.getElementById('navNext');
 var ORDER  = ['ask','wall','letter','cake'];
 
 var HF = {
-  msg:"{{message}}", frm:"{{from}}", age:"{{age}}", who:"{{name}}",
+  frm:"{{from}}", age:"{{age}}", who:"{{name}}", tint:"{{bg_tint}}",
   photos:[{src:"{{cphoto1}}",cap:"{{ccap1}}"},{src:"{{cphoto2}}",cap:"{{ccap2}}"},{src:"{{cphoto3}}",cap:"{{ccap3}}"},{src:"{{cphoto4}}",cap:"{{ccap4}}"},{src:"{{cphoto5}}",cap:"{{ccap5}}"},{src:"{{cphoto6}}",cap:"{{ccap6}}"},{src:"{{cphoto7}}",cap:"{{ccap7}}"},{src:"{{cphoto8}}",cap:"{{ccap8}}"},{src:"{{cphoto9}}",cap:"{{ccap9}}"},{src:"{{cphoto10}}",cap:"{{ccap10}}"}],
   letters:[{msg:"{{cl1m}}",frm:"{{cl1f}}"},{msg:"{{cl2m}}",frm:"{{cl2f}}"},{msg:"{{cl3m}}",frm:"{{cl3f}}"},{msg:"{{cl4m}}",frm:"{{cl4f}}"},{msg:"{{cl5m}}",frm:"{{cl5f}}"},{msg:"{{cl6m}}",frm:"{{cl6f}}"},{msg:"{{cl7m}}",frm:"{{cl7f}}"},{msg:"{{cl8m}}",frm:"{{cl8f}}"},{msg:"{{cl9m}}",frm:"{{cl9f}}"},{msg:"{{cl10m}}",frm:"{{cl10f}}"},{msg:"{{cl11m}}",frm:"{{cl11f}}"},{msg:"{{cl12m}}",frm:"{{cl12f}}"}]
 };
@@ -637,7 +659,7 @@ document.documentElement.style.setProperty('--photo',
   PHOTO ? 'url("' + PHOTO.replace(/"/g,'%22') + '")' : 'none');
 
 function tell(m){ try{ frame.contentWindow.postMessage(m,"*"); }catch(_){} }
-function sendVals(){ tell({__hfvals:1, msg:HF.msg, frm:HF.frm, age:HF.age, who:HF.who,
+function sendVals(){ tell({__hfvals:1, frm:HF.frm, age:HF.age, who:HF.who, tint:HF.tint,
                            photos:HF.photos, letters:HF.letters}); }
 
 var stage = 'ask';
@@ -654,7 +676,7 @@ function go(which){
      body-level hearts layer would paint straight over the envelope. */
   var host = document.getElementById('st-' + which);
   if(hearts){
-    var wanted = (which === 'ask' || which === 'letter');
+    var wanted = (which === 'ask' || which === 'letter' || which === 'wall');
     hearts.style.display = wanted ? 'block' : 'none';
     if(wanted && host && hearts.parentElement !== host) host.insertBefore(hearts, host.firstChild);
   }

@@ -122,7 +122,7 @@ var navBtn = document.getElementById('navNext');
 var ORDER  = ['ask','wall','letter','cake'];
 
 var HF = {
-  msg:"{{message}}", frm:"{{from}}", age:"{{age}}", who:"{{name}}",
+  frm:"{{from}}", age:"{{age}}", who:"{{name}}", tint:"{{bg_tint}}",
   photos:[{src:"{{cphoto1}}",cap:"{{ccap1}}"},{src:"{{cphoto2}}",cap:"{{ccap2}}"},{src:"{{cphoto3}}",cap:"{{ccap3}}"},{src:"{{cphoto4}}",cap:"{{ccap4}}"},{src:"{{cphoto5}}",cap:"{{ccap5}}"},{src:"{{cphoto6}}",cap:"{{ccap6}}"},{src:"{{cphoto7}}",cap:"{{ccap7}}"},{src:"{{cphoto8}}",cap:"{{ccap8}}"},{src:"{{cphoto9}}",cap:"{{ccap9}}"},{src:"{{cphoto10}}",cap:"{{ccap10}}"}],
   letters:[{msg:"{{cl1m}}",frm:"{{cl1f}}"},{msg:"{{cl2m}}",frm:"{{cl2f}}"},{msg:"{{cl3m}}",frm:"{{cl3f}}"},{msg:"{{cl4m}}",frm:"{{cl4f}}"},{msg:"{{cl5m}}",frm:"{{cl5f}}"},{msg:"{{cl6m}}",frm:"{{cl6f}}"},{msg:"{{cl7m}}",frm:"{{cl7f}}"},{msg:"{{cl8m}}",frm:"{{cl8f}}"},{msg:"{{cl9m}}",frm:"{{cl9f}}"},{msg:"{{cl10m}}",frm:"{{cl10f}}"},{msg:"{{cl11m}}",frm:"{{cl11f}}"},{msg:"{{cl12m}}",frm:"{{cl12f}}"}]
 };
@@ -133,7 +133,7 @@ document.documentElement.style.setProperty('--photo',
   PHOTO ? 'url("' + PHOTO.replace(/"/g,'%22') + '")' : 'none');
 
 function tell(m){ try{ frame.contentWindow.postMessage(m,"*"); }catch(_){} }
-function sendVals(){ tell({__hfvals:1, msg:HF.msg, frm:HF.frm, age:HF.age, who:HF.who,
+function sendVals(){ tell({__hfvals:1, frm:HF.frm, age:HF.age, who:HF.who, tint:HF.tint,
                            photos:HF.photos, letters:HF.letters}); }
 
 var stage = 'ask';
@@ -150,7 +150,7 @@ function go(which){
      body-level hearts layer would paint straight over the envelope. */
   var host = document.getElementById('st-' + which);
   if(hearts){
-    var wanted = (which === 'ask' || which === 'letter');
+    var wanted = (which === 'ask' || which === 'letter' || which === 'wall');
     hearts.style.display = wanted ? 'block' : 'none';
     if(wanted && host && hearts.parentElement !== host) host.insertBefore(hearts, host.firstChild);
   }
@@ -252,12 +252,22 @@ body{font-family:var(--hf-font),'Baloo 2',cursive;background:#fff;overflow:hidde
 
 /* ── the four rooms ── */
 .stage{display:none}
+/* the wall used to be a white page between two pink ones, which read as a
+   different site mid-gift. Same wash as the ask and the letter now. */
+#st-wall{position:fixed; inset:0; overflow:hidden;
+  background: linear-gradient(color-mix(in srgb, var(--tint) 35%, transparent),
+              color-mix(in srgb, var(--tint) 50%, transparent)),
+              var(--photo) no-repeat center center;
+  background-size: cover}
 #st-wall.on{display:block}
 #st-ask.on,#st-letter.on{display:flex;justify-content:center;align-items:center}
 #st-letter{flex-direction:column}
 /* the letter used to be shown by hand by the old two-page router, so it
    still carries display:none/opacity:0 — the stage owns that now */
 #st-letter #surprise-content{display:flex;opacity:1}
+
+/* the wall's own hearts sit behind its characters */
+#st-wall #hearts{z-index:0}
 
 /* On to the cake — but only once the candle is out, so nobody skips the
    wishes. The letter needs the full height, which is why the wall's nav
@@ -273,6 +283,18 @@ __BC_CSS__
 
 /* ══ from the letter ══════════════════════════════════════ */
 __BD_CSS__
+
+/* ══ overrides ════════════════════════════════════════════
+   These have to sit AFTER both imported sheets. Equal specificity is
+   decided by order, so anything competing with a rule that came in from
+   a source template belongs here, not up top. */
+
+/* With the brand and the birthday line gone, a full-width white bar with a
+   border read as a site header sitting on someone's gift. The button floats
+   on its own instead. */
+#nav{background:none;border:0;box-shadow:none;height:auto;padding:14px 16px 0;
+  justify-content:flex-end;pointer-events:none}
+#nav .nextbtn{pointer-events:auto}
 </style>
 </head>
 <body>
@@ -280,9 +302,9 @@ __BD_CSS__
 <!-- the hearts drift behind the ask and the letter -->
 <div id="hearts"></div>
 
+<!-- just the way onward: no brand, no birthday line. This is the sender's
+     gift, not a masthead. -->
 <div id="nav" style="display:none">
-  <span class="brand">{{brand}}</span>
-  <span class="friends-line">{{message}}</span>
   <span class="spacer"></span>
   <button class="nextbtn" id="navNext" type="button">the letter →</button>
 </div>
@@ -348,9 +370,59 @@ doc = unmask(doc)
 OUT.mkdir(exist_ok=True)
 (OUT/'index.html').write_text(doc)
 
-# the cake scroll and its art are shared with the party template
+# ── the cake scroll: same source, restyled to match the other rooms ──
 import shutil
-shutil.copy(ROOT/'templates/birthday-cartoon/cake.html', OUT/'cake.html')
+cake = (ROOT/'templates/birthday-cartoon/cake.html').read_text()
+
+# only the Back button up top — the brand and the birthday line belong to
+# the party template this was borrowed from, not to this gift
+assert '<span class="brand">wiki day.</span>' in cake
+cake = cake.replace('  <span class="brand">wiki day.</span>\n'
+                    '  <span class="friends-line">happy birthday saj</span>\n', '')
+
+# the white page made this room look like a different site from the three
+# before it. --tint arrives with the values; hearts drift behind the scroll.
+assert "background:#fff;color:var(--ink)" in cake
+cake = cake.replace("background:#fff;color:var(--ink)",
+                    "background:var(--room);color:var(--ink)")
+cake = cake.replace(':root{ --navy:#16307a; --ink:#2a2a2a; }',
+  ':root{ --navy:#16307a; --ink:#2a2a2a; --tint:#f4a5b5;\n'
+  '  --room:linear-gradient(color-mix(in srgb, var(--tint) 35%, transparent),\n'
+  '         color-mix(in srgb, var(--tint) 50%, transparent)) fixed, #fff; }\n'
+  '#hearts{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}\n'
+  '.heart{position:absolute;bottom:-100px;opacity:0;animation:floatUp linear infinite}\n'
+  '.heart::before,.heart::after{content:"";position:absolute;width:50%;height:80%;\n'
+  '  background:currentColor;border-radius:50% 50% 0 0}\n'
+  '.heart::before{left:50%;transform-origin:left bottom;transform:rotate(-45deg)}\n'
+  '.heart::after{left:0;transform-origin:right bottom;transform:rotate(45deg)}\n'
+  '@keyframes floatUp{0%{transform:translateY(0);opacity:0}10%{opacity:.55}\n'
+  '  100%{transform:translateY(-120vh) translateX(40px) rotate(20deg);opacity:0}}\n'
+  '#page,#nav{position:relative;z-index:1}')
+cake = cake.replace('<div id="page">', '<div id="hearts"></div>\n<div id="page">')
+
+# build the hearts, and take the sender's tint when the values arrive
+assert 'var cb=document.getElementById("cakeBack");' in cake
+cake = cake.replace('var cb=document.getElementById("cakeBack");', '''
+(function(){
+  var box=document.getElementById("hearts"); if(!box) return;
+  for(var i=0;i<44;i++){
+    var h=document.createElement("span"); h.className="heart";
+    var s=10+Math.random()*46;
+    h.style.width=s+"px"; h.style.height=s+"px";
+    h.style.left=Math.random()*100+"vw";
+    h.style.color="color-mix(in srgb, var(--tint) "+(55+Math.random()*45)+"%, white)";
+    h.style.animationDuration=(6+Math.random()*10)+"s";
+    h.style.animationDelay=(-Math.random()*12)+"s";
+    box.appendChild(h);
+  }
+})();
+window.addEventListener("message",function(e){
+  var d=e.data||{}; if(!d.__hfvals||!d.tint) return;
+  document.documentElement.style.setProperty("--tint", d.tint);
+});
+var cb=document.getElementById("cakeBack");''')
+
+(OUT/'cake.html').write_text(cake)
 assets = OUT/'birthday-assets'
 if assets.exists(): shutil.rmtree(assets)
 shutil.copytree(ROOT/'templates/birthday-cartoon/birthday-assets', assets)

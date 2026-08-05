@@ -6,8 +6,8 @@
   "experienceTime": "1 min",
   "description": "An envelope, a candle they blow out with their mic, and a scroll of little notes written just for them.",
   "thumbnail": "thumbnail/birthday.png",
-  "featured": true,
-  "trending": true,
+  "featured": false,
+  "trending": false,
   "assetsBaseURL": "https://giveawaychallenge76-hub.github.io/latenight/",
   "pages": [
     {
@@ -145,5 +145,6 @@
       "default": "Georgia",
       "page": "front"
     }
-  ]
+  ],
+  "retired": true
 }

@@ -6,8 +6,8 @@
   "experienceTime": "1 min",
   "description": "A wall of little characters gathers on screen — tap anyone and the whole gang bursts into a dancing party. Then a second page: a scroll of cakes, photos and letters from everyone.",
   "thumbnail": "thumbnail/birthdaymemory.png",
-  "featured": true,
-  "trending": true,
+  "featured": false,
+  "trending": false,
   "pages": [
     {
       "id": "friends",
@@ -399,5 +399,6 @@
       "default": "Baloo 2",
       "page": "friends"
     }
-  ]
+  ],
+  "retired": true
 }

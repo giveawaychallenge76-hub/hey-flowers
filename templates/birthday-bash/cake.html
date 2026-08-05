@@ -17,10 +17,21 @@
 ════════════════════════════════════════════════
 -->
 <style>
-:root{ --navy:#16307a; --ink:#2a2a2a; }
+:root{ --navy:#16307a; --ink:#2a2a2a; --tint:#f4a5b5;
+  --room:linear-gradient(color-mix(in srgb, var(--tint) 35%, transparent),
+         color-mix(in srgb, var(--tint) 50%, transparent)) fixed, #fff; }
+#hearts{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.heart{position:absolute;bottom:-100px;opacity:0;animation:floatUp linear infinite}
+.heart::before,.heart::after{content:"";position:absolute;width:50%;height:80%;
+  background:currentColor;border-radius:50% 50% 0 0}
+.heart::before{left:50%;transform-origin:left bottom;transform:rotate(-45deg)}
+.heart::after{left:0;transform-origin:right bottom;transform:rotate(45deg)}
+@keyframes floatUp{0%{transform:translateY(0);opacity:0}10%{opacity:.55}
+  100%{transform:translateY(-120vh) translateX(40px) rotate(20deg);opacity:0}}
+#page,#nav{position:relative;z-index:1}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'EB Garamond',Georgia,serif;background:#fff;color:var(--ink);overflow-x:hidden}
+body{font-family:'EB Garamond',Georgia,serif;background:var(--room);color:var(--ink);overflow-x:hidden}
 
 #nav{position:fixed;left:0;right:0;top:0;height:52px;z-index:60;display:flex;align-items:center;
   padding:0 20px;background:#fff;border-top:3px solid #2b2b2b;border-bottom:1px solid #e3e3e3;box-shadow:0 2px 6px rgba(0,0,0,.05)}
@@ -80,12 +91,11 @@ body{font-family:'EB Garamond',Georgia,serif;background:#fff;color:var(--ink);ov
 <body>
 
 <div id="nav">
-  <span class="brand">wiki day.</span>
-  <span class="friends-line">happy birthday saj</span>
   <span class="spacer"></span>
   <button class="backbtn" id="cakeBack">← Back</button>
 </div>
 
+<div id="hearts"></div>
 <div id="page">
   <div id="hero">
     <div class="big">happy 24th, saj ♥</div>
@@ -288,6 +298,24 @@ window.addEventListener("message",function(e){ var d=e.data||{}; if(!d.__hfvals)
     changed=true;
   }
   if(changed) buildRows();
+});
+
+(function(){
+  var box=document.getElementById("hearts"); if(!box) return;
+  for(var i=0;i<44;i++){
+    var h=document.createElement("span"); h.className="heart";
+    var s=10+Math.random()*46;
+    h.style.width=s+"px"; h.style.height=s+"px";
+    h.style.left=Math.random()*100+"vw";
+    h.style.color="color-mix(in srgb, var(--tint) "+(55+Math.random()*45)+"%, white)";
+    h.style.animationDuration=(6+Math.random()*10)+"s";
+    h.style.animationDelay=(-Math.random()*12)+"s";
+    box.appendChild(h);
+  }
+})();
+window.addEventListener("message",function(e){
+  var d=e.data||{}; if(!d.__hfvals||!d.tint) return;
+  document.documentElement.style.setProperty("--tint", d.tint);
 });
 var cb=document.getElementById("cakeBack"); if(cb) cb.addEventListener("click",function(){ try{ parent.postMessage({__cakeBack:1},"*"); }catch(_){}});
 try{ parent.postMessage({__cakeReady:1},"*"); }catch(_){}

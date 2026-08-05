@@ -58,22 +58,6 @@
       "page": "ask"
     },
     {
-      "key": "message",
-      "type": "text",
-      "label": "Birthday line (top bar)",
-      "default": "happy birthday saj",
-      "placeholder": "happy birthday saj",
-      "required": true,
-      "page": "wall"
-    },
-    {
-      "key": "brand",
-      "type": "text",
-      "label": "Corner brand",
-      "default": "wiki day.",
-      "page": "wall"
-    },
-    {
       "key": "from",
       "type": "text",
       "label": "From (your name)",

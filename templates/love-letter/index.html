@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>a letter for you</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
+<!--
+════════════════════════════════════════════════
+  one envelope, one letter. Tap it and it opens.
+  Built from templates/birthday by _build.py —
+  edit that template or this script, not this file.
+════════════════════════════════════════════════
+-->
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+:root{
+  --tint:   {{bg_tint}};
+  --env:    {{envelope_color}};
+  --accent: {{accent_color}};
+  --font:   {{font_family}};
+  --accent-bright: color-mix(in srgb, var(--accent) 72%, white);
+  --env-dark: color-mix(in srgb, var(--env) 82%, #5c4a12);
+  --env-mid:  color-mix(in srgb, var(--env) 91%, #5c4a12);
+}
+
+body{
+height:100vh;
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+background: linear-gradient(color-mix(in srgb, var(--tint) 35%, transparent),
+            color-mix(in srgb, var(--tint) 50%, transparent)),
+            var(--photo) no-repeat center center;
+background-size: cover;
+font-family:var(--font), Georgia, serif;
+}
+
+/* HEARTS BACKGROUND */
+#hearts{ position:fixed; inset:0; pointer-events:none; z-index: 1; }
+.heart{
+position:absolute; bottom:-100px; opacity:0;
+animation:floatUp linear infinite;
+}
+.heart::before,.heart::after{
+content:''; position:absolute;
+width:50%; height:80%; background:currentColor;
+border-radius:50% 50% 0 0;
+}
+.heart::before{ left:50%; transform-origin:left bottom; transform:rotate(-45deg); }
+.heart::after{  left:0;   transform-origin:right bottom; transform:rotate(45deg); }
+@keyframes floatUp{
+0%  { transform:translateY(0); opacity:0; }
+10% { opacity:.8; }
+100%{ transform:translateY(-120vh) translateX(40px) rotate(20deg); opacity:0; }
+}
+
+/* ── CELEBRATION CONFETTI ENGINE ── */
+.confetti-particle {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 99;
+  animation: explodeDrop 3s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+@keyframes explodeDrop {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  30% { opacity: 1; }
+  100% { transform: translate(var(--x-move), var(--y-move)) rotate(var(--rot)) scale(0.3); opacity: 0; }
+}
+
+/* ── FRONT PAGE ── */
+#front-page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  background: linear-gradient(color-mix(in srgb, var(--tint) 40%, transparent),
+              color-mix(in srgb, var(--tint) 55%, transparent)),
+              var(--photo) no-repeat center center;
+  background-size: cover;
+  transition: opacity 0.6s ease;
+}
+
+.proposal-box {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(192, 67, 90, 0.3);
+  max-width: 90%;
+  width: 360px;
+  backdrop-filter: blur(4px);
+}
+
+.proposal-box h1 {
+  color: var(--accent);
+  font-size: 1.6rem;
+  margin-bottom: 30px;
+}
+
+.btn-container {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  position: relative;
+  height: 50px;
+}
+
+.btn {
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#yes-btn {
+  background-color: var(--accent-bright);
+  color: white;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+#yes-btn:hover {
+  background-color: color-mix(in srgb, var(--accent-bright) 80%, white);
+}
+
+#no-btn {
+  background-color: #f0f0f0;
+  color: #555;
+  position: absolute;
+  left: 190px; 
+  transition: all 0.2s ease;
+}
+
+/* ── SURPRISE CONTAINER ── */
+#surprise-content {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  position: relative;      /* so the next-wish button can sit over the envelope */
+}
+
+/* appears once the candle is out — makes it obvious there's more than one
+   wish, instead of relying on people guessing they can tap the note */
+#next-wish {
+  position: absolute;
+  left: 50%;
+  bottom: -16px;
+  transform: translateX(-50%) translateY(10px);
+  z-index: 40;
+  opacity: 0;
+  transition: opacity .45s ease, transform .45s cubic-bezier(.2,1.3,.4,1);
+  font-family: "Comic Sans MS", "Chalkboard SE", "Comic Neue", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(180deg, #ff6f91, #e63b66);
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 26px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #b32349, 0 10px 22px -8px rgba(180,20,60,.55);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+#next-wish.in { opacity: 1; transform: translateX(-50%) translateY(0); }
+#next-wish:active { transform: translateX(-50%) translateY(3px); box-shadow: 0 2px 0 #b32349; }
+@media (max-width: 640px) {
+  #next-wish { font-size: 17px; padding: 15px 30px; bottom: -12px; }
+}
+
+.hint{
+text-align:center;
+color:var(--accent);
+font-size:16px;
+margin-bottom:20px;
+transition:opacity .4s;
+font-weight: bold;
+text-shadow: 0 1px 4px rgba(255,255,255,0.8);
+background: rgba(255, 255, 255, 0.7);
+padding: 5px 15px;
+border-radius: 20px;
+}
+.hint.hidden{ opacity:0; }
+
+/* Envelope Setup */
+.envelope{
+position:relative;
+width:320px;
+height:380px; 
+cursor:pointer;
+animation:bob 3s ease-in-out infinite;
+}
+.envelope.pulled{ animation:none; }
+
+@keyframes bob{
+0%,100%{ transform:translateY(0); }
+50%    { transform:translateY(-10px); }
+}
+
+.back-flap{
+position:absolute;
+top:0; left:0;
+width:0; height:0;
+border-left:  160px solid transparent;
+border-right: 160px solid transparent;
+border-bottom:130px solid var(--env-dark);
+z-index:1;
+}
+
+.body-bg{
+position:absolute;
+left:0; right:0;
+top:130px;
+height:250px;
+background:var(--env-mid);
+z-index:1;
+border-radius:0 0 4px 4px;
+box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+
+/* ── LETTER CARD ENGINE ── */
+.letter{
+position:absolute;
+left:20px;
+right:20px;
+height:245px; 
+background:#fff;
+border-radius:4px;
+top:132px; 
+z-index:2;
+box-shadow:0 4px 15px rgba(0,0,0,.15);
+transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), height 1s cubic-bezier(0.25, 1, 0.5, 1);
+overflow:hidden;
+transform: translateY(0);
+}
+
+.envelope.pulled .letter{
+transform:translateY(-215px);
+height: 325px; 
+}
+
+.content{
+height:100%;
+display:flex; flex-direction:column;
+justify-content:flex-start; align-items:center;
+text-align:center; padding:12px;
+opacity:0;
+transition:opacity 0.6s ease 0.4s;
+}
+.envelope.pulled .content{ opacity:1; }
+
+.content h2{
+  color:var(--accent);
+  margin-top: 5px;
+  margin-bottom:5px;
+  font-size: 1.5rem;
+  font-weight: normal;
+  font-family: var(--font), 'Dancing Script', 'Brush Script MT', 'Georgia', cursive, serif;
+}
+
+.highlight-name {
+  background: transparent; 
+  padding: 0 4px;
+  border: none; 
+  font-weight: bold;
+  color: var(--accent-bright);
+  font-size: 1.8rem;
+  display: inline-block;
+}
+
+.mic-instruction {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+/* CAKE */
+.cake-design {
+  position: relative;
+  width: 90px;
+  height: 45px;
+  background: #f48fb1; 
+  border-radius: 6px 6px 0 0;
+  margin-top: 22px;
+  margin-bottom: 12px;
+  box-shadow: inset 0 -8px 0 #f06292;
+  flex-shrink: 0;
+}
+.cake-design::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 8px;
+  background: #fff8e1; 
+  top: 18px; left: 0;
+}
+.cake-design::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 6px;
+  background: #e1bee7; 
+  border-radius: 6px 6px 0 0;
+  top: 0; left: 0;
+}
+.candle-wick {
+  position: absolute;
+  width: 6px;
+  height: 18px;
+  background: linear-gradient(#b2ebf2, #00bcd4);
+  top: -18px;
+  left: 42px;
+  border-radius: 1px;
+}
+.candle-wick::before {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 4px;
+  background: #333;
+  top: -4px; left: 2px;
+}
+.glowing-flame {
+  position: absolute;
+  width: 10px;
+  height: 14px;
+  background: #ffb74d;
+  border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+  top: -32px;
+  left: 40px;
+  box-shadow: 0 0 10px #ffb74d, 0 0 20px #ff9800;
+  animation: flameMove 0.6s ease-in-out infinite alternate;
+  transition: opacity 0.3s ease;
+}
+@keyframes flameMove {
+  0% { transform: scale(1) rotate(-3deg); opacity: 0.9; }
+  100% { transform: scale(1.15) rotate(4deg); opacity: 1; box-shadow: 0 0 12px #ffb74d, 0 0 22px #ff5722; }
+}
+
+.smoke {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: rgba(220, 220, 220, 0.8);
+  border-radius: 50%;
+  top: -36px;
+  left: 39px;
+  opacity: 0;
+  pointer-events: none;
+}
+.blown-out .glowing-flame {
+  opacity: 0 !important;
+  animation: none !important;
+}
+.blown-out .smoke {
+  animation: smokeRise 1.5s ease-out forwards;
+}
+@keyframes smokeRise {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; filter: blur(0px); }
+  50% { opacity: 0.4; }
+  100% { transform: translateY(-30px) scale(2.5); opacity: 0; filter: blur(4px); }
+}
+
+/* MEMORY SLIDER DISPLAY SCROLL */
+.cute-note-scroll {
+  width: 100%;
+  background: #fff9f9;
+  border: none; 
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 4px;
+  font-family: "Comic Sans MS", "Chalkboard SE", "Comic Neue", sans-serif;
+  position: relative;
+}
+.cute-note-scroll h4 {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 5px;
+  font-weight: normal;
+}
+.important-list {
+  color: var(--accent-bright);
+  font-weight: bold;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  letter-spacing: 1px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.front-pocket{
+position:absolute;
+left:0; right:0;
+top:130px;
+bottom:0;
+background:var(--env);
+z-index:4;
+border-radius:0 0 4px 4px;
+clip-path: polygon(0 0, 50% 55px, 100% 0, 100% 100%, 0 100%);
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.front-label{
+font-size:18px;
+font-weight:bold;
+color:color-mix(in srgb, var(--env) 18%, black);
+opacity:0.85;
+transition:opacity .3s;
+text-align:center;
+margin-top:45px; 
+}
+.envelope.pulled .front-label{ opacity:0; }
+
+/* ══ the letter itself ════════════════════════════════════════════ */
+.love-note{
+  font-family: var(--font), Georgia, serif;
+  /* sized so ~25-30 words clear the envelope front without pulling the
+     letter so far up that its top leaves the screen on a short phone */
+  font-size: clamp(14px, 3.6vw, 17px);
+  line-height: 1.58;
+  color: var(--accent);
+  text-align: center;
+  padding: 4px 6px;
+  white-space: pre-wrap;      /* keep the sender's own line breaks */
+}
+.love-sign{
+  margin-top: 10px;
+  font-family: var(--font), Georgia, serif;
+  font-style: italic;
+  font-size: clamp(13px, 3.4vw, 16px);
+  color: color-mix(in srgb, var(--accent) 72%, white);
+  text-align: right;
+  padding-right: 6px;
+}
+/* the card is shorter without a candle and a carousel in it */
+.content{ display:flex; flex-direction:column; justify-content:center; }
+
+/* The birthday card only ever had to clear the envelope front with a
+   heading and one line — the rest scrolled inside a carousel. A whole
+   letter has to be readable in one go, so it comes further out. Measured
+   against .front-pocket: the old -215px left 213px of clear space for
+   ~275px of letter, and the last two lines sat behind the envelope. */
+.envelope.pulled .letter{ transform:translateY(-296px); height:340px; }
+
+/* The old template showed this by hand when you pressed Yes on the front
+   page. There is no front page now, so it has to start visible — and this
+   has to sit after the imported rules to win on order. */
+#surprise-content{ display:flex; opacity:1; }
+
+/* The tint is painted as a translucent gradient, and the source template
+   always had a background photo underneath it. This one ships without a
+   photo, so without an opaque base the page renders against whatever sits
+   behind the frame. */
+body{ background-color:#fff9f2; }
+</style>
+</head>
+<body>
+
+<div id="hearts"></div>
+
+<div id="surprise-content" class="wrap">  
+    <div class="hint" id="hint">Tap to pull out the letter 💖</div>  
+    
+    <div class="envelope" id="envelope">  
+        <div class="back-flap"></div>  
+        <div class="body-bg"></div>  
+
+        <div class="letter">  
+            <div class="content">
+                <div class="love-note">{{letter_text}}</div>
+                <div class="love-sign">{{sign_off}}</div>
+            </div>  
+        </div>  
+
+        <div class="front-pocket">
+            <div class="front-label">Place your hand here</div>  
+        </div>
+    </div>
+</div>
+
+<script>
+/* an optional background photo — `none` is a valid background-image layer,
+   an empty url() is not (it re-requests this very page) */
+var PHOTO = "{{photo_url}}";
+document.documentElement.style.setProperty('--photo',
+  PHOTO ? 'url("' + PHOTO.replace(/"/g,'%22') + '")' : 'none');
+
+/* ── the drifting hearts ── */
+const hearts = document.getElementById("hearts");
+const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ff4d6d";
+const colors = [55, 65, 75, 88, 100].map(p => `color-mix(in srgb, ${accent} ${p}%, white)`);
+for(let i = 0; i < 80; i++){  
+    const h = document.createElement("span");  
+    h.className = "heart";  
+    const size = 10 + Math.random()*50;  
+    h.style.width  = size+"px";  
+    h.style.height = size+"px";  
+    h.style.left   = Math.random()*100+"vw";  
+    h.style.color  = colors[Math.floor(Math.random()*colors.length)];  
+    h.style.animationDuration = 6+Math.random()*10+"s";  
+    h.style.animationDelay   = -Math.random()*12+"s";  
+    hearts.appendChild(h);  
+}
+
+/* ── confetti when the letter comes out ── */
+function triggerConfettiExplosion() {
+const confettiColors = ["#ff4d6d", "#ff758f", "#ffbe0b", "#ff006e", "#8338ec", "#3a86ff", "#00f5d4"];
+    
+    for (let i = 0; i < 65; i++) {
+        const p = document.createElement("div");
+        p.className = "confetti-particle";
+        p.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+        
+        // Emits directly outwards center-screen from behind the envelope position
+        p.style.left = "50vw";
+        p.style.top = "45vh";
+        
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 80 + Math.random() * 160;
+        
+        p.style.setProperty('--x-move', Math.cos(angle) * velocity + 'vw');
+        p.style.setProperty('--y-move', (Math.sin(angle) * velocity + 150) + 'vh');
+        p.style.setProperty('--rot', Math.floor(Math.random() * 720 - 360) + 'deg');
+        
+        p.style.animationDelay = (Math.random() * 0.2) + 's';
+        p.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+        
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 3500);
+    }
+}
+
+/* ── the envelope ── */
+const envelope = document.getElementById("envelope");  
+const hint     = document.getElementById("hint");  
+let letterOpened = false;
+  
+function toggle(){  
+    envelope.classList.toggle("pulled");  
+    const isPulled = envelope.classList.contains("pulled");
+    hint.classList.toggle("hidden", isPulled);  
+    
+    if(isPulled && !letterOpened) {
+        letterOpened = true;
+        setTimeout(triggerConfettiExplosion, 450); 
+    }
+}  
+envelope.addEventListener("click", toggle);  
+envelope.addEventListener("touchstart", e => { e.preventDefault(); toggle(); }, {passive:false});
+
+/* the editor has one page, so there is nothing to route — but it still
+   posts here when you switch to it, and an unhandled message is fine. */
+</script>
+</body>
+</html>
