@@ -26,7 +26,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@700;800;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=35">
+<link rel="stylesheet" href="styles.css?v=36">
+
+<!-- Vercel Web Analytics. The shim queues events fired before the script
+     lands. NOTE: custom events are a Pro feature — on Hobby only page
+     views are recorded, so app.js's track() also writes each event to the
+     `visits` table, which works on any plan. -->
+<script>
+  window.va = window.va || function(){ (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
@@ -37,7 +46,7 @@
   <div class="auth-card">
     <button type="button" class="auth-x" id="authClose" aria-label="Close">✕</button>
     <div class="auth-logo"><span class="hey">hey</span><span class="flowers">flowers</span></div>
-    <p class="auth-sub">Sign in to create &amp; send your gifts.</p>
+    <p class="auth-sub">Your gift is saved. Create an account to get its link.</p>
     <div class="auth-tabs">
       <button type="button" id="tabLogin" class="on">Log in</button>
       <button type="button" id="tabSignup">Sign up</button>
@@ -99,7 +108,6 @@
 <!-- ══ landing: the templates greet you, drifting ══ -->
 <main class="screen on" id="gallery">
   <section class="hero">
-    <div class="count-pill"><span class="rd"></span>+999 PEOPLE CREATING</div>
     <h1 class="hero-h">create your <em>stunning</em> gift,<br>share the link</h1>
     <p class="hero-p">make your first gift</p>
     <div class="hero-cta">
@@ -107,28 +115,31 @@
     </div>
   </section>
 
-  <div class="shelf" id="shelf" aria-live="polite">
-    <div class="loading">Reading the template folder…</div>
+  <div class="shelf as-grid" id="shelf" aria-live="polite">
+    <div class="shelf-grid skeleton">
+      <div class="sk-card"></div><div class="sk-card"></div><div class="sk-card"></div>
+      <div class="sk-card"></div><div class="sk-card"></div><div class="sk-card"></div>
+    </div>
   </div>
 
   <!-- ══ pricing ══ -->
   <section class="pricing" id="pricing">
     <h2 class="sec-h">price</h2>
-    <p class="price-note">🎉 <b>14 days free</b> — try everything first, no card needed.</p>
+    <p class="price-note">No subscription. Build it free, pay only when you send.</p>
     <div class="price-grid one">
       <div class="price-card dark featured">
-        <div class="badge">✦ 14 DAYS FREE</div>
-        <div class="tier">MONTHLY</div>
-        <div class="amount"><s>$1</s> FREE <span>/ month</span></div>
-        <p class="price-sub">Free for your first 14 days. No card needed.</p>
+        <div class="badge">✦ PAY PER GIFT</div>
+        <div class="tier">ONE GIFT</div>
+        <div class="amount">$1 <span>/ gift</span></div>
+        <p class="price-sub">One-time. No account needed until you want the link.</p>
         <ul>
-          <li>Access every template</li>
-          <li><b>Unlimited</b> gifts</li>
-          <li>A new template every month</li>
+          <li>Every template, no tiers</li>
+          <li>Make it and preview it <b>free</b></li>
           <li>Colours, stickers, fonts &amp; uploads</li>
           <li>Photo, music &amp; video uploads</li>
+          <li>Your link never expires</li>
         </ul>
-        <button class="cta wide" data-auth-open="signup">Start 14 days free</button>
+        <button class="cta wide" data-scrollto="#shelf">Make one ↓</button>
       </div>
     </div>
   </section>
@@ -256,6 +267,11 @@
     <iframe id="viewFrame" title="Your gift" allow="microphone; autoplay"
             sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-presentation"></iframe>
   </div>
+  <!-- Only for someone who was sent this, and only once it's had time to
+       play. It sits under the gift in its own strip — never over it. -->
+  <a class="gift-mark" id="giftMark" href="/?ref=gift">
+    Made with <b>heyflowers</b> — make your own <span aria-hidden="true">→</span>
+  </a>
 </div>
 
 <script src="auth.js?v=4"></script>
@@ -267,7 +283,7 @@
      cache. Guarded so it can never loop. -->
 <script>
 (function(){
-  var EXPECT = 35;                       // keep in step with build.json
+  var EXPECT = 36;                       // keep in step with build.json
   try{
     fetch('build.json?t=' + Date.now(), { cache:'no-store' })
       .then(function(r){ return r.ok ? r.json() : null; })
@@ -281,6 +297,6 @@
   }catch(e){}
 })();
 </script>
-<script src="app.js?v=35"></script>
+<script src="app.js?v=36"></script>
 </body>
 </html>

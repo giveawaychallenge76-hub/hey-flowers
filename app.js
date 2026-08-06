@@ -77,7 +77,7 @@ const SHAPES = ['rect','circle','star','heart','tri'];
 /* ───────────────────────── 1. load the folders ───────────────────── */
 /* Bump on every release, and keep build.json in step. Printed on load so
    "is this the new code or a cached copy?" is answerable at a glance. */
-const HF_BUILD = 35;
+const HF_BUILD = 36;
 console.log('%c heyflowers build ' + HF_BUILD + ' ', 'background:#ffd935;color:#4a3305;font-weight:700;border-radius:4px');
 window.HF_BUILD = HF_BUILD;
 
@@ -99,32 +99,76 @@ window.HF_BUILD = HF_BUILD;
   }catch{}
 })();
 
-async function boot(){
+/* A fetch that gives up instead of hanging. A stalled request on a bad
+   phone connection used to leave "Reading the template folder…" on screen
+   forever, because nothing ever rejected. */
+const TIMEOUT = 5000;
+function fetchT(url, opts, ms = TIMEOUT){
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), ms);
+  return fetch(url, { ...opts, signal: ctl.signal }).finally(() => clearTimeout(t));
+}
+
+/* The shelf is a wall of thumbnails: all it needs from a template is its
+   manifest. The full index.html — 440KB for one of them, 670KB across the
+   set — is only needed once you open the editor or actually render a gift,
+   so it's fetched then. Manifests go out in parallel; before this they
+   were serial and the page waited on all of it. */
+async function ensureHTML(tpl){
+  if (tpl.html != null) return tpl;
+  tpl.html = await fetchT(tpl.dir + 'index.html', { cache: 'no-cache' }, 15000)
+                    .then(r => { if(!r.ok) throw new Error(r.status); return r.text(); });
+  return tpl;
+}
+
+function shelfSkeleton(){
+  shelf.classList.add('as-grid');       // same padding the real grid gets
+  shelf.innerHTML = `<div class="shelf-grid skeleton">${
+    Array.from({length:6}, () => '<div class="sk-card"></div>').join('')}</div>`;
+}
+function shelfError(){
+  shelf.innerHTML = `<div class="loading shelf-oops">
+      <p>Couldn't load the templates.</p>
+      <p class="sub">Check your connection and try again.</p>
+      <button type="button" class="cta" id="shelfRetry">Retry</button>
+    </div>`;
+  const b = document.getElementById('shelfRetry');
+  if (b) b.onclick = () => { shelfSkeleton(); loadTemplates(); };
+}
+
+async function loadTemplates(){
   try{
-    const reg = await fetch('templates/index.json', { cache: 'no-cache' }).then(r => r.json());
-    for (const id of reg.templates){
+    const reg = await fetchT('templates/index.json', { cache: 'no-cache' })
+                      .then(r => { if(!r.ok) throw new Error(r.status); return r.json(); });
+    const manifests = await Promise.all(reg.templates.map(id => {
       const dir = `templates/${id}/`;
-      const [manifest, html] = await Promise.all([
-        fetch(dir + 'manifest.json', { cache: 'no-cache' }).then(r => r.json()),
-        fetch(dir + 'index.html', { cache: 'no-cache' }).then(r => r.text())
-      ]);
-      manifest.dir  = dir;
-      manifest.html = html;
-      manifest.assetsBaseURL = manifest.assetsBaseURL || dir;
-      TEMPLATES.push(manifest);
-    }
+      return fetchT(dir + 'manifest.json', { cache: 'no-cache' })
+        .then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })
+        .then(m => { m.dir = dir; m.assetsBaseURL = m.assetsBaseURL || dir; return m; })
+        .catch(err => { console.warn('[heyflowers] skipping', id, err); return null; });
+    }));
+    const good = manifests.filter(Boolean);
+    if (!good.length) throw new Error('no templates loaded');
+    TEMPLATES.length = 0;
+    good.forEach(m => TEMPLATES.push(m));
   }catch(err){
-    shelf.innerHTML = `<div class="loading">Couldn't read the template folder.<br>
-      Serve this over http (see README) — <code>fetch</code> won't work from a file:// path.</div>`;
-    console.error(err);
-    return;
+    console.error('[heyflowers] template load failed', err);
+    shelfError();
+    return false;
   }
+  paintShelf(TEMPLATES);
+  return true;
+}
+
+async function boot(){
+  shelfSkeleton();
+  if (!await loadTemplates()) return;
   try{
-    const s = await fetch('stickers/index.json').then(r => r.json());
+    const s = await fetchT('stickers/index.json').then(r => r.json());
     // absolute so they survive inside a gift's <base>-scoped iframe
     STICKERS = (s.stickers || []).map(f => new URL('stickers/' + f, location.href).href);
   }catch{ /* no sticker folder yet — the emoji row still works */ }
-  paintShelf(TEMPLATES);
+  track('landing_view', { ref: new URLSearchParams(location.search).get('ref') || 'direct' });
   routeFromHash();          // a gift link opens straight into the gift
   logVisit();               // count the visit for the admin dashboard (no-op if not set up)
 }
@@ -385,15 +429,18 @@ const CONTROL = {
 /* set when a signed-out visitor picks a template — we reopen it for them
    the moment they finish signing in, instead of dumping them on the shelf */
 let pendingOpen = null;
-function openEditor(id, preset, resumeKey){
-  // browse freely, but you must be signed in to actually make a gift
-  if (window.HFAuth && !window.HFAuth.isIn()){
-    pendingOpen = { id, preset, resumeKey };
-    window.HFAuth.open('signup');
-    return;
-  }
-  current = TEMPLATES.find(t => t.id === id);
-  if (!current) return;
+/* set when someone hits Export without an account — the gift is already
+   saved as a draft, this is just where to pick the thread back up */
+let pendingExport = null;
+async function openEditor(id, preset, resumeKey){
+  const tpl = TEMPLATES.find(t => t.id === id);
+  if (!tpl) return;
+  /* Make anything you like without an account. The gate is at Export,
+     where the link gets made — see wrap(). */
+  try{ await ensureHTML(tpl); }
+  catch(err){ console.error(err); toast("Couldn't open that template — try again"); return; }
+  current = tpl;
+  track('editor_opened', { template: tpl.id });
   draftKey = resumeKey !== undefined ? resumeKey : null;
 
   values = {};
@@ -1139,7 +1186,7 @@ function posterHTML(){
    branding, no "made with", no template name (that last one quietly
    reframes something handmade as something picked off a shelf). The
    person who was sent it just sees who it's for. */
-function openGift(tpl, vals, opts = {}){
+async function openGift(tpl, vals, opts = {}){
   const forYou = !!opts.recipient;
   const to = draftLabel(tpl, vals);
   viewerTag.textContent = forYou
@@ -1151,8 +1198,32 @@ function openGift(tpl, vals, opts = {}){
 
   viewer.hidden = false;
   document.body.style.overflow = 'hidden';
+  // the template's HTML is fetched on demand now, and a recipient arrives
+  // here cold — this is usually the request that actually loads it
+  try{ await ensureHTML(tpl); }
+  catch(err){
+    console.error(err);
+    viewerTag.textContent = "Couldn't load this gift — check your connection";
+    return;
+  }
   viewFrame.srcdoc = inject(tpl, vals);
   window._viewing = { tpl, vals, recipient: forYou };
+  if (forYou){
+    track('gift_opened_by_recipient', { template: tpl.id });
+    markGiftPlayed();                  // arms the "make your own" footer
+  }
+}
+
+/* The one mark we leave on a received gift. It waits — the gift has to
+   land first, and it must never sit over the thing the sender made — then
+   fades in underneath as a quiet line you can ignore. */
+let playedTimer = null;
+function markGiftPlayed(){
+  clearTimeout(playedTimer);
+  document.body.classList.remove('gift-played');
+  playedTimer = setTimeout(() => {
+    if (!viewer.hidden) document.body.classList.add('gift-played');
+  }, 12000);
 }
 function closeGift(){
   viewer.hidden = true;
@@ -1251,12 +1322,61 @@ async function shortenGift(tpl, vals, payload){
   }catch{ return null; }
 }
 
+/* ── the one payment: $1 for this gift, once ────────────────────────────
+   Pricing is per gift, not a subscription, so the charge belongs right
+   here — at the moment a link gets minted — and nowhere else.
+
+   NOTHING CHARGES YET. There is no payment provider in this project, so
+   flipping PAYMENTS_LIVE on without wiring `chargeOneGift` below would
+   just block every export. While it's off, exports go through free and we
+   don't show a price we can't take.
+
+   To switch it on: implement chargeOneGift() against the provider (create
+   a $1 order server-side, open the checkout, resolve true only once the
+   provider confirms), then set PAYMENTS_LIVE = true. Verify the payment
+   server-side before trusting it — this file runs on the customer's
+   machine and anything it decides can be edited by them. */
+const PAYMENTS_LIVE = false;
+const GIFT_PRICE = '$1';
+
+async function chargeOneGift(){
+  throw new Error('no payment provider wired up yet');
+}
+
+async function payForGift(){
+  if (!PAYMENTS_LIVE) return true;              // free while payments are off
+  try{
+    const ok = await chargeOneGift();
+    if (!ok){ toast('Payment cancelled'); return false; }
+    track('gift_paid', { template: current.id, amount: GIFT_PRICE });
+    return true;
+  }catch(err){
+    console.error('[heyflowers] payment failed', err);
+    toast("Couldn't take the payment — nothing was charged");
+    return false;
+  }
+}
+
 async function wrap(){
   const missing = current.fields.filter(f => f.required && !values[f.key]);
   if (missing.length){
     toast(`${missing[0].label} is needed first`);
     return;
   }
+  track('export_clicked', { template: current.id });
+
+  /* THE gate. Everything up to here is free — pick a template, fill it in,
+     watch the preview. An account is only needed to mint a link, because
+     the link is the thing we have to store and stand behind. The gift is
+     saved first so signing up never costs them the work. */
+  if (window.HFAuth && !window.HFAuth.isIn()){
+    saveDraft();
+    pendingExport = { id: current.id, key: draftKey };
+    window.HFAuth.open('signup');
+    toast('Almost there — create an account to get your link');
+    return;
+  }
+  if (!await payForGift()) return;
   const payload = encodeGift(current.id, values);
   const base = location.origin + location.pathname;
   let url = base + '#g=' + payload;
@@ -1273,6 +1393,7 @@ async function wrap(){
 }
 
 copyBtn.onclick = async () => {
+  track('gift_link_copied', { template: current && current.id });
   try{ await navigator.clipboard.writeText(glink.dataset.url); toast('Link copied'); }
   catch{ toast('Press ⌘C to copy'); }
 };
@@ -1280,10 +1401,34 @@ openSentBtn.onclick = () => openGift(current, values);
 previewBtn.onclick  = () => openGift(current, values);
 wrapBtn.onclick     = wrap;
 
+/* Drafts are stored per account, and an account didn't exist while they
+   were building. Carry the signed-out work over instead of stranding it
+   under a key nobody reads again. */
+function adoptAnonDrafts(){
+  try{
+    const anon = JSON.parse(localStorage.getItem('sunflower.drafts') || '[]');
+    if (!anon.length) return;
+    const mine = drafts.read();
+    const have = new Set(mine.map(d => d.key));
+    drafts.write([...anon.filter(d => !have.has(d.key)), ...mine].slice(0, 40));
+    localStorage.removeItem('sunflower.drafts');
+  }catch{}
+}
+
 /* just signed in: pick up whatever they were trying to do, and repaint the
    profile since the drafts/sent storage is now scoped to their account */
-document.addEventListener('hf:signedin', () => {
+document.addEventListener('hf:signedin', async () => {
+  adoptAnonDrafts();
+  track('signup_completed');
   paintShelf(TEMPLATES);          // marquee → calm static grid
+
+  const x = pendingExport;        // they were mid-export when we stopped them
+  pendingExport = null;
+  if (x){
+    const d = drafts.read().find(v => v.key === x.key);
+    await openEditor(x.id, d ? d.vals : values, x.key);
+    return wrap();                // straight to the link they asked for
+  }
   const p = pendingOpen;
   pendingOpen = null;
   if (p) openEditor(p.id, p.preset, p.resumeKey);
@@ -1363,6 +1508,25 @@ function logVisit(){
       .then(() => {}, () => {});
   }catch{}
 }
+
+/* One place to record what people actually do.
+   Two sinks on purpose: Vercel Web Analytics is the nice dashboard, but
+   CUSTOM EVENTS ARE A PRO FEATURE — on Hobby only page views are kept, so
+   these calls would vanish. The same event also goes into the `visits`
+   table we already have, which works on any plan and feeds /admin. */
+function track(name, data){
+  try{ if (typeof window.va === 'function') window.va('event', { name, data }); }catch{}
+  try{
+    const sb = window.HF_SB;
+    if (!sb) return;
+    sb.from('visits').insert({
+      path: 'event:' + name,
+      ref: data ? JSON.stringify(data).slice(0, 300) : null,
+      ua: navigator.userAgent
+    }).then(() => {}, () => {});
+  }catch{}
+}
+window.track = track;
 
 let draftKey = null;
 function draftLabel(tpl, vals){
@@ -1556,7 +1720,7 @@ document.addEventListener('click', e => {
   const nav = e.target.closest('[data-go]');
   if (nav) go(nav.dataset.go);
   const card = e.target.closest('[data-open]');
-  if (card) openEditor(card.dataset.open);
+  if (card){ track('template_selected', { template: card.dataset.open }); openEditor(card.dataset.open); }
   if (e.target.closest('[data-open-blank]')) openEditor('blank');
   if (e.target.closest('#addPage')){ addPage(); return; }
   const tab = e.target.closest('[data-ptab]');

@@ -82,17 +82,6 @@ body.no-oauth .nav-signin{padding:8px 18px}
 body.authed  .nav-signin{display:none}
 body.authed  .nav-me{display:inline-flex}
 body.auth-off .nav-signin{display:none}
-/* "+999 people creating" pill above the headline */
-/* matching sticker treatment — white on the blue sky, so it actually pops */
-.count-pill{
-  display:inline-flex;align-items:center;gap:9px;margin-bottom:26px;
-  background:#fffdf5;border:2.5px solid #16224a;
-  border-radius:999px;padding:8px 18px;
-  box-shadow:0 4px 0 #16224a, 0 12px 22px -12px rgba(10,35,80,.5);
-  font-size:13px;font-weight:700;letter-spacing:.08em;color:#16224a;
-}
-.count-pill .rd{width:8px;height:8px;border-radius:50%;background:#ff4b3e;flex:none;
-  animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.35}}
 
 /* ── landing ── */
@@ -325,6 +314,18 @@ body.auth-off .nav-signin{display:none}
 .f .lab.small,.lab.small{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   color:var(--soft);margin:18px 0 8px}
 .f .req{color:var(--red)}
+/* the shelf while the manifests are in flight, and when they don't arrive */
+.shelf-grid.skeleton{pointer-events:none}
+.sk-card{border-radius:18px;height:300px;background:linear-gradient(100deg,
+  rgba(255,255,255,.06) 30%, rgba(255,255,255,.14) 50%, rgba(255,255,255,.06) 70%);
+  background-size:220% 100%;animation:skShine 1.3s ease-in-out infinite}
+@keyframes skShine{0%{background-position:180% 0}100%{background-position:-40% 0}}
+@media(max-width:900px){.sk-card{height:240px}}
+@media(max-width:620px){.sk-card{height:auto;aspect-ratio:4/5}}
+.shelf-oops .sub{opacity:.7;margin:2px 0 14px}
+.shelf-oops .cta{display:inline-block}
+@media(prefers-reduced-motion:reduce){.sk-card{animation-duration:3s}}
+
 .f .help,.help{font-size:12.5px;color:var(--soft);font-weight:300;margin:6px 0 8px}
 /* character count on fields that have to fit a small slot in the artwork */
 .f .cap{font-size:11.5px;color:var(--soft);font-weight:300;text-align:right;margin:5px 2px 0}
@@ -475,6 +476,25 @@ textarea{resize:vertical;min-height:76px}
    Nothing of ours. No wordmark, no "made with", no template name — the
    gift should read as the sender's own work, start to finish. */
 body.as-recipient .viewer-bar span#viewerTag{color:var(--ink);font-weight:500}
+
+/* The single exception to the rule above: one quiet line, only for a
+   recipient, and only after the gift has had time to play. It lives in its
+   own strip BELOW the frame — it never overlays the gift, so it can't
+   cover the thing the sender made. */
+.gift-mark{display:none}
+body.as-recipient.gift-played .gift-mark{
+  display:block;flex:none;text-align:center;text-decoration:none;
+  padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+  background:var(--panel,#14161c);color:var(--soft,#9aa3b2);
+  font-size:13px;letter-spacing:.01em;border-top:1px solid rgba(255,255,255,.07);
+  animation:markIn .7s var(--ease,ease) both;
+}
+body.as-recipient.gift-played .gift-mark b{color:var(--ink,#fff);font-weight:600}
+body.as-recipient.gift-played .gift-mark:hover{color:var(--ink,#fff)}
+@keyframes markIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){
+  body.as-recipient.gift-played .gift-mark{animation:none}
+}
 .viewer-bar span#viewerTag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .viewer-bar .vbtn{white-space:nowrap;flex:none}
 @media (max-width:620px){
@@ -534,7 +554,6 @@ body.as-recipient .viewer-bar span#viewerTag{color:var(--ink);font-weight:500}
   /* the nav is shorter here, so #gallery needs less clearance */
   #gallery{padding-top:74px}
   .hero{padding-top:14px}
-  .count-pill{font-size:11px;padding:7px 13px;margin-bottom:18px;letter-spacing:.06em}
   .hero-p{font-size:15px}
   /* the 3px outline was built for a 78px headline — at phone size it closed
      up and turned the letters muddy. Thin it out and let the type breathe. */
