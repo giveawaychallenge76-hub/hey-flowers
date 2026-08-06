@@ -435,7 +435,7 @@ margin-top:45px;
   line-height: 1.58;
   color: var(--accent);
   text-align: center;
-  padding: 4px 6px;
+  padding: 4px 20px;          /* clear of the stems either side */
   white-space: pre-wrap;      /* keep the sender's own line breaks */
 }
 .love-sign{
@@ -447,6 +447,27 @@ margin-top:45px;
   text-align: right;
   padding-right: 6px;
 }
+/* ══ the bouquet ═══════════════════════════════════════════════════
+   Real pressed-flower cutouts, layered BETWEEN the letter (z2) and the
+   envelope front (z4). That one fact does all the work: the blooms sit in
+   front of the letter while the envelope front swallows their stems, so
+   they read as standing IN the envelope rather than pasted on top.
+   They're there from the moment it opens — no reveal. */
+.bloom{
+  position:absolute; z-index:3; pointer-events:none; user-select:none;
+  transform-origin:50% 100%;                 /* pivot at the cut stem */
+  filter:drop-shadow(0 6px 10px rgba(90,35,55,.22));
+  transform:translate(var(--x), var(--y)) rotate(var(--r));
+}
+/* a breath of movement, so the bouquet isn't a flat decal */
+.bloom.sway{ animation:sway 6s var(--d) ease-in-out infinite alternate; }
+@keyframes sway{
+  from{ transform:translate(var(--x), var(--y)) rotate(var(--r)); }
+  to  { transform:translate(var(--x), calc(var(--y) - 4px))
+                  rotate(calc(var(--r) + 1.6deg)); }
+}
+@media(prefers-reduced-motion:reduce){ .bloom.sway{animation:none} }
+
 /* the card is shorter without a candle and a carousel in it */
 .content{ display:flex; flex-direction:column; justify-content:center; }
 
@@ -466,12 +487,21 @@ margin-top:45px;
    always had a background photo underneath it. This one ships without a
    photo, so without an opaque base the page renders against whatever sits
    behind the frame. */
-body{ background-color:#fff9f2; }
+body{ background-color:#fff5f7; }
+
+/* The bouquet deliberately overhangs the envelope, which widens the
+   document — body's overflow:hidden doesn't stop that, the scroll lands on
+   <html>. Without this a phone scrolls sideways into empty space. */
+html{ overflow-x:hidden; }
 </style>
 </head>
 <body>
 
 <div id="hearts"></div>
+
+<!-- their song. No <source>: an empty src resolves to this page and fails
+     to decode, so the src is only set once we know there is one. -->
+<audio id="song" loop></audio>
 
 <div id="surprise-content" class="wrap">  
     <div class="hint" id="hint">Tap to pull out the letter 💖</div>  
@@ -487,11 +517,42 @@ body{ background-color:#fff9f2; }
             </div>  
         </div>  
 
+        <img class="bloom sway" src="flowers/blossom-branch.png" alt="" aria-hidden="true"
+             style="left:84%;bottom:60%;width:42%;--x:4px;--y:0px;--r:22deg;--d:.06s">
+        <img class="bloom sway" src="flowers/lily.png" alt="" aria-hidden="true"
+             style="left:86%;bottom:62%;width:26%;--x:0px;--y:0px;--r:10deg;--d:.17s">
+        <img class="bloom sway" src="flowers/blossoms.png" alt="" aria-hidden="true"
+             style="left:78%;bottom:52%;width:24%;--x:0px;--y:0px;--r:6deg;--d:.28s">
+        <img class="bloom sway" src="flowers/lilac.png" alt="" aria-hidden="true"
+             style="left:74%;bottom:58%;width:42%;--x:0px;--y:0px;--r:8deg;--d:0s">
+
         <div class="front-pocket">
             <div class="front-label">Place your hand here</div>  
         </div>
     </div>
 </div>
+
+<script>
+/* ── their song, starting as the letter comes out ──────────────────────
+   An uploaded file, or a YouTube link. Nothing plays if they picked
+   neither — a letter in silence, rather than someone else's music. */
+var SONG_FILE = "{{song}}", SONG_URL = "{{song_url}}";
+var songEl = document.getElementById('song'), songStarted = false;
+if (SONG_FILE) songEl.src = SONG_FILE;
+function ytId(u){
+  var m = String(u||"").match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : "";
+}
+function startSong(){
+  if (songStarted) return;
+  songStarted = true;
+  var id = ytId(SONG_URL);
+  // the page hosts the YouTube player for us — its own player refuses to
+  // run in the sandboxed origin a gift renders in. See the bridge in inject().
+  if (id && window.__hfPlayYT) { window.__hfPlayYT(id); return; }
+  if (SONG_FILE) songEl.play().catch(function(){});
+}
+</script>
 
 <script>
 /* an optional background photo — `none` is a valid background-image layer,
@@ -557,7 +618,7 @@ function toggle(){
     
     if(isPulled && !letterOpened) {
         letterOpened = true;
-        setTimeout(triggerConfettiExplosion, 450); 
+        setTimeout(triggerConfettiExplosion, 450); startSong(); 
     }
 }  
 envelope.addEventListener("click", toggle);  

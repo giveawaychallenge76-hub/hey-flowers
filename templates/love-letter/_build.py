@@ -49,9 +49,38 @@ envelope = between(js, 'const envelope = document.getElementById("envelope")',
                        '/* Most people never got the candle out')
 confetti = between(js, 'function triggerConfettiExplosion()', 'function runMemoryNoteCarousel()')
 
-# the envelope used to arm the candle on first open; now it just celebrates
+# the envelope used to arm the candle on first open; now it celebrates and
+# starts their song
 assert 'initBlowDetection' in envelope
-envelope = envelope.replace('setTimeout(initBlowDetection, 1000);', 'setTimeout(triggerConfettiExplosion, 450);')
+envelope = envelope.replace('setTimeout(initBlowDetection, 1000);',
+                            'setTimeout(triggerConfettiExplosion, 450); startSong();')
+
+# ══ the bouquet ═════════════════════════════════════════════════════
+# --x/--y place each stem, --r its lean, --d offsets the sway so they
+# don't breathe in unison. Ordered back-to-front.
+   # One bouquet, on the right, the way the reference has it. Pushed out
+   # past the envelope's edge so it frames the card and only grazes it —
+   # the letter stays readable.
+# The stems must END below the envelope front so it swallows them —
+# .front-pocket starts 130px down a 380px envelope, so a bloom's bottom
+# edge has to sit lower than that: bottom must stay under ~65%. Height
+# comes from `bottom` alone now; --y would lift the stems into mid-air.
+BLOOMS = [
+  # file,            left,    bottom,  width, x,      y,      rot,      delay
+  ('blossom-branch', '84%',   '60%',   '42%', '4px',  '0px',  '22deg',  '.06s'),
+  ('lily',           '86%',   '62%',   '26%', '0px',  '0px',  '10deg',  '.17s'),
+  ('blossoms',       '78%',   '52%',   '24%', '0px',  '0px',  '6deg',   '.28s'),
+  ('lilac',          '74%',   '58%',   '42%', '0px',  '0px',  '8deg',   '0s'),   # the hero
+]
+bouquet = '\n'.join(
+  f'        <img class="bloom sway" src="flowers/{f}.png" alt="" aria-hidden="true"\n'
+  f'             style="left:{l};bottom:{b};width:{w};--x:{x};--y:{y};--r:{r};--d:{d}">'
+  for f,l,b,w,x,y,r,d in BLOOMS)
+
+# they belong inside the envelope, after the letter and before the front
+assert '<div class="front-pocket">' in letter
+letter = letter.replace('        <div class="front-pocket">',
+                        bouquet + '\n\n        <div class="front-pocket">')
 
 DOC = '''<!DOCTYPE html>
 <html lang="en">
@@ -79,7 +108,7 @@ __CSS__
   line-height: 1.58;
   color: var(--accent);
   text-align: center;
-  padding: 4px 6px;
+  padding: 4px 20px;          /* clear of the stems either side */
   white-space: pre-wrap;      /* keep the sender's own line breaks */
 }
 .love-sign{
@@ -91,6 +120,27 @@ __CSS__
   text-align: right;
   padding-right: 6px;
 }
+/* ══ the bouquet ═══════════════════════════════════════════════════
+   Real pressed-flower cutouts, layered BETWEEN the letter (z2) and the
+   envelope front (z4). That one fact does all the work: the blooms sit in
+   front of the letter while the envelope front swallows their stems, so
+   they read as standing IN the envelope rather than pasted on top.
+   They're there from the moment it opens — no reveal. */
+.bloom{
+  position:absolute; z-index:3; pointer-events:none; user-select:none;
+  transform-origin:50% 100%;                 /* pivot at the cut stem */
+  filter:drop-shadow(0 6px 10px rgba(90,35,55,.22));
+  transform:translate(var(--x), var(--y)) rotate(var(--r));
+}
+/* a breath of movement, so the bouquet isn't a flat decal */
+.bloom.sway{ animation:sway 6s var(--d) ease-in-out infinite alternate; }
+@keyframes sway{
+  from{ transform:translate(var(--x), var(--y)) rotate(var(--r)); }
+  to  { transform:translate(var(--x), calc(var(--y) - 4px))
+                  rotate(calc(var(--r) + 1.6deg)); }
+}
+@media(prefers-reduced-motion:reduce){ .bloom.sway{animation:none} }
+
 /* the card is shorter without a candle and a carousel in it */
 .content{ display:flex; flex-direction:column; justify-content:center; }
 
@@ -110,14 +160,45 @@ __CSS__
    always had a background photo underneath it. This one ships without a
    photo, so without an opaque base the page renders against whatever sits
    behind the frame. */
-body{ background-color:#fff9f2; }
+body{ background-color:#fff5f7; }
+
+/* The bouquet deliberately overhangs the envelope, which widens the
+   document — body's overflow:hidden doesn't stop that, the scroll lands on
+   <html>. Without this a phone scrolls sideways into empty space. */
+html{ overflow-x:hidden; }
 </style>
 </head>
 <body>
 
 <div id="hearts"></div>
 
+<!-- their song. No <source>: an empty src resolves to this page and fails
+     to decode, so the src is only set once we know there is one. -->
+<audio id="song" loop></audio>
+
 __LETTER__
+
+<script>
+/* ── their song, starting as the letter comes out ──────────────────────
+   An uploaded file, or a YouTube link. Nothing plays if they picked
+   neither — a letter in silence, rather than someone else's music. */
+var SONG_FILE = "{{song}}", SONG_URL = "{{song_url}}";
+var songEl = document.getElementById('song'), songStarted = false;
+if (SONG_FILE) songEl.src = SONG_FILE;
+function ytId(u){
+  var m = String(u||"").match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : "";
+}
+function startSong(){
+  if (songStarted) return;
+  songStarted = true;
+  var id = ytId(SONG_URL);
+  // the page hosts the YouTube player for us — its own player refuses to
+  // run in the sandboxed origin a gift renders in. See the bridge in inject().
+  if (id && window.__hfPlayYT) { window.__hfPlayYT(id); return; }
+  if (SONG_FILE) songEl.play().catch(function(){});
+}
+</script>
 
 <script>
 /* an optional background photo — `none` is a valid background-image layer,

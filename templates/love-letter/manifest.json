@@ -1,10 +1,10 @@
 {
   "id": "love-letter",
   "name": "LOVE LETTER",
-  "tagline": "one envelope, one letter",
+  "tagline": "an envelope, a letter, flowers",
   "category": "Love",
   "experienceTime": "30 sec",
-  "description": "An envelope waiting on screen. They tap it, the letter slides out, and there's the thing you wanted to say — in your words, nothing else in the way.",
+  "description": "An envelope waiting on screen. They tap it, the letter slides out with a bouquet rising behind it, their song starts, and there's the thing you wanted to say — in your words, nothing else in the way.",
   "thumbnail": "thumbnail/dump-instagram-portrait-11.png",
   "featured": true,
   "trending": true,
@@ -37,6 +37,21 @@
       "max": 28
     },
     {
+      "key": "song",
+      "type": "music",
+      "label": "Their song — upload an audio file",
+      "default": "",
+      "page": "letter"
+    },
+    {
+      "key": "song_url",
+      "type": "text",
+      "label": "…or paste a YouTube link",
+      "default": "",
+      "placeholder": "https://youtu.be/…",
+      "page": "letter"
+    },
+    {
       "key": "photo_url",
       "type": "image",
       "label": "Background photo (optional)",
@@ -47,21 +62,21 @@
       "key": "bg_tint",
       "type": "color",
       "label": "Background tint",
-      "default": "#e8c9a8",
+      "default": "#f7c6d4",
       "page": "letter"
     },
     {
       "key": "envelope_color",
       "type": "color",
       "label": "Envelope colour",
-      "default": "#c9a37b",
+      "default": "#e7a3b5",
       "page": "letter"
     },
     {
       "key": "accent_color",
       "type": "color",
       "label": "Text & accent colour",
-      "default": "#7a4a34",
+      "default": "#8e2f4d",
       "page": "letter"
     },
     {
