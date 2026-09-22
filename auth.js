@@ -49,7 +49,7 @@ window.HF_SB = HF_SB;   // app.js uses the same client for drafts / uploads
 
   /* ── modal open / close ─────────────────────────────────────────── */
   function openModal(m){
-    if (!HF_SB){ return; }                  // nothing to sign into yet
+    if (!HF_SB || offline){ return; }       // nothing to sign into yet
     if (m) setMode(m);
     document.body.classList.add('auth-open');
     const el = $('authEmail'); if (el) setTimeout(() => el.focus(), 60);
@@ -130,13 +130,57 @@ window.HF_SB = HF_SB;   // app.js uses the same client for drafts / uploads
     }
   }
 
-  /* app.js asks: is someone signed in? (when Supabase is unconfigured we
-     don't gate at all, so the site stays usable) */
+  /* Supabase free projects are paused after a stretch of no traffic, and a
+     paused project stops resolving entirely — so this isn't "configured vs
+     not", it's "configured and answering vs configured and gone". When it's
+     gone we behave exactly as if accounts were switched off: no gate, no
+     sign-in button, no modal that can only fail. The site keeps making and
+     sending gifts; only the account-shaped extras go quiet. */
+  let offline = false;
+
+  function goOffline(why){
+    if (offline) return;
+    offline = true;
+    currentUser = null;
+    window.HF_SB = null;          // every caller in app.js already no-ops on this
+    document.body.classList.add('authed', 'auth-off');
+    const lo = $('logoutBtn'); if (lo) lo.style.display = 'none';
+    closeModal();
+    console.warn('[heyflowers] ' + why + ' — running without accounts. '
+               + 'Gifts still work; links fall back to the long form.');
+  }
+
+  /* Does the project actually answer? getSession() only reads localStorage,
+     so it can't tell us. This asks the same REST endpoint the app uses all
+     day, with the same key, so we know it's allowed by both CORS and our
+     own connect-src.
+
+     Deliberately fails OPEN: ANY reply, whatever the status, means the
+     project is there and we carry on as normal. Only a network-level
+     failure counts as down — which is what a paused project gives, because
+     its hostname stops resolving. Getting this backwards would switch
+     accounts off for everyone over one bad status code. */
+  function reachable(ms){
+    if (!HF_SB) return Promise.resolve(false);
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), ms);
+    return fetch(HF_URL + '/rest/v1/', {
+        headers: { apikey: String(SUPABASE_ANON_KEY).trim() },
+        signal: ctl.signal, cache: 'no-store'
+      })
+      .then(() => true)          // it answered — good enough
+      .catch(() => false)        // DNS / connection / timeout
+      .finally(() => clearTimeout(t));
+  }
+
+  /* app.js asks: is someone signed in? With no backend to sign in to we
+     don't gate at all, so the site stays usable. */
   window.HFAuth = {
-    isIn:  () => !HF_SB || !!currentUser,
+    isIn:  () => offline || !HF_SB || !!currentUser,
     open:  openModal,
     close: closeModal,
-    user:  () => currentUser
+    user:  () => currentUser,
+    offline: () => offline
   };
 
   function boot(){
@@ -177,8 +221,13 @@ window.HF_SB = HF_SB;   // app.js uses the same client for drafts / uploads
       console.warn('[heyflowers] Supabase not configured — sign-in disabled. Add keys in auth.js.');
       return;
     }
-    HF_SB.auth.getSession().then(({ data }) => setAuthed(data.session ? data.session.user : null));
-    HF_SB.auth.onAuthStateChange((_e, session) => setAuthed(session ? session.user : null));
+    /* Don't wire up sign-in until we know there's something to sign in to.
+       Otherwise the only thing a signup button can do is fail slowly. */
+    reachable(6000).then(ok => {
+      if (!ok){ goOffline('Supabase project is unreachable (paused or deleted?)'); return; }
+      HF_SB.auth.getSession().then(({ data }) => setAuthed(data.session ? data.session.user : null));
+      HF_SB.auth.onAuthStateChange((_e, session) => setAuthed(session ? session.user : null));
+    });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

@@ -274,7 +274,7 @@
   </a>
 </div>
 
-<script src="auth.js?v=4"></script>
+<script src="auth.js?v=5"></script>
 <script src="qrcode.min.js"></script>
 <!-- The build check inside app.js can't save a browser that cached THIS
      file, because a stale index.html keeps requesting a stale app.js.
@@ -283,7 +283,7 @@
      cache. Guarded so it can never loop. -->
 <script>
 (function(){
-  var EXPECT = 36;                       // keep in step with build.json
+  var EXPECT = 37;                       // keep in step with build.json
   try{
     fetch('build.json?t=' + Date.now(), { cache:'no-store' })
       .then(function(r){ return r.ok ? r.json() : null; })
@@ -297,6 +297,6 @@
   }catch(e){}
 })();
 </script>
-<script src="app.js?v=36"></script>
+<script src="app.js?v=37"></script>
 </body>
 </html>

@@ -77,7 +77,7 @@ const SHAPES = ['rect','circle','star','heart','tri'];
 /* ───────────────────────── 1. load the folders ───────────────────── */
 /* Bump on every release, and keep build.json in step. Printed on load so
    "is this the new code or a cached copy?" is answerable at a glance. */
-const HF_BUILD = 36;
+const HF_BUILD = 37;
 console.log('%c heyflowers build ' + HF_BUILD + ' ', 'background:#ffd935;color:#4a3305;font-weight:700;border-radius:4px');
 window.HF_BUILD = HF_BUILD;
 
@@ -1455,7 +1455,13 @@ async function routeFromHash(){
   if (!short) return;
   try{
     const sb = window.HF_SB;
-    if (!sb) return;
+    /* A short link is only a key — the gift itself lives in the database.
+       With no database to ask, this used to return silently and leave the
+       person who was sent a gift staring at the landing page. Say something. */
+    if (!sb){
+      toast("This gift can't be opened right now — please try again later");
+      return;
+    }
     /* open_gift() returns just this one row. Reading the table directly
        would mean letting strangers list every gift — payloads and all. */
     const { data, error } = await sb.rpc('open_gift', { p_slug: short[1] });
