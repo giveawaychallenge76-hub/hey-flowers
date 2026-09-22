@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@700;800;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=36">
+<link rel="stylesheet" href="styles.css?v=38">
 
 <!-- Vercel Web Analytics. The shim queues events fired before the script
      lands. NOTE: custom events are a Pro feature — on Hobby only page
@@ -274,7 +274,7 @@
   </a>
 </div>
 
-<script src="auth.js?v=5"></script>
+<script src="auth.js?v=6"></script>
 <script src="qrcode.min.js"></script>
 <!-- The build check inside app.js can't save a browser that cached THIS
      file, because a stale index.html keeps requesting a stale app.js.
@@ -283,7 +283,7 @@
      cache. Guarded so it can never loop. -->
 <script>
 (function(){
-  var EXPECT = 37;                       // keep in step with build.json
+  var EXPECT = 38;                       // keep in step with build.json
   try{
     fetch('build.json?t=' + Date.now(), { cache:'no-store' })
       .then(function(r){ return r.ok ? r.json() : null; })
@@ -297,6 +297,6 @@
   }catch(e){}
 })();
 </script>
-<script src="app.js?v=37"></script>
+<script src="app.js?v=38"></script>
 </body>
 </html>

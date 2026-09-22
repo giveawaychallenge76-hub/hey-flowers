@@ -49,9 +49,20 @@ window.HF_SB = HF_SB;   // app.js uses the same client for drafts / uploads
 
   /* ── modal open / close ─────────────────────────────────────────── */
   function openModal(m){
-    if (!HF_SB || offline){ return; }       // nothing to sign into yet
+    if (!HF_SB){ return; }                  // never configured — nothing to show
     if (m) setMode(m);
     document.body.classList.add('auth-open');
+    if (offline){
+      /* The form can only fail against a project that isn't answering, so
+         don't let someone type a password into it and wait. Say what's
+         happening and point at the thing that still works. */
+      ['authEmail','authPass','authSubmit'].forEach(id => {
+        const el = $(id); if (el) el.disabled = true;
+      });
+      document.querySelectorAll('[data-oauth]').forEach(b => b.disabled = true);
+      msg("Accounts are temporarily unavailable. You can still make a gift and send the link — no account needed.");
+      return;
+    }
     const el = $('authEmail'); if (el) setTimeout(() => el.focus(), 60);
   }
   function closeModal(){ document.body.classList.remove('auth-open'); msg(''); }
@@ -143,9 +154,12 @@ window.HF_SB = HF_SB;   // app.js uses the same client for drafts / uploads
     offline = true;
     currentUser = null;
     window.HF_SB = null;          // every caller in app.js already no-ops on this
-    document.body.classList.add('authed', 'auth-off');
+    /* Deliberately NOT marking the page as signed in. Doing that swapped the
+       nav's Sign in button for a profile button, which changed how the site
+       looks and implied an account nobody has. The page stays exactly as it
+       was signed out; the only difference is what the button says when you
+       press it, and that the export gate stands aside (see isIn). */
     const lo = $('logoutBtn'); if (lo) lo.style.display = 'none';
-    closeModal();
     console.warn('[heyflowers] ' + why + ' — running without accounts. '
                + 'Gifts still work; links fall back to the long form.');
   }

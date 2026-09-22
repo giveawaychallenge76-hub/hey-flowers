@@ -327,6 +327,11 @@ body.auth-off .nav-signin{display:none}
 @media(prefers-reduced-motion:reduce){.sk-card{animation-duration:3s}}
 
 .f .help,.help{font-size:12.5px;color:var(--soft);font-weight:300;margin:6px 0 8px}
+/* when the backend is down the sign-in form is disabled — make it look it,
+   so nobody types a password into a box that can't submit */
+#authForm input:disabled,#authSubmit:disabled,.oauth-btn:disabled{
+  opacity:.4;cursor:not-allowed;filter:grayscale(.5)}
+
 /* character count on fields that have to fit a small slot in the artwork */
 .f .cap{font-size:11.5px;color:var(--soft);font-weight:300;text-align:right;margin:5px 2px 0}
 .f .cap.full{color:#e2a03f}
